@@ -1,0 +1,12 @@
+/build/
+/out/
+/dist/
+*.elf
+*.o
+*.a
+*.so
+*.pyc
+__pycache__/
+
+# Local CPython source/build trees can be large; add deliberately after review.
+/upstream/

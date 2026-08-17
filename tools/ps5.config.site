@@ -1,0 +1,13 @@
+# Cross-build answers for the PS5 payload environment.
+ac_cv_file__dev_ptmx=no
+ac_cv_file__dev_ptc=no
+ac_cv_func_pthread_getname_np=no
+ac_cv_func_pthread_get_name_np=no
+ac_cv_func_pthread_setname_np=no
+ac_cv_func_pthread_set_name_np=no
+
+# The SDK advertises struct tm.tm_zone, but its localtime compatibility layer
+# does not reliably populate it.  Make CPython use its portable timezone
+# fallback instead of reading that field.
+ac_cv_member_struct_tm_tm_zone=no
+ac_cv_have_decl_tzname=no
