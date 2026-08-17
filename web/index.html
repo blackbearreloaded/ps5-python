@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Python PS5</title>
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">Py</div>
+        <div>
+          <p class="eyebrow">PS5 runtime</p>
+          <h1>Python apps</h1>
+        </div>
+      </div>
+      <div id="status" class="status-pill status-ready">
+        <span class="status-dot"></span>
+        <span class="status-text">Connecting</span>
+      </div>
+    </header>
+
+    <section class="workspace">
+      <aside class="sidebar">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Library</p>
+            <h2>Applications</h2>
+          </div>
+          <button id="refresh-apps" class="icon-button" type="button"
+                  title="Refresh applications" aria-label="Refresh applications">↻</button>
+        </div>
+        <div id="apps" class="app-list">
+          <div class="loading-card">Loading applications…</div>
+        </div>
+        <div class="sidebar-note">
+          <span class="note-icon">i</span>
+          <span>Apps are loaded from <code>/data/python/apps</code>.</span>
+        </div>
+      </aside>
+
+      <main class="console-panel">
+        <div class="console-heading">
+          <div>
+            <p class="eyebrow">Execution console</p>
+            <h2 id="console-title">Select an application</h2>
+          </div>
+          <button id="clear-output" class="secondary-button" type="button">Clear logs</button>
+        </div>
+        <pre id="terminal" class="terminal" role="log" aria-live="polite"><span class="terminal-placeholder">Choose an application to stream its output here.</span></pre>
+        <div class="console-footer">
+          <span class="live-indicator"><span class="live-dot"></span>Live output</span>
+          <span id="exit-code">Waiting for a run</span>
+        </div>
+      </main>
+    </section>
+
+    <footer class="footer">
+      <span>CPython on PS5</span>
+      <span class="footer-separator">•</span>
+      <span>Local launcher</span>
+    </footer>
+  </div>
+  <script src="/app.js"></script>
+</body>
+</html>

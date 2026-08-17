@@ -1,0 +1,1 @@
+Hello from a packaged Python app on PS5

@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+set -eu
+
+root_dir=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+sdk_dir="${PS5_PAYLOAD_SDK:-/opt/ps5-payload-sdk}"
+ps5_host="${PS5_HOST:-192.168.4.30}"
+ftp_port="${PS5_FTP_PORT:-2121}"
+loader_port="${PS5_LOADER_PORT:-9021}"
+web_port="${PS5_WEB_PORT:-8090}"
+ftp_url="ftp://$ps5_host:$ftp_port"
+
+bash "$root_dir/tools/build_ps5.sh" web
+
+web_elf="$root_dir/build/ps5/python-web.elf"
+runtime_dir="$root_dir/build/ps5/cpython-lib"
+web_dir="$root_dir/web"
+apps_dir="$root_dir/apps"
+
+mkdir_remote() {
+    curl --silent --show-error -Q "MKD $1" "$ftp_url/" >/dev/null 2>&1 || true
+}
+
+upload() {
+    curl --fail --silent --show-error --upload-file "$1" "$ftp_url$2"
+}
+
+mkdir_remote /data/python
+mkdir_remote /data/python/web
+mkdir_remote /data/python/runtime
+mkdir_remote /data/python/runtime/cpython-lib
+mkdir_remote /data/python/runtime/cpython-lib/encodings
+mkdir_remote /data/python/apps
+upload "$web_elf" /data/python/runtime/python-web.elf
+upload "$web_dir/index.html" /data/python/web/index.html
+upload "$web_dir/app.css" /data/python/web/app.css
+upload "$web_dir/app.js" /data/python/web/app.js
+upload "$runtime_dir/codecs.py" /data/python/runtime/cpython-lib/codecs.py
+upload "$runtime_dir/encodings/__init__.py" /data/python/runtime/cpython-lib/encodings/__init__.py
+upload "$runtime_dir/encodings/ascii.py" /data/python/runtime/cpython-lib/encodings/ascii.py
+upload "$runtime_dir/encodings/utf_8.py" /data/python/runtime/cpython-lib/encodings/utf_8.py
+upload "$runtime_dir/encodings/idna.py" /data/python/runtime/cpython-lib/encodings/idna.py
+upload "$runtime_dir/selectors.py" /data/python/runtime/cpython-lib/selectors.py
+for module in os.py stat.py genericpath.py posixpath.py abc.py _collections_abc.py io.py socket.py enum.py types.py; do
+    upload "$runtime_dir/$module" "/data/python/runtime/cpython-lib/$module"
+done
+
+while IFS= read -r -d '' app_file; do
+    relative_file="${app_file#"$apps_dir/"}"
+    remote_file="/data/python/apps/$relative_file"
+    mkdir_remote "${remote_file%/*}"
+    upload "$app_file" "$remote_file"
+done < <(find "$apps_dir" -type f \
+    -not -path '*/__pycache__/*' \
+    -not -name '*.pyc' \
+    -print0 | sort -z)
+
+source "$sdk_dir/toolchain/prospero.sh"
+launch_uri="file:/data/python/runtime/python-web.elf?args=$web_port"
+log_file="$root_dir/build/ps5/python-web-deploy.log"
+nohup "$sdk_dir/bin/prospero-deploy" -h "$ps5_host" -p "$loader_port" \
+    "$launch_uri" >"$log_file" 2>&1 < /dev/null &
+deploy_pid=$!
+
+ready=0
+for attempt in $(seq 1 20); do
+    if curl --fail --silent --show-error \
+        "http://$ps5_host:$web_port/api/status" >/dev/null 2>&1; then
+        ready=1
+        break
+    fi
+    sleep 1
+done
+
+if [ "$ready" -ne 1 ]; then
+    echo "Python web launcher did not become ready." >&2
+    cat "$log_file" >&2 || true
+    kill "$deploy_pid" >/dev/null 2>&1 || true
+    exit 1
+fi
+
+echo "Python web launcher: http://$ps5_host:$web_port/"
+
+if [ "${PS5_WEB_CHECK:-0}" = "1" ]; then
+    echo "Apps:"
+    curl --fail --silent --show-error "http://$ps5_host:$web_port/api/apps"
+    echo
+    curl --fail --silent --show-error \
+        "http://$ps5_host:$web_port/api/launch?app=hello"
+    echo
+    for attempt in $(seq 1 20); do
+        logs=$(curl --fail --silent --show-error \
+            "http://$ps5_host:$web_port/api/logs?since=0")
+        if printf '%s' "$logs" | grep -q "Hello from a packaged Python app on PS5"; then
+            echo "Live app output: PASS"
+            break
+        fi
+        sleep 1
+    done
+    printf '%s\n' "$logs"
+    curl --fail --silent --show-error \
+        "http://$ps5_host:$web_port/api/shutdown" >/dev/null
+    wait "$deploy_pid" || true
+fi

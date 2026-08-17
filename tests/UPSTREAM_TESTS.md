@@ -1,0 +1,52 @@
+# CPython upstream test basis
+
+The language-core scripts in this directory are a PS5-compatible subset of
+the official CPython regression tests under:
+
+```text
+upstream/cpython/Lib/test/
+```
+
+They keep the behavior being tested, but remove `unittest`, `test.support`,
+filesystem helpers, subprocesses, and other standard-library dependencies so
+the first PS5 runtime can execute them with no user imports. This is an
+adaptation policy, not a replacement for CPython's complete regression suite.
+
+## Coverage map
+
+| PS5 test group | CPython source used as the behavior reference |
+| --- | --- |
+| `core_values/numeric.py` | `test_int.py`, `test_float.py`, `test_complex.py` |
+| `core_values/comparisons.py` | `test_compare.py`, `test_richcmp.py` |
+| `core_values/strings.py` | `test_str.py`, `test_string_literals.py` |
+| `core_values/unicode.py` | `test_str.py`, `test_unicode_identifiers.py` |
+| `core_values/lists.py` | `test_list.py` |
+| `core_values/tuples.py` | `test_tuple.py` |
+| `core_values/dictionaries.py` | `test_dict.py`, `test_dictcomps.py` |
+| `core_values/sets.py` | `test_set.py`, `test_setcomps.py` |
+| `core_objects/functions/*` | `test_funcattrs.py`, `test_class.py` |
+| `core_objects/classes/*` | `test_class.py`, `test_subclassinit.py` |
+| `core_objects/iteration/*` | `test_iter.py`, `test_generators.py`, `test_genexps.py`, `test_listcomps.py` |
+| `core_control/exceptions.py` | `test_exceptions.py`, `test_baseexception.py` |
+| `core_control/try_finally.py` | `test_exceptions.py` |
+| `core_control/generators.py` | `test_generators.py`, `test_generator_stop.py` |
+| `core_control/generator_expressions.py` | `test_genexps.py` |
+| `core_control/iterators.py` | `test_iter.py`, `test_iterlen.py` |
+| `core_control/gc_stress.py` | `test_gc.py` |
+| `core_control/allocation_churn.py` | `test_list.py`, `test_dict.py`, `test_gc.py` |
+| `stdlib/test_os.py` | `test_os.py` |
+| `stdlib/test_time.py` | `test_time.py` |
+| `stdlib/test_io.py` | `test_io.py` |
+| `stdlib/test_socket.py` | `test_socket.py` |
+| `stdlib/test_select.py` | `test_select.py`, `test_selectors.py` |
+
+The standard-library tests are intentionally direct, import-light adaptations
+of the upstream behavior checks. They keep the upstream module-to-test naming
+so each file can be compared directly with CPython. `time.sleep()` is excluded
+because the current PS5 libc sleep syscall returns `ENOSYS`; it will be added
+when the native sleep hook is implemented.
+
+The exact upstream release is pinned by `CPYTHON_VERSION.txt`. When a test is
+expanded, record the source file above and keep the PS5 version import-free.
+The complete upstream suite remains a later host-validation phase after the
+missing standard-library modules are ported.

@@ -1,0 +1,102 @@
+diff --git a/configure.ac b/configure.ac
+index 967d34d..0000000 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -324,6 +324,9 @@ then
+ 	*-*-linux*)
+ 		ac_sys_system=Linux
+ 		;;
++	*-*-freebsd*)
++		ac_sys_system=FreeBSD
++		;;
+ 	*-*-cygwin*)
+ 		ac_sys_system=Cygwin
+ 		;;
+@@ -771,6 +774,9 @@ if test "$cross_compiling" = yes; then
+ 			_host_ident=$host_cpu
+ 		esac
+ 		;;
++	*-*-freebsd*)
++		_host_ident=$host_cpu
++		;;
+ 	*-*-cygwin*)
+ 		_host_ident=
+ 		;;
+@@ -6240,14 +6246,20 @@
+ # ************************************
+ 
+-LIBS_SAVE=$LIBS
+-LIBS="$LIBS $LIBM"
++if test "$ac_sys_system" = "FreeBSD"; then
++  dnl The PS5 SDK has no separate libm and does not expose these optional
++  dnl C99 functions. The language core does not require them.
++  AC_MSG_NOTICE([skipping C99 libm probe for the PS5 FreeBSD target])
++else
++  LIBS_SAVE=$LIBS
++  LIBS="$LIBS $LIBM"
+ 
+-AC_CHECK_FUNCS(
+-  [acosh asinh atanh erf erfc expm1 log1p log2],
+-  [],
+-  [AC_MSG_ERROR([Python requires C99 compatible libm])]
+-)
+-LIBS=$LIBS_SAVE
++  AC_CHECK_FUNCS(
++    [acosh asinh atanh erf erfc expm1 log1p log2],
++    [],
++    [AC_MSG_ERROR([Python requires C99 compatible libm])]
++  )
++  LIBS=$LIBS_SAVE
++fi
+ 
+ dnl For multiprocessing module, check that sem_open
+ dnl actually works.  For FreeBSD versions <= 7.2,
+diff --git a/configure b/configure
+index 2cb22a7..0000000 100755
+--- a/configure
++++ b/configure
+@@ -4110,6 +4110,9 @@ then
+ 	*-*-linux*)
+ 		ac_sys_system=Linux
+ 		;;
++	*-*-freebsd*)
++		ac_sys_system=FreeBSD
++		;;
+ 	*-*-cygwin*)
+ 		ac_sys_system=Cygwin
+ 		;;
+@@ -4591,6 +4594,9 @@ if test "$cross_compiling" = yes; then
+ 			_host_ident=$host_cpu
+ 		esac
+ 		;;
++	*-*-freebsd*)
++		_host_ident=$host_cpu
++		;;
+ 	*-*-cygwin*)
+ 		_host_ident=
+ 		;;
+@@ -26295,8 +26301,12 @@ fi
+ # * Check for mathematical functions *
+ # ************************************
+ 
+-LIBS_SAVE=$LIBS
+-LIBS="$LIBS $LIBM"
++if test "$ac_sys_system" = "FreeBSD"; then
++  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: PS5 target: skipping C99 libm probe" >&5
++printf "%s\n" "PS5 target: skipping C99 libm probe" >&6; }
++else
++  LIBS_SAVE=$LIBS
++  LIBS="$LIBS $LIBM"
+ 
+ 
+   for ac_func in acosh asinh atanh erf erfc expm1 log1p log2
+@@ -26316,7 +26326,8 @@ esac
+ fi
+ 
+ done
+-LIBS=$LIBS_SAVE
++  LIBS=$LIBS_SAVE
++fi
+ 
+ { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether POSIX semaphores are enabled" >&5
+ printf %s "checking whether POSIX semaphores are enabled... " >&6; }
