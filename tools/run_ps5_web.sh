@@ -46,6 +46,10 @@ done
 for module in threading.py queue.py logging.py runpy.py secrets.py tempfile.py shutil.py; do
     upload "$runtime_dir/$module" "/data/python/runtime/cpython-lib/$module"
 done
+mkdir_remote /data/python/runtime/cpython-lib/importlib
+for module in __init__.py _abc.py machinery.py util.py; do
+    upload "$runtime_dir/importlib/$module" "/data/python/runtime/cpython-lib/importlib/$module"
+done
 for package in concurrent multiprocessing; do
     mkdir_remote "/data/python/runtime/cpython-lib/$package"
     if [ "$package" = concurrent ]; then

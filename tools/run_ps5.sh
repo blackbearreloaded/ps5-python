@@ -110,6 +110,10 @@ done
 for module in threading.py queue.py logging.py runpy.py secrets.py tempfile.py shutil.py; do
     upload "$runtime_dir/$module" "$remote_runtime/$module"
 done
+mkdir_remote "$remote_runtime/importlib"
+for module in __init__.py _abc.py machinery.py util.py; do
+    upload "$runtime_dir/importlib/$module" "$remote_runtime/importlib/$module"
+done
 for package in concurrent multiprocessing; do
     mkdir_remote "$remote_runtime/$package"
     if [ "$package" = concurrent ]; then
