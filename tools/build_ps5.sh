@@ -136,7 +136,34 @@ build_runtime_bundle() {
     cp "$source_dir/Lib/tracemalloc.py" "$runtime_dir/tracemalloc.py"
     cp "$source_dir/Lib/threading.py" "$runtime_dir/threading.py"
     cp "$source_dir/Lib/queue.py" "$runtime_dir/queue.py"
-    cp "$root_dir/tools/minimal_logging.py" "$runtime_dir/logging.py"
+    rm -rf "$runtime_dir/logging"
+    mkdir -p "$runtime_dir/logging"
+    cp "$source_dir/Lib/logging/__init__.py" "$runtime_dir/logging/__init__.py"
+    for module in argparse.py gettext.py locale.py traceback.py pprint.py textwrap.py codeop.py tokenize.py token.py _colorize.py difflib.py inspect.py calendar.py quopri.py uu.py ipaddress.py; do
+        cp "$source_dir/Lib/$module" "$runtime_dir/$module"
+    done
+    mkdir -p "$runtime_dir/string"
+    cp "$source_dir/Lib/string/__init__.py" "$runtime_dir/string/__init__.py"
+    "$build_python" "$root_dir/tools/patch_subprocess.py" \
+        "$source_dir/Lib/subprocess.py" \
+        "$runtime_dir/subprocess.py"
+    mkdir -p "$runtime_dir/urllib"
+    for module in __init__.py error.py parse.py request.py response.py robotparser.py; do
+        cp "$source_dir/Lib/urllib/$module" "$runtime_dir/urllib/$module"
+    done
+    mkdir -p "$runtime_dir/http"
+    for module in __init__.py client.py cookiejar.py cookies.py server.py; do
+        cp "$source_dir/Lib/http/$module" "$runtime_dir/http/$module"
+    done
+    mkdir -p "$runtime_dir/email"
+    for module in "$source_dir"/Lib/email/*.py; do
+        cp "$module" "$runtime_dir/email/$(basename "$module")"
+    done
+    mkdir -p "$runtime_dir/unittest"
+    for module in "$source_dir"/Lib/unittest/*.py; do
+        cp "$module" "$runtime_dir/unittest/$(basename "$module")"
+    done
+    cp "$source_dir/Lib/pprint.py" "$runtime_dir/pprint.py"
     cp "$source_dir/Lib/runpy.py" "$runtime_dir/runpy.py"
     cp "$source_dir/Lib/secrets.py" "$runtime_dir/secrets.py"
     cp "$source_dir/Lib/tempfile.py" "$runtime_dir/tempfile.py"
