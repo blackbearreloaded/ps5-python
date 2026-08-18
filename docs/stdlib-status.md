@@ -351,6 +351,31 @@ Source and tests:
 - `tests/stdlib/test_import_runtime.py`, adapted from `test_pathlib.py`,
   `test_zipimport.py`, and `test_stat.py`.
 
+## Diagnostics and multiprocessing primitives
+
+Status: native `_tracemalloc`, `_multiprocessing`, and `_posixshmem` are
+statically linked and import-tested on PS5.
+
+Included and tested:
+
+- `tracemalloc.start()`, `get_traced_memory()`, `stop()`, and `is_tracing()`
+- `_multiprocessing` import availability
+- `_posixshmem` import availability
+
+Full shared-memory/semaphore behavior remains unverified in the PS5 sandbox.
+The higher-level `multiprocessing` package and process pools are not bundled.
+
+`_ctypes` remains disabled because the PS5 build has no libffi dependency.
+Calling native `.sprx` or `.so` APIs therefore still requires a custom C
+extension or native launcher bridge.
+
+Source and tests:
+
+- `upstream/cpython/Modules/_tracemalloc.c`
+- `upstream/cpython/Modules/_multiprocessing/`
+- `tests/stdlib/test_diagnostics.py`, adapted from `test_tracemalloc.py` and
+  `test_multiprocessing.py`.
+
 ## Core extension modules
 
 Status: statically linked and tested on PS5.

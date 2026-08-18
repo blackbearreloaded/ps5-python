@@ -14,3 +14,5 @@ _decimal _decimal/_decimal.c
 pyexpat pyexpat.c
 _elementtree _elementtree.c
 _random _randommodule.c
+_multiprocessing _multiprocessing/multiprocessing.c _multiprocessing/semaphore.c
+_posixshmem _multiprocessing/posixshmem.c
