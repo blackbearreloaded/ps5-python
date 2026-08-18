@@ -32,6 +32,7 @@ TEST_FILES = (
     "test_core_modules.py",
     "test_posix_boundary.py",
     "test_process.py",
+    "test_network.py",
     "test_select.py",
     "test_selectors.py",
 )
