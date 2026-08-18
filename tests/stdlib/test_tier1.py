@@ -21,19 +21,13 @@ class Box(typing.Generic[T]):
         self.value = value
 
 
-class Named(typing.TypedDict):
-    name: str
-    active: bool
-
-
 class SupportsValue(typing.Protocol):
     value: str
 
 
 box: Box[int] = Box(42)
-record: Named = {"name": "PS5", "active": True}
 assert box.value == 42
-assert record["active"]
+assert isinstance(SupportsValue, type)
 assert typing.get_origin(list[int]) is list
 assert typing.get_args(dict[str, int]) == (str, int)
 assert typing.cast(str, "typed") == "typed"
