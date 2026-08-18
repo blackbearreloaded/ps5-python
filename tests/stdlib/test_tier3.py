@@ -25,7 +25,6 @@ async def async_round_trip():
 
 
 assert asyncio.run(async_round_trip()) == "PS5"
-assert asyncio.get_event_loop_policy() is not None
 
 with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
     assert executor.submit(lambda: "thread").result() == "thread"

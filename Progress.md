@@ -9,14 +9,14 @@ upstream source commit `823f0323ee6ec1402088b73bce1a38473cac36dc`.
 
 ## Follow-up
 
-- Host validation now passes all 46 discovered scripts. Tests that require PS5
+- Host validation now passes all 47 discovered scripts. Tests that require PS5
   capabilities (fork, `select.poll`, external DNS, and live TLS) skip cleanly
   on desktop Python instead of making the host baseline nondeterministic.
 - Added `tests/stdlib/test_tls_handshake.py` as a separate live PS5 smoke test;
   the PS5 handshake now passes with certificate checking disabled. A selected
   PS5 CA bundle is the next TLS increment.
-- PS5 aggregate suite passes with the profiling, concurrency, and Tier 2
-  utility wrappers: `CPYTHON_CORE_SUITE: PASS (45 scripts)`.
+- PS5 aggregate suite passes with the profiling, concurrency, and Tier 3
+  utility wrappers: `CPYTHON_CORE_SUITE: PASS (46 scripts)`.
 
 ## Completed Today
 
@@ -71,6 +71,9 @@ Static or bundled support now includes:
 - Tier 2 utility wrappers: `argparse`, official `logging`, `shutil`, `random`,
   `copy`, `enum`, `csv`, `unittest`, patched-import `subprocess`, `urllib`,
   `hashlib`, `io`, `traceback`, and `pprint`
+- Tier 3 concurrency/networking wrappers: official `asyncio`, `threading`,
+  `multiprocessing`, `concurrent.futures`, `socket`, `ssl`, `http`, `queue`,
+  `select`, and `signal`
 
 ### Security and hashing
 
@@ -128,12 +131,22 @@ Static or bundled support now includes:
   `Lib/test/test_*.py` files, and recorded every requested module's gaps in
   `docs/stdlib-status.md`.
 
+### Tier 3 concurrency and networking
+
+- Bundled the complete pinned CPython 3.14.7 `Lib/asyncio` package and its
+  official `html` and `mimetypes` dependencies required by `http.server`.
+- Verified an asyncio event loop, coroutine scheduling, `asyncio.Queue`,
+  synchronized `queue.Queue`, and thread-pool execution on PS5.
+- Added `tests/stdlib/test_tier3.py`, adapted from the pinned asyncio,
+  threading, multiprocessing, futures, socket, SSL, HTTP, queue, select, and
+  signal tests; documented all platform ceilings in `docs/stdlib-status.md`.
+
 ## Verification
 
 The final PS5 aggregate run completed with:
 
 ```text
-CPYTHON_CORE_SUITE: PASS (45 scripts)
+CPYTHON_CORE_SUITE: PASS (46 scripts)
 ```
 
 The suite includes adapted tests based on the pinned CPython `Lib/test` tree.

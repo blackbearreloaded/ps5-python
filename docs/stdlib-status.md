@@ -56,7 +56,7 @@ surface and the remaining PS5-specific gap for every requested module.
 | `copy` | Official wrapper | Shallow and deep copy of nested data | Custom `__reduce__`/extension-object coverage pending |
 | `enum` | Official wrapper | Symbolic values and identity semantics | Full flag, verification, and pickle coverage pending |
 | `csv` | Official wrapper plus native `_csv` | Reader/writer round trip and dialect basics | Complete dialect/error/large-file coverage pending |
-| `unittest` | Official core package bundled | `TestCase`, assertions, and core test-discovery imports | Full runner/discovery CLI, signal/isolation coverage, and `unittest.mock` (which needs the unbundled `asyncio`/advanced dataclass closure) remain pending |
+| `unittest` | Official core package bundled | `TestCase`, assertions, and core test-discovery imports | Full runner/discovery CLI, signal/isolation coverage, and `unittest.mock` (which needs advanced dataclass reflection) remain pending |
 | `subprocess` | Importable patched official wrapper | API import and unsupported-execution behavior | Child execution is unavailable: no `_posixsubprocess`, ELF broker, or reliable descriptor duplication |
 | `urllib` | Official `urllib`/`http`/`email` closure bundled | URL parsing, quoting, and `Request` construction | Live HTTP proxy/server, TLS verification, IPv6, and full coverage pending |
 | `hashlib` | Official wrapper plus OpenSSL `_hashlib` | MD5, SHA-256, SHA-3, and OpenSSL-backed BLAKE2 | HACL `_blake2`/native extras are not linked; provider edge cases pending |
@@ -67,8 +67,32 @@ surface and the remaining PS5-specific gap for every requested module.
 The dependency closure needed by this tier is intentionally bundled as
 official CPython code (`gettext`, `locale`, `encodings.aliases`, `tokenize`,
 `inspect`, `socketserver`, `email`, `http`, `string`, and `unittest` support
-modules), rather
-than weakening tests when an import exposed a missing dependency.
+modules), rather than weakening tests when an import exposed a missing
+dependency.
+
+## Tier 3 concurrency and networking status
+
+The requested Tier 3 modules use the pinned CPython 3.14.7 `Lib/` sources and
+the focused `tests/stdlib/test_tier3.py` smoke test, alongside the existing
+socket, TLS, select, signal, and concurrency tests.
+
+| Module | PS5 status | Included and tested | Missing or limited |
+| --- | --- | --- | --- |
+| `asyncio` | Official package bundled | Event loop startup, coroutine/task execution, `asyncio.Queue`, and zero-delay scheduling | Full upstream asyncio suite, subprocess transports, IPv6, and advanced event-loop policy coverage pending |
+| `threading` | Official wrapper bundled | Threads, events, locks, identities, joins, and thread-pool integration | Full stress/daemon/interrupt coverage pending |
+| `multiprocessing` | Official package bundled | Import, metadata, `Pipe`, and explicit-fork `Process` | Queue/Semaphore/SharedMemory, spawn/forkserver, and cross-process shared state remain unavailable |
+| `concurrent.futures` | Official core package bundled | `ThreadPoolExecutor`, futures, mapping, and exception propagation | `ProcessPoolExecutor` cannot launch workers without subprocess/ELF support |
+| `socket` | Native `_socket` plus official wrapper | IPv4 TCP/UDP, DNS basics, nonblocking readiness, and socket options | IPv6 is disabled; full makefile/ancillary/upstream coverage pending |
+| `ssl` | Native `_ssl` plus official wrapper | OpenSSL context creation and live TLS handshake smoke test | Certificate verification/CA-store selection and full TLS regression coverage pending |
+| `http` | Official `http.client`/`http.server` package bundled | Client/server imports and status-code surface | Live server lifecycle, HTTP parsing edge cases, proxy behavior, and full coverage pending |
+| `queue` | Official wrapper bundled | Synchronized `Queue` put/get and asyncio queue operations | `PriorityQueue`, `LifoQueue`, shutdown, and full contention coverage pending |
+| `select` | Native module built in | `select.select()`, `poll()`, and socket readiness | kqueue integration and complete upstream coverage pending |
+| `signal` | Native module built in | Handler installation/restoration and safe signal inspection | Signal-driven worker orchestration and complete upstream coverage pending |
+
+`asyncio`'s official package is shipped together with the recursive `html` and
+`mimetypes` dependencies needed by `http.server`. It uses the bundled PS5
+`selectors` wrapper over `select.select()`. Child-process asyncio transports
+inherit the documented `subprocess`/ELF-launch limitation.
 
 ## `os`
 
@@ -242,7 +266,8 @@ Not yet covered or packaged:
 Platform notes:
 
 - The PS5 static build provides `poll` and `kqueue` capabilities, but the
-  Python `selectors` dependency tree is not bundled yet.
+  Python `selectors` wrapper is intentionally a small `select.select()`-
+  backed implementation used by the bundled asyncio package.
 - `select.select()` is compiled into the interpreter and verified by
   `tests/stdlib/test_select.py`.
 - `select.poll()` and non-blocking IPv4 TCP readiness are verified by
