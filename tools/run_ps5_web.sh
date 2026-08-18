@@ -43,6 +43,12 @@ upload "$runtime_dir/selectors.py" /data/python/runtime/cpython-lib/selectors.py
 for module in os.py stat.py genericpath.py posixpath.py abc.py _collections_abc.py io.py socket.py enum.py types.py; do
     upload "$runtime_dir/$module" "/data/python/runtime/cpython-lib/$module"
 done
+for package in re json; do
+    mkdir_remote "/data/python/runtime/cpython-lib/$package"
+    while IFS= read -r -d '' module_file; do
+        upload "$module_file" "/data/python/runtime/cpython-lib/$package/$(basename "$module_file")"
+    done < <(find "$runtime_dir/$package" -maxdepth 1 -type f -name '*.py' -print0 | sort -z)
+done
 
 while IFS= read -r -d '' app_file; do
     relative_file="${app_file#"$apps_dir/"}"

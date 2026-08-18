@@ -2,3 +2,9 @@
 *static*
 select selectmodule.c
 _socket socketmodule.c
+_sre _sre/sre.c
+_json _json.c
+_struct _struct.c
+math mathmodule.c
+_codecs _codecsmodule.c
+unicodedata unicodedata.c

@@ -44,6 +44,9 @@ configure_ps5() {
         --with-static-libpython \
         --disable-ipv6 \
         --with-libm=no
+    # The SDK exposes timezone() as a function, not the POSIX timezone variable.
+    sed -i 's/^#define HAVE_TZNAME 1$/#undef HAVE_TZNAME/' pyconfig.h
+    sed -i 's/^#define HAVE_DECL_TZNAME 0$/#undef HAVE_DECL_TZNAME/' pyconfig.h
     cp "$root_dir/tools/ps5-setup.local" "$build_dir/Modules/Setup.local"
 }
 
@@ -57,6 +60,14 @@ build_runtime_bundle() {
     cp "$source_dir/Lib/encodings/utf_8.py" \
         "$runtime_dir/encodings/utf_8.py"
     cp "$root_dir/tools/minimal_idna.py" "$runtime_dir/encodings/idna.py"
+    mkdir -p "$runtime_dir/re" "$runtime_dir/json"
+    cp "$source_dir/Lib/re/__init__.py" "$runtime_dir/re/__init__.py"
+    for module in _casefix.py _compiler.py _constants.py _parser.py; do
+        cp "$source_dir/Lib/re/$module" "$runtime_dir/re/$module"
+    done
+    for module in __init__.py decoder.py encoder.py scanner.py; do
+        cp "$source_dir/Lib/json/$module" "$runtime_dir/json/$module"
+    done
 
     # os is the Python-level POSIX wrapper; its native posix/time/stat pieces
     # are already compiled into Modules/config.c.
