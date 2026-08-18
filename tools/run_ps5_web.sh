@@ -47,7 +47,7 @@ done
 for module in threading.py queue.py runpy.py secrets.py tempfile.py datetime.py typing.py annotationlib.py ast.py keyword.py __future__.py argparse.py gettext.py locale.py traceback.py pprint.py textwrap.py codeop.py tokenize.py token.py _colorize.py difflib.py inspect.py calendar.py quopri.py ipaddress.py socketserver.py subprocess.py shutil.py; do
     upload "$runtime_dir/$module" "/data/python/runtime/cpython-lib/$module"
 done
-for package in logging string urllib http email unittest asyncio; do
+for package in logging string urllib http email unittest asyncio html; do
     mkdir_remote "/data/python/runtime/cpython-lib/$package"
     while IFS= read -r -d '' module_file; do
         relative_file="${module_file#"$runtime_dir/$package/"}"
