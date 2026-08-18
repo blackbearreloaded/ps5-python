@@ -54,6 +54,10 @@ for module in __init__.py _local.py _os.py types.py; do
     upload "$runtime_dir/pathlib/$module" "/data/python/runtime/cpython-lib/pathlib/$module"
 done
 upload "$runtime_dir/zipimport.py" /data/python/runtime/cpython-lib/zipimport.py
+mkdir_remote /data/python/runtime/cpython-lib/collections
+upload "$runtime_dir/collections/__init__.py" /data/python/runtime/cpython-lib/collections/__init__.py
+upload "$runtime_dir/heapq.py" /data/python/runtime/cpython-lib/heapq.py
+upload "$runtime_dir/dataclasses.py" /data/python/runtime/cpython-lib/dataclasses.py
 mkdir_remote /data/python/runtime/cpython-lib/ctypes
 for module in __init__.py _endian.py _layout.py _aix.py util.py wintypes.py; do
     upload "$runtime_dir/ctypes/$module" "/data/python/runtime/cpython-lib/ctypes/$module"

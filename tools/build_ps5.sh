@@ -145,6 +145,10 @@ build_runtime_bundle() {
         cp "$source_dir/Lib/pathlib/$module" "$runtime_dir/pathlib/$module"
     done
     cp "$source_dir/Lib/zipimport.py" "$runtime_dir/zipimport.py"
+    mkdir -p "$runtime_dir/collections"
+    cp "$source_dir/Lib/collections/__init__.py" "$runtime_dir/collections/__init__.py"
+    cp "$source_dir/Lib/heapq.py" "$runtime_dir/heapq.py"
+    cp "$root_dir/tools/minimal_dataclasses.py" "$runtime_dir/dataclasses.py"
     rm -rf "$runtime_dir/ctypes" "$runtime_dir/sysconfig"
     cp "$root_dir/tools/minimal_sysconfig.py" "$runtime_dir/sysconfig.py"
     mkdir -p "$runtime_dir/ctypes"
