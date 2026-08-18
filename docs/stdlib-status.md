@@ -365,6 +365,15 @@ Included and tested:
 Full shared-memory/semaphore behavior remains unverified in the PS5 sandbox.
 The higher-level `multiprocessing` package and process pools are not bundled.
 
+The native `mmap` module is compiled and importable, but `mmap.mmap()` returns
+`ENOTSUP` in the current PS5 payload. The limitation is covered by
+`tests/stdlib/test_diagnostics.py`.
+
+`subprocess` remains unavailable: the PS5 payload cannot execute ordinary
+filesystem ELFs through libc `execve()`, and descriptor duplication is not
+supported. Process execution still requires the native kernel-assisted ELF
+broker described in the process-management section.
+
 `_ctypes` is now statically linked against a PS5-built libffi 3.8.0 Unix SysV
 backend. The Python wrapper is bundled with a reduced PS5 `sysconfig` surface.
 Basic `ctypes.c_int` construction and sizing pass on PS5; loading arbitrary

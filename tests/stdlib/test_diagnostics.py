@@ -2,6 +2,9 @@
 
 import tracemalloc
 import ctypes
+import mmap
+import os
+import signal
 
 
 tracemalloc.start()
@@ -14,6 +17,40 @@ assert not tracemalloc.is_tracing()
 del values
 assert ctypes.sizeof(ctypes.c_int) >= 2
 assert ctypes.c_int(42).value == 42
+assert ctypes.Structure is not None
+assert ctypes.POINTER(ctypes.c_int) is not None
+
+path = "/data/python/.mmap_test_{0}".format(os.getpid())
+fd = os.open(path, os.O_CREAT | os.O_RDWR, 0o600)
+try:
+    os.write(fd, b"mapped")
+    try:
+        mapped = mmap.mmap(fd, 6)
+    except OSError as error:
+        assert error.errno == 45
+        print("test_diagnostics: mmap unavailable (ENOTSUP)")
+    else:
+        try:
+            assert mapped[:6] == b"mapped"
+            mapped[0:6] = b"update"
+        finally:
+            mapped.close()
+finally:
+    os.close(fd)
+    os.remove(path)
+
+called = []
+previous = signal.getsignal(signal.SIGINT)
+
+
+def handler(signum, frame):
+    called.append(signum)
+
+
+signal.signal(signal.SIGINT, handler)
+assert signal.getsignal(signal.SIGINT) is handler
+signal.signal(signal.SIGINT, previous)
+assert signal.getsignal(signal.SIGINT) is previous
 
 try:
     import _multiprocessing
@@ -27,6 +64,13 @@ try:
 except ImportError:
     posixshmem_available = False
 
+try:
+    import subprocess
+    subprocess_available = True
+except ImportError:
+    subprocess_available = False
+
 print("test_diagnostics: tracemalloc PASS")
 print("test_diagnostics: _multiprocessing", multiprocessing_available)
 print("test_diagnostics: _posixshmem", posixshmem_available)
+print("test_diagnostics: subprocess", subprocess_available)
