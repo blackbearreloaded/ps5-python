@@ -374,6 +374,28 @@ filesystem ELFs through libc `execve()`, and descriptor duplication is not
 supported. Process execution still requires the native kernel-assisted ELF
 broker described in the process-management section.
 
+## Collections, algorithms, and dataclasses
+
+Status: native `_collections`, `_heapq`, and `itertools` are statically linked;
+the `collections`, `heapq`, and PS5-compatible `dataclasses` wrappers are
+bundled.
+
+Included and tested:
+
+- `deque`, `defaultdict`, `Counter`, and `namedtuple`
+- `itertools.count()` and `permutations()`
+- heap push/pop operations
+- dataclass generated initialization, representation, equality, and frozen
+  instances
+
+The dataclasses wrapper intentionally covers the foundation subset and does not
+yet implement every CPython decorator option or reflection helper.
+
+Tests:
+
+- `tests/stdlib/test_data_structures.py`, adapted from `test_collections.py`,
+  `test_itertools.py`, `test_heapq.py`, and `test_dataclasses.py`.
+
 `_ctypes` is now statically linked against a PS5-built libffi 3.8.0 Unix SysV
 backend. The Python wrapper is bundled with a reduced PS5 `sysconfig` surface.
 Basic `ctypes.c_int` construction and sizing pass on PS5; loading arbitrary

@@ -118,6 +118,10 @@ for module in __init__.py _local.py _os.py types.py; do
     upload "$runtime_dir/pathlib/$module" "$remote_runtime/pathlib/$module"
 done
 upload "$runtime_dir/zipimport.py" "$remote_runtime/zipimport.py"
+mkdir_remote "$remote_runtime/collections"
+upload "$runtime_dir/collections/__init__.py" "$remote_runtime/collections/__init__.py"
+upload "$runtime_dir/heapq.py" "$remote_runtime/heapq.py"
+upload "$runtime_dir/dataclasses.py" "$remote_runtime/dataclasses.py"
 mkdir_remote "$remote_runtime/ctypes"
 for module in __init__.py _endian.py _layout.py _aix.py util.py wintypes.py; do
     upload "$runtime_dir/ctypes/$module" "$remote_runtime/ctypes/$module"
