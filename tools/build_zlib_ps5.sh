@@ -8,6 +8,7 @@ source_dir="$root_dir/build/ps5/deps/src/zlib-$version"
 archive="$root_dir/build/ps5/deps/src/zlib-$version.tar.gz"
 prefix="$root_dir/build/ps5/deps/zlib"
 url="https://zlib.net/fossils/zlib-$version.tar.gz"
+sha256="9a93b2b7dfdac77ceba5a558a580e74667dd6fede4585b91eefb60f03b72df23"
 
 if [ ! -f "$sdk_dir/toolchain/prospero.sh" ]; then
     echo "Missing PS5 SDK: $sdk_dir" >&2
@@ -20,6 +21,7 @@ mkdir -p "$(dirname "$archive")" "$prefix"
 if [ ! -f "$archive" ]; then
     curl --fail --location --silent --show-error --output "$archive" "$url"
 fi
+printf '%s  %s\n' "$sha256" "$archive" | sha256sum --check --status
 if [ ! -f "$source_dir/configure" ]; then
     tar -xzf "$archive" -C "$(dirname "$source_dir")"
 fi
