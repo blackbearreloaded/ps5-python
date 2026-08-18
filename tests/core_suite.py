@@ -33,6 +33,7 @@ TEST_FILES = (
     "test_ssl_hashlib.py",
     "test_thread_context.py",
     "test_data_formats.py",
+    "test_import_runtime.py",
     "test_posix_boundary.py",
     "test_process.py",
     "test_network.py",
