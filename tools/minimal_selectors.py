@@ -71,4 +71,6 @@ class DefaultSelector:
 
 
 DefaultSelector = DefaultSelector
-
+# ``multiprocessing.connection`` names the concrete selector explicitly on
+# platforms where select.select is the available backend.
+SelectSelector = DefaultSelector
