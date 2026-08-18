@@ -9,14 +9,14 @@ upstream source commit `823f0323ee6ec1402088b73bce1a38473cac36dc`.
 
 ## Follow-up
 
-- Host validation now passes all 42 discovered scripts. Tests that require PS5
+- Host validation now passes all 44 discovered scripts. Tests that require PS5
   capabilities (fork, `select.poll`, external DNS, and live TLS) skip cleanly
   on desktop Python instead of making the host baseline nondeterministic.
 - Added `tests/stdlib/test_tls_handshake.py` as a separate live PS5 smoke test;
   the PS5 handshake now passes with certificate checking disabled. A selected
   PS5 CA bundle is the next TLS increment.
 - PS5 aggregate suite passes with the profiling and concurrency wrappers:
-  `CPYTHON_CORE_SUITE: PASS (42 scripts)`.
+  `CPYTHON_CORE_SUITE: PASS (43 scripts)`.
 
 ## Completed Today
 
@@ -109,7 +109,7 @@ Static or bundled support now includes:
 The final PS5 aggregate run completed with:
 
 ```text
-CPYTHON_CORE_SUITE: PASS (41 scripts)
+CPYTHON_CORE_SUITE: PASS (43 scripts)
 ```
 
 The suite includes adapted tests based on the pinned CPython `Lib/test` tree.
