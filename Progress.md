@@ -276,3 +276,9 @@ coverage remain incomplete.
 - `67fbbd1` Document fork process concurrency coverage
 - `65ee705` Bundle datetime and typing Tier 1 wrappers
 - `4e323e9` Bundle typing annotation dependencies
+- `7be1041` Bundle Tier 2 utility modules
+- `a92c914` Extend dataclasses shim for official logging
+- `a146ad2` Bundle encoding aliases dependency
+- `8d6be17` Bundle official logging submodules
+- `380b8a4` Bundle socketserver logging dependency
+- `0b0662c` Document complete logging package surface
