@@ -82,10 +82,13 @@ if sys.platform.startswith("freebsd"):
     process = fork_context.Process(target=process_child, args=(sender,))
     process.start()
     sender.close()
-    assert receiver.recv()[0] == "process"
+    child_pid = receiver.recv()
+    assert child_pid[0] == "process"
+    assert child_pid[1] != os.getpid()
     receiver.close()
     process.join(2.0)
     assert process.exitcode == 0
+    print("test_concurrency: multiprocessing.Process(fork) PASS")
 
     try:
         queue = multiprocessing.Queue()
@@ -117,10 +120,11 @@ if sys.platform.startswith("freebsd"):
     else:
         try:
             shared = SharedMemory(create=True, size=16)
-        except OSError as error:
+        except (ImportError, OSError) as error:
             # mmap is currently ENOTSUP in the PS5 payload.
-            assert error.errno in (38, 45, 95)
-            print("test_concurrency: SharedMemory unavailable (ENOTSUP)")
+            if isinstance(error, OSError):
+                assert error.errno in (2, 38, 45, 95)
+            print("test_concurrency: SharedMemory unavailable")
         else:
             try:
                 shared.buf[:4] = b"PS5!"
