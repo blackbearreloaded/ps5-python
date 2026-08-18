@@ -365,7 +365,9 @@ Included and tested:
 Full shared-memory/semaphore behavior remains unverified in the PS5 sandbox.
 The higher-level `multiprocessing` package and process pools are not bundled.
 
-`_ctypes` remains disabled because the PS5 build has no libffi dependency.
+`_ctypes` remains disabled because the first static libffi 3.8.0 attempt selects
+its Windows x86-64 `ms_abi` backend under the PS5 cross target, which the PS5
+clang rejects. A target-specific libffi backend/configuration is still needed.
 Calling native `.sprx` or `.so` APIs therefore still requires a custom C
 extension or native launcher bridge.
 
