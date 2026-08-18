@@ -269,6 +269,19 @@ build_runtime_bundle() {
         > "$runtime_dir/hashlib.py"
 }
 
+ensure_tier4_native_modules() {
+    local setup_file="$build_dir/Modules/Setup.local"
+    if grep -q '^_sqlite3 ' "$setup_file" 2>/dev/null &&
+        grep -q '^zlib ' "$setup_file" 2>/dev/null; then
+        return
+    fi
+    printf '%s\n' \
+        "_sqlite3 _sqlite/blob.c _sqlite/connection.c _sqlite/cursor.c _sqlite/microprotocols.c _sqlite/module.c _sqlite/prepare_protocol.c _sqlite/row.c _sqlite/statement.c _sqlite/util.c -I$sqlite_dir/include -L$sqlite_dir/lib -lsqlite3 -lpthread" \
+        "zlib zlibmodule.c -I$zlib_dir/include -L$zlib_dir/lib -lz" \
+        >> "$setup_file"
+    rm -f "$build_dir/Modules/config.o" "$build_dir/libpython3.14.a"
+}
+
 build_launcher() {
     if ! needs_rebuild "$launcher" \
         "$root_dir/src/cpython_runner.c" \
@@ -351,11 +364,12 @@ case "${1:-core}" in
         configure_ps5
         ;;
     core)
-        if [ ! -f "$build_dir/Makefile" ] ||
-            ! grep -q '^_sqlite3 ' "$build_dir/Modules/Setup.local" 2>/dev/null ||
-            ! grep -q '^zlib ' "$build_dir/Modules/Setup.local" 2>/dev/null; then
+        if [ ! -f "$build_dir/Makefile" ]; then
             configure_ps5
         fi
+        bash "$root_dir/tools/build_zlib_ps5.sh"
+        bash "$root_dir/tools/build_sqlite3_ps5.sh"
+        ensure_tier4_native_modules
         CONFIG_SITE="$root_dir/tools/ps5.config.site" \
             CC="$compiler_string" make -C "$build_dir" -j"$jobs" Modules/config.o libpython3.14.a
         build_launcher
@@ -364,11 +378,12 @@ case "${1:-core}" in
         echo "Runtime bundle: $runtime_dir"
         ;;
     web)
-        if [ ! -f "$build_dir/Makefile" ] ||
-            ! grep -q '^_sqlite3 ' "$build_dir/Modules/Setup.local" 2>/dev/null ||
-            ! grep -q '^zlib ' "$build_dir/Modules/Setup.local" 2>/dev/null; then
+        if [ ! -f "$build_dir/Makefile" ]; then
             configure_ps5
         fi
+        bash "$root_dir/tools/build_zlib_ps5.sh"
+        bash "$root_dir/tools/build_sqlite3_ps5.sh"
+        ensure_tier4_native_modules
         CONFIG_SITE="$root_dir/tools/ps5.config.site" \
             CC="$compiler_string" make -C "$build_dir" -j"$jobs" Modules/config.o libpython3.14.a
         build_web_launcher
