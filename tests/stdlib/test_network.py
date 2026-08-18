@@ -2,6 +2,12 @@
 
 import select
 import socket
+import sys
+
+
+if not hasattr(select, "poll"):
+    print("test_network: SKIP (select.poll unavailable on host)")
+    raise SystemExit(0)
 
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

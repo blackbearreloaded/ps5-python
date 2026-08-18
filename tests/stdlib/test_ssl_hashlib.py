@@ -9,13 +9,16 @@ import warnings
 import _py_warnings
 import hmac
 import random
+import sys
 
 
 assert hashlib.sha256(b"CPythonPS5").hexdigest() == (
     "f1ed3d6270637bf6fc81bcc16cfd460929a9f270f5215fac17d4c8c127323087"
 )
 assert hashlib.md5(b"CPythonPS5").digest_size == 16
-assert ssl.OPENSSL_VERSION.startswith("OpenSSL 3.5.")
+assert ssl.OPENSSL_VERSION.startswith("OpenSSL")
+if sys.platform.startswith("freebsd"):
+    assert ssl.OPENSSL_VERSION.startswith("OpenSSL 3.5.")
 assert _hashlib.openssl_sha256(b"CPythonPS5").digest() == hashlib.sha256(
     b"CPythonPS5"
 ).digest()

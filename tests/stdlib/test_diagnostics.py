@@ -5,6 +5,7 @@ import ctypes
 import mmap
 import os
 import signal
+import sys
 
 
 tracemalloc.start()
@@ -20,7 +21,8 @@ assert ctypes.c_int(42).value == 42
 assert ctypes.Structure is not None
 assert ctypes.POINTER(ctypes.c_int) is not None
 
-path = "/data/python/.mmap_test_{0}".format(os.getpid())
+test_base = "/data/python" if sys.platform.startswith("freebsd") else os.getcwd()
+path = os.path.join(test_base, ".mmap_test_{0}".format(os.getpid()))
 fd = os.open(path, os.O_CREAT | os.O_RDWR, 0o600)
 try:
     os.write(fd, b"mapped")

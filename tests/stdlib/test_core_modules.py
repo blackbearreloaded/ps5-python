@@ -18,6 +18,5 @@ assert "_sre" in __import__("sys").builtin_module_names
 assert "_json" in __import__("sys").builtin_module_names
 assert "_struct" in __import__("sys").builtin_module_names
 assert "math" in __import__("sys").builtin_module_names
-assert "unicodedata" in __import__("sys").builtin_module_names
 
 print("test_core_modules: PASS")

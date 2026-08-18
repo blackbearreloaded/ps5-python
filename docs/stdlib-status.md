@@ -235,7 +235,12 @@ Included and tested:
 
 Limitations:
 
-- A live HTTPS handshake and certificate verification are not yet tested.
+- A live HTTPS handshake is verified on PS5 by
+  `tests/stdlib/test_tls_handshake.py`.
+- The smoke test uses verification disabled; certificate-store selection and
+  certificate verification remain unimplemented. It is intentionally excluded
+  from the aggregate suite because it depends on external DNS and internet
+  reachability.
 - The `hashlib` wrapper omits BLAKE2 because CPython's generated HACL BLAKE2
   objects are not linked; OpenSSL-backed algorithms remain available.
 
@@ -354,13 +359,22 @@ Source and tests:
 ## Diagnostics and multiprocessing primitives
 
 Status: native `_tracemalloc`, `_multiprocessing`, and `_posixshmem` are
-statically linked and import-tested on PS5.
+statically linked. The official CPython `tracemalloc.py` wrapper is now
+bundled, while multiprocessing primitives remain import-tested only.
 
 Included and tested:
 
 - `tracemalloc.start()`, `get_traced_memory()`, `stop()`, and `is_tracing()`
+- `tracemalloc.take_snapshot()`, `Snapshot.statistics()`, and
+  `Snapshot.compare_to()`
+- `tracemalloc.Filter`, snapshot filtering, traceback lookup, and
+  `Snapshot.dump()`/`Snapshot.load()` on the host
 - `_multiprocessing` import availability
 - `_posixshmem` import availability
+
+The full wrapper and dependency bundle pass the PS5 aggregate suite. Full
+upstream snapshot/filter coverage, long-running tracing, and cross-process
+tracing remain unverified.
 
 Full shared-memory/semaphore behavior remains unverified in the PS5 sandbox.
 The higher-level `multiprocessing` package and process pools are not bundled.
@@ -398,19 +412,38 @@ Tests:
 
 ## Profiling and diagnostics wrappers
 
-Status: `timeit`, `dis`, `struct`, and a minimal `tracemalloc` wrapper are
-bundled and tested.
+Status: official CPython `timeit.py`, `dis.py`, `struct.py`, and
+`tracemalloc.py` wrappers are bundled. Native `_struct` and `_tracemalloc` are
+statically linked.
 
 Included and tested:
 
 - `timeit.timeit()` execution timing
-- `dis.get_instructions()` bytecode inspection
-- `struct.pack()` and `struct.unpack()` binary conversion
-- native tracemalloc start/stop and traced-memory counters
+- `timeit.Timer`, repeat timing, callable timing, source validation, and
+  garbage-collection suppression during timed sections
+- `dis.get_instructions()`, `Bytecode`, code metadata, and formatted output
+- `struct.pack()`/`unpack()`, `pack_into()`/`unpack_from()`, `iter_unpack()`,
+  layout sizing, and malformed-format errors
+- native tracemalloc counters plus snapshots, statistics, filtering,
+  comparisons, traceback lookup, and snapshot persistence
 
-The full Python `tracemalloc` snapshot/statistics layer is not bundled because
-it requires additional modules such as `linecache`, `pickle`, and the full
-collections dependency tree.
+The full `tracemalloc.py` wrapper requires and now bundles the small pure-
+Python dependency closure for `functools`, `reprlib`, `operator`, `linecache`,
+`pickle`, `copyreg`, and `_compat_pickle`.
+
+Missing or not yet verified:
+
+- the complete upstream `test_timeit.py`, `test_dis.py`, `test_struct.py`, and
+  `test_tracemalloc.py` suites;
+- command-line `timeit`/`dis` entry points and their `argparse` dependency;
+- long-running tracing and cross-process/fork tracing on PS5;
+- domain-specific allocators and cross-process/fork tracing behavior.
+
+Source:
+
+- `upstream/cpython/Modules/_tracemalloc.c`
+- `upstream/cpython/Lib/tracemalloc.py`, `Lib/timeit.py`, `Lib/dis.py`, and
+  `Lib/struct.py`
 
 Tests:
 

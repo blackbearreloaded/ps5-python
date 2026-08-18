@@ -1,6 +1,12 @@
 """PS5-safe process management coverage from CPython test_os."""
 
 import os
+import sys
+
+
+if not hasattr(os, "fork") or not sys.platform.startswith(("freebsd", "linux", "darwin")):
+    print("test_process: SKIP (fork unavailable on host)")
+    raise SystemExit(0)
 
 
 pid = os.fork()
