@@ -2,7 +2,7 @@ PYTHON ?= python3
 POWERSHELL ?= powershell.exe
 PS5_PAYLOAD_SDK ?= /opt/ps5-payload-sdk
 CPYTHON_SRC ?= upstream/cpython
-PS5_JOBS ?= 2
+PS5_JOBS ?= $(shell nproc 2>/dev/null || echo 2)
 SCRIPT ?= examples/main.py
 APP ?= apps/hello
 

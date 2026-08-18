@@ -7,7 +7,7 @@ build_dir="$root_dir/build/ps5"
 build_python="$root_dir/build/host/python.exe"
 sdk_dir="${PS5_PAYLOAD_SDK:-/opt/ps5-payload-sdk}"
 hb_dir="$root_dir/build/ps5/deps/user/homebrew"
-jobs="${PS5_JOBS:-2}"
+jobs="${PS5_JOBS:-$(nproc 2>/dev/null || echo 2)}"
 launcher="$build_dir/python.elf"
 web_launcher="$build_dir/python-web.elf"
 runtime_dir="$build_dir/cpython-lib"
@@ -29,11 +29,27 @@ fi
 
 source "$sdk_dir/toolchain/prospero.sh"
 
+compiler=("$sdk_dir/bin/prospero-clang")
+if [ "${PS5_CCACHE:-1}" != "0" ] && command -v ccache >/dev/null 2>&1; then
+    compiler=(ccache "${compiler[@]}")
+fi
+compiler_string="${compiler[*]}"
+
+needs_rebuild() {
+    output="$1"
+    shift
+    [ ! -f "$output" ] && return 0
+    for input in "$@"; do
+        [ "$input" -nt "$output" ] && return 0
+    done
+    return 1
+}
+
 configure_ps5() {
     mkdir -p "$build_dir"
     cd "$build_dir"
     CONFIG_SITE="$root_dir/tools/ps5.config.site" \
-    "$source_dir/configure" \
+    CC="$compiler_string" "$source_dir/configure" \
         --build=x86_64-pc-linux-gnu \
         --host=x86_64-pc-freebsd \
         --with-build-python="$build_python" \
@@ -78,7 +94,17 @@ build_runtime_bundle() {
 }
 
 build_launcher() {
-    "$sdk_dir/bin/prospero-clang" \
+    if ! needs_rebuild "$launcher" \
+        "$root_dir/src/cpython_runner.c" \
+        "$root_dir/src/cpython_runtime.c" \
+        "$root_dir/src/ps5_time.c" \
+        "$root_dir/platform/cpython_ps5_host.c" \
+        "$build_dir/Modules/config.o" \
+        "$build_dir/libpython3.14.a"; then
+        echo "Launcher unchanged: $launcher"
+        return
+    fi
+    "${compiler[@]}" \
         -DCPYTHON_PS5 \
         -I"$root_dir/include" \
         -I"$build_dir" \
@@ -97,7 +123,18 @@ build_launcher() {
 
 build_web_launcher() {
     bash "$root_dir/tools/build_libmicrohttpd.sh"
-    "$sdk_dir/bin/prospero-clang" \
+    if ! needs_rebuild "$web_launcher" \
+        "$root_dir/src/cpython_web_launcher.c" \
+        "$root_dir/src/cpython_runtime.c" \
+        "$root_dir/src/ps5_time.c" \
+        "$root_dir/platform/cpython_ps5_host.c" \
+        "$build_dir/Modules/config.o" \
+        "$build_dir/libpython3.14.a" \
+        "$hb_dir/lib/libmicrohttpd.a"; then
+        echo "Web launcher unchanged: $web_launcher"
+        return
+    fi
+    "${compiler[@]}" \
         -DCPYTHON_PS5 \
         -I"$root_dir/include" \
         -I"$hb_dir/include" \
