@@ -115,6 +115,9 @@ Static or bundled support now includes:
 
 - Bundled the pinned CPython 3.14.7 implementations and recursive pure-Python
   dependencies for all requested Tier 2 modules.
+- Expanded `logging` to the complete official package surface shipped by the
+  pin (`logging`, `logging.handlers`, and `logging.config`) plus its
+  `socketserver` dependency.
 - Extended the PS5 dataclasses foundation with `MISSING`, `Field`, `field()`,
   keyword-only dataclasses, default factories, generated field metadata, and
   `__post_init__` so the official logging colorization dependency imports.

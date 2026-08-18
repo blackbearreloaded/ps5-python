@@ -50,7 +50,7 @@ surface and the remaining PS5-specific gap for every requested module.
 | Module | PS5 status | Included and tested | Missing or limited |
 | --- | --- | --- | --- |
 | `argparse` | Bundled | Parser construction, positional/optional arguments, and conversion | Full formatter, subparser, file-completion, and upstream regression coverage pending |
-| `logging` | Official package bundled | Logger, level filtering, `StreamHandler`, and formatter output | File handlers, multiprocessing handlers, and full upstream coverage pending |
+| `logging` | Official package bundled | Core logger plus official `logging.handlers` and `logging.config` imports, level filtering, `StreamHandler`, and formatter output | Network/file handler behavior, multiprocessing integration, and full upstream coverage pending |
 | `shutil` | Bundled with PS5 fallback | Copy/file operations and temporary-directory cleanup | fd-based `rmtree` hardening is unavailable because `os.scandir(fd)` is `ENOTSUP`; archive and metadata coverage pending |
 | `random` | Official wrapper plus native `_random` | Seeded `Random`, choices, and shuffle foundation | System entropy/provider edge cases and full statistical coverage pending |
 | `copy` | Official wrapper | Shallow and deep copy of nested data | Custom `__reduce__`/extension-object coverage pending |
@@ -66,7 +66,8 @@ surface and the remaining PS5-specific gap for every requested module.
 
 The dependency closure needed by this tier is intentionally bundled as
 official CPython code (`gettext`, `locale`, `encodings.aliases`, `tokenize`,
-`inspect`, `email`, `http`, `string`, and `unittest` support modules), rather
+`inspect`, `socketserver`, `email`, `http`, `string`, and `unittest` support
+modules), rather
 than weakening tests when an import exposed a missing dependency.
 
 ## `os`
