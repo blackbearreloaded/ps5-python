@@ -26,7 +26,7 @@ APIs are recorded rather than implied to be complete.
 | `sys` | Built in and available | Interpreter state, streams, version, and arguments in `test_tier1.py`; full startup/configuration coverage remains pending. |
 | `os` | Bundled | POSIX filesystem, environment, pipes, and process checks pass; advanced descriptor/process APIs remain limited. |
 | `pathlib` | Bundled | Concrete `Path` and `PurePosixPath` operations pass; full upstream pathlib coverage is pending. |
-| `typing` | Official wrapper plus native `_typing` | `TypeVar`, `Generic`, `Protocol`, aliases, and `cast` pass; `TypedDict` and annotation introspection still require the unbundled `annotationlib`. |
+| `typing` | Official wrapper plus native `_typing` | `TypeVar`, `Generic`, `Protocol`, aliases, `cast`, `TypedDict`, and basic annotation introspection pass; the complete upstream typing suite is pending. |
 | `collections` | Bundled with native `_collections` | `deque`, `defaultdict`, `Counter`, and `namedtuple` pass; full upstream coverage is pending. |
 | `dataclasses` | PS5-compatible subset | Core generation, equality, defaults, and frozen instances pass; advanced decorator/reflection options are omitted. |
 | `json` | Official wrappers plus native `_json` | Encoding/decoding pass; complete upstream regression coverage is pending. |
@@ -575,7 +575,8 @@ Source:
 - `upstream/cpython/Modules/unicodedata.c`
 - `upstream/cpython/Modules/arraymodule.c`
 - matching `Lib/re/`, `Lib/json/`, `Lib/datetime.py`, `Lib/typing.py`,
-  `Lib/functools.py`, and `Lib/codecs.py` wrappers
+  `Lib/annotationlib.py`, `Lib/ast.py`, `Lib/keyword.py`, `Lib/functools.py`,
+  and `Lib/codecs.py` wrappers
 
 Included and tested:
 
