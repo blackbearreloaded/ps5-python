@@ -56,7 +56,7 @@ surface and the remaining PS5-specific gap for every requested module.
 | `copy` | Official wrapper | Shallow and deep copy of nested data | Custom `__reduce__`/extension-object coverage pending |
 | `enum` | Official wrapper | Symbolic values and identity semantics | Full flag, verification, and pickle coverage pending |
 | `csv` | Official wrapper plus native `_csv` | Reader/writer round trip and dialect basics | Complete dialect/error/large-file coverage pending |
-| `unittest` | Official package bundled | `TestCase`, assertions, and test discovery imports | Full runner, discovery CLI, signal, and isolation coverage pending |
+| `unittest` | Official core package bundled | `TestCase`, assertions, and core test-discovery imports | Full runner/discovery CLI, signal/isolation coverage, and `unittest.mock` (which needs the unbundled `asyncio`/advanced dataclass closure) remain pending |
 | `subprocess` | Importable patched official wrapper | API import and unsupported-execution behavior | Child execution is unavailable: no `_posixsubprocess`, ELF broker, or reliable descriptor duplication |
 | `urllib` | Official `urllib`/`http`/`email` closure bundled | URL parsing, quoting, and `Request` construction | Live HTTP proxy/server, TLS verification, IPv6, and full coverage pending |
 | `hashlib` | Official wrapper plus OpenSSL `_hashlib` | MD5, SHA-256, SHA-3, and OpenSSL-backed BLAKE2 | HACL `_blake2`/native extras are not linked; provider edge cases pending |
