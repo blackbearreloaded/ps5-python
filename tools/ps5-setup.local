@@ -13,3 +13,4 @@ _csv _csv.c
 _decimal _decimal/_decimal.c
 pyexpat pyexpat.c
 _elementtree _elementtree.c
+_random _randommodule.c
