@@ -64,7 +64,7 @@ printf 'hello from netcat\n' | nc 192.168.4.30 9091
 The complete PS5 aggregate suite currently passes:
 
 ```
-CPYTHON_CORE_SUITE: PASS (41 scripts)
+CPYTHON_CORE_SUITE: PASS (44 scripts)
 ```
 
 It includes the core tests plus:
