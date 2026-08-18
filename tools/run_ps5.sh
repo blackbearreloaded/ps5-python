@@ -104,7 +104,7 @@ upload "$runtime_dir/encodings/ascii.py" "$remote_runtime/encodings/ascii.py"
 upload "$runtime_dir/encodings/utf_8.py" "$remote_runtime/encodings/utf_8.py"
 upload "$runtime_dir/encodings/idna.py" "$remote_runtime/encodings/idna.py"
 upload "$runtime_dir/selectors.py" "$remote_runtime/selectors.py"
-for module in os.py stat.py genericpath.py posixpath.py abc.py _collections_abc.py io.py socket.py enum.py types.py signal.py hashlib.py ssl.py base64.py warnings.py contextvars.py _py_warnings.py _weakrefset.py tracemalloc.py csv.py decimal.py numbers.py contextlib.py weakref.py copy.py hmac.py random.py bisect.py glob.py fnmatch.py; do
+for module in os.py stat.py genericpath.py posixpath.py abc.py _collections_abc.py io.py socket.py enum.py types.py signal.py hashlib.py ssl.py base64.py warnings.py contextvars.py _py_warnings.py _weakrefset.py tracemalloc.py csv.py decimal.py numbers.py contextlib.py weakref.py copy.py hmac.py random.py bisect.py glob.py fnmatch.py timeit.py dis.py opcode.py _opcode_metadata.py; do
     upload "$runtime_dir/$module" "$remote_runtime/$module"
 done
 mkdir_remote "$remote_runtime/xml"
