@@ -15,7 +15,8 @@ if os.name == "nt":
     # the real tempfile APIs below.
     print("test_filesystem: tempfile checks skipped on host")
 else:
-    with tempfile.TemporaryDirectory(prefix="cpython-ps5-") as directory:
+    temp_root = "/data/python"
+    with tempfile.TemporaryDirectory(prefix="cpython-ps5-", dir=temp_root) as directory:
         root = pathlib.Path(directory)
         nested = root / "nested"
         nested.mkdir()
@@ -32,7 +33,9 @@ else:
 
     assert not root.exists()
 
-    with tempfile.NamedTemporaryFile(mode="w+", encoding="utf-8") as handle:
+    with tempfile.NamedTemporaryFile(
+        mode="w+", encoding="utf-8", dir=temp_root
+    ) as handle:
         handle.write("temporary file")
         handle.flush()
         handle.seek(0)
@@ -40,7 +43,7 @@ else:
         named_path = handle.name
     assert not os.path.exists(named_path)
 
-    fd, path = tempfile.mkstemp(prefix="cpython-ps5-")
+    fd, path = tempfile.mkstemp(prefix="cpython-ps5-", dir=temp_root)
     try:
         os.write(fd, b"mkstemp")
         os.close(fd)
