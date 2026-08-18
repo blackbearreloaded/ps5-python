@@ -141,6 +141,10 @@ build_runtime_bundle() {
     cp "$source_dir/Lib/secrets.py" "$runtime_dir/secrets.py"
     cp "$source_dir/Lib/tempfile.py" "$runtime_dir/tempfile.py"
     cp "$source_dir/Lib/shutil.py" "$runtime_dir/shutil.py"
+    mkdir -p "$runtime_dir/importlib"
+    for module in __init__.py _abc.py machinery.py util.py; do
+        cp "$source_dir/Lib/importlib/$module" "$runtime_dir/importlib/$module"
+    done
     mkdir -p "$runtime_dir/concurrent/futures"
     cp "$source_dir/Lib/concurrent/__init__.py" "$runtime_dir/concurrent/__init__.py"
     cp "$source_dir/Lib/concurrent/futures/__init__.py" "$runtime_dir/concurrent/futures/__init__.py"
