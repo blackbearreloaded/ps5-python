@@ -78,6 +78,12 @@ configure_ps5() {
     mkdir -p "$build_dir"
     cd "$build_dir"
     CONFIG_SITE="$root_dir/tools/ps5.config.site" \
+    ac_cv_header_curses_h=no \
+    ac_cv_header_ncurses_h=no \
+    ac_cv_header_ncursesw_curses_h=no \
+    ac_cv_header_ncursesw_ncurses_h=no \
+    ac_cv_header_ncurses_curses_h=no \
+    ac_cv_header_ncurses_ncurses_h=no \
     CC="$compiler_string" \
     CPPFLAGS="-I$openssl_dir/include -I$libffi_dir/include -I$zlib_dir/include -I$sqlite_dir/include" \
     LDFLAGS="-L$openssl_dir/lib -lssl -lcrypto -L$libffi_dir/lib -lffi -L$zlib_dir/lib -lz -L$sqlite_dir/lib -lsqlite3 ${linker_args[*]}" \
