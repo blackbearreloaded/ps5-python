@@ -295,3 +295,7 @@ coverage remain incomplete.
 - `8d6be17` Bundle official logging submodules
 - `380b8a4` Bundle socketserver logging dependency
 - `0b0662c` Document complete logging package surface
+- `a9bde66` Bundle asyncio and add Tier 3 coverage
+- `1067017` Bundle html dependency for http server
+- `57378dc` Bundle mimetypes dependency for http server
+- `6fab23f` Document Tier 3 concurrency and networking
