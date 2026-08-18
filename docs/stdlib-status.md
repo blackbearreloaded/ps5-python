@@ -400,9 +400,10 @@ Included and tested:
 
 PS5 limitations:
 
-- The payload has no usable `/tmp`, `/var/tmp`, or `/usr/tmp`, so
-  `tempfile.gettempdir()` and default temporary-file calls fail. Callers must
-  pass the writable `/data/python` directory (or configure `tempfile.tempdir`).
+- The PS5 launcher sets `TMPDIR=/user/temp` before CPython initializes.
+  `tempfile.gettempdir()` and default temporary-file calls therefore use the
+  PS5-managed directory, which is cleaned on restart. Callers may override
+  `TMPDIR` or configure `tempfile.tempdir` when needed.
 - `shutil.rmtree` uses CPython's path-based fallback because PS5
   `os.scandir(fd)` returns `ENOTSUP`; the fallback still provides automatic
   `TemporaryDirectory` cleanup but does not provide fd-based symlink-race

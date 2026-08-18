@@ -61,8 +61,8 @@ Static or bundled support now includes:
 - `heapq` and `_heapq`
 - A PS5-compatible `dataclasses` subset
 - `pathlib`, `stat`, `_stat`, `posixpath`, and `zipimport`
-- `tempfile.TemporaryDirectory`, `NamedTemporaryFile`, and `mkstemp` using an
-  explicit writable PS5 directory
+- `tempfile.TemporaryDirectory`, `NamedTemporaryFile`, and `mkstemp` using the
+  PS5-managed `/user/temp` directory
 - `timeit` and `dis`
 
 ### Security and hashing
@@ -172,11 +172,10 @@ The native `mmap` module is compiled and importable, but `mmap.mmap()` returns
 
 ### Temporary files
 
-`tempfile` works when callers provide the writable `/data/python` directory.
-The payload has no usable default `/tmp`-style directory, so default temp-file
-creation and `gettempdir()` fail. `TemporaryDirectory` cleanup works through
-the path-based `shutil.rmtree` fallback because fd-based `os.scandir` is
-`ENOTSUP`.
+The PS5 launcher sets `TMPDIR=/user/temp`, a writable directory cleaned on
+restart. Default tempfile creation and `gettempdir()` now use that location.
+`TemporaryDirectory` cleanup works through the path-based `shutil.rmtree`
+fallback because fd-based `os.scandir` is `ENOTSUP`.
 
 ### ctypes
 
