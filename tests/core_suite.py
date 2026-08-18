@@ -31,6 +31,7 @@ TEST_FILES = (
     "test_dns.py",
     "test_core_modules.py",
     "test_posix_boundary.py",
+    "test_process.py",
     "test_select.py",
     "test_selectors.py",
 )

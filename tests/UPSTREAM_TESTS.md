@@ -41,6 +41,7 @@ adaptation policy, not a replacement for CPython's complete regression suite.
 | `stdlib/test_dns.py` | `test_socket.py` (`getaddrinfo`) |
 | `stdlib/test_core_modules.py` | `test_re.py`, `test_json`, `test_struct`, `test_math`, `test_unicodedata` |
 | `stdlib/test_posix_boundary.py` | `test_os.py`, `test_signal.py` |
+| `stdlib/test_process.py` | `test_os.py` (`fork`, `waitpid`) |
 | `stdlib/test_select.py` | `test_select.py`, `test_selectors.py` |
 
 The standard-library tests are intentionally direct, import-light adaptations
