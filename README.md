@@ -35,6 +35,14 @@ Core scaffold started. The pinned CPython checkout is kept outside Git under
 language-core suite and its PS5 aggregate run pass. The PS5 core ELF and
 static library build with WSL and the installed PS5 SDK.
 
+The current CPython 3.14.7 runtime bundle includes the official
+`threading.py`, `concurrent.futures.ThreadPoolExecutor`, and supported
+`multiprocessing` wrappers. Thread pools and `multiprocessing.Pipe` are
+verified on PS5; Queue/Semaphore, POSIX `SharedMemory`, and
+`ProcessPoolExecutor` remain unavailable until the payload gains named
+semaphores, file-backed `mmap`, and an ELF process broker. See
+[`docs/stdlib-status.md`](docs/stdlib-status.md) for the per-module contract.
+
 ## Build the first PS5 ELF
 
 Run these from WSL at the repository root:

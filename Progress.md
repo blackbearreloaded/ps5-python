@@ -15,8 +15,8 @@ upstream source commit `823f0323ee6ec1402088b73bce1a38473cac36dc`.
 - Added `tests/stdlib/test_tls_handshake.py` as a separate live PS5 smoke test;
   the PS5 handshake now passes with certificate checking disabled. A selected
   PS5 CA bundle is the next TLS increment.
-- PS5 aggregate suite passes with the expanded official profiling wrapper:
-  `CPYTHON_CORE_SUITE: PASS (41 scripts)`.
+- PS5 aggregate suite passes with the profiling and concurrency wrappers:
+  `CPYTHON_CORE_SUITE: PASS (42 scripts)`.
 
 ## Completed Today
 
@@ -82,6 +82,11 @@ Static or bundled support now includes:
   closure.
 - Verified tracing start/stop and traced-memory counters.
 - `_multiprocessing` and `_posixshmem` are statically linked and import-tested.
+- Bundled official `threading.py`, `concurrent.futures.ThreadPoolExecutor`,
+  and the supported `multiprocessing` package surface. PS5 verifies thread
+  pools and `multiprocessing.Pipe`; Queue/Semaphore/SharedMemory and
+  ProcessPoolExecutor are recorded as platform limitations.
+- Statically linked native `array` for multiprocessing reduction support.
 - `_ctypes` is statically linked against a PS5-built libffi 3.8.0 Unix SysV
   backend.
 - Verified basic `ctypes.c_int` construction and sizing.
@@ -146,11 +151,12 @@ The full Python snapshot/statistics layer is now bundled and passes the PS5
 aggregate suite. Long-running tracing, snapshot stress, and cross-process
 behavior remain unverified.
 
-### Multiprocessing
+### Multiprocessing and process pools
 
-Native `_multiprocessing` and `_posixshmem` import successfully, but semaphore,
-shared-memory, message-queue, and process-pool behavior is not fully verified.
-The higher-level `multiprocessing` package is not bundled.
+The official Python wrappers are bundled. Thread pools and `Pipe` pass on PS5,
+but Queue/Semaphore fail because named semaphores are unavailable, SharedMemory
+fails because `mmap` is `ENOTSUP`, and ProcessPoolExecutor/process spawning is
+not bundled or supported without subprocess/ELF-launch integration.
 
 ### mmap
 
@@ -184,7 +190,8 @@ coverage remain incomplete.
 - A complete ctypes native-library loading test.
 - Full pathlib, dataclasses, SSL, and compression upstream test coverage;
   long-running profiling stress remains unverified.
-- Higher-level `threading.py` and broader concurrency wrappers.
+- Queue/semaphore support, POSIX shared memory, and process-pool launching once
+  the PS5 payload gains named semaphores, file-backed `mmap`, and an ELF broker.
 - A complete HTTP server foundation suitable for Flask or Werkzeug.
 - Flask, Werkzeug, Jinja2, and MarkupSafe dependency validation.
 
@@ -195,9 +202,9 @@ coverage remain incomplete.
 3. Add a minimal HTTP server using the verified IPv4 poll/event-loop layer.
 4. Validate `ctypes` against a safe PS5-native test library or broker API.
 5. Investigate the kernel-assisted ELF broker for subprocess-compatible workers.
-6. Bundle and test the higher-level `threading` wrapper.
-7. Expand upstream-derived tests without weakening the documented PS5 subset.
-8. Attempt a minimal Flask/Werkzeug/Jinja2/MarkupSafe application bundle.
+6. Expand upstream-derived concurrency tests as each PS5 primitive becomes
+   available, without weakening the documented PS5 subset.
+7. Attempt a minimal Flask/Werkzeug/Jinja2/MarkupSafe application bundle.
 
 ## Git Checkpoints
 
@@ -213,3 +220,5 @@ coverage remain incomplete.
 - `105ea8e` Build libffi and enable ctypes
 - `c3302fc` Add collections algorithms and dataclasses
 - `e65ca71` Add profiling and diagnostics wrappers
+- `77543b3` Support multiprocessing SelectSelector alias
+- `cbab5df` Mark unsupported PS5 process IPC explicitly

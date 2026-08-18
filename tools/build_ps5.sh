@@ -134,6 +134,25 @@ build_runtime_bundle() {
     cp "$source_dir/Lib/_py_warnings.py" "$runtime_dir/_py_warnings.py"
     cp "$source_dir/Lib/_weakrefset.py" "$runtime_dir/_weakrefset.py"
     cp "$source_dir/Lib/tracemalloc.py" "$runtime_dir/tracemalloc.py"
+    cp "$source_dir/Lib/threading.py" "$runtime_dir/threading.py"
+    cp "$source_dir/Lib/queue.py" "$runtime_dir/queue.py"
+    cp "$root_dir/tools/minimal_logging.py" "$runtime_dir/logging.py"
+    cp "$source_dir/Lib/runpy.py" "$runtime_dir/runpy.py"
+    cp "$source_dir/Lib/secrets.py" "$runtime_dir/secrets.py"
+    cp "$source_dir/Lib/tempfile.py" "$runtime_dir/tempfile.py"
+    cp "$source_dir/Lib/shutil.py" "$runtime_dir/shutil.py"
+    mkdir -p "$runtime_dir/concurrent/futures"
+    cp "$source_dir/Lib/concurrent/__init__.py" "$runtime_dir/concurrent/__init__.py"
+    cp "$source_dir/Lib/concurrent/futures/__init__.py" "$runtime_dir/concurrent/futures/__init__.py"
+    cp "$source_dir/Lib/concurrent/futures/_base.py" "$runtime_dir/concurrent/futures/_base.py"
+    cp "$source_dir/Lib/concurrent/futures/thread.py" "$runtime_dir/concurrent/futures/thread.py"
+    mkdir -p "$runtime_dir/multiprocessing"
+    for module in "$source_dir"/Lib/multiprocessing/*.py; do
+        cp "$module" "$runtime_dir/multiprocessing/$(basename "$module")"
+    done
+    "$build_python" "$root_dir/tools/patch_multiprocessing_util.py" \
+        "$source_dir/Lib/multiprocessing/util.py" \
+        "$runtime_dir/multiprocessing/util.py"
     cp "$source_dir/Lib/csv.py" "$runtime_dir/csv.py"
     cp "$source_dir/Lib/decimal.py" "$runtime_dir/decimal.py"
     mkdir -p "$runtime_dir/xml/etree"

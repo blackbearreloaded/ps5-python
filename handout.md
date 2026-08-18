@@ -170,11 +170,11 @@ and import-tested.
 1. Add a selected CA bundle and certificate verification to the passing
    `tests/stdlib/test_tls_handshake.py` smoke test.
 2. Build and integrate static zlib, then add gzip/content-encoding tests.
-3. Bundle and test the higher-level `threading` wrapper.
+3. Add named-semaphore, file-backed `mmap`, and ELF-broker support to unlock
+   multiprocessing Queue/Semaphore/SharedMemory and ProcessPoolExecutor.
 4. Build a minimal HTTP server on the verified IPv4 selector layer.
 5. Validate ctypes against a safe PS5-native test library or broker API.
-6. Investigate the kernel-assisted ELF broker for subprocess-compatible
-   workers.
+6. Expand the official concurrency-derived tests as each PS5 primitive lands.
 7. Attempt a minimal Flask/Werkzeug/Jinja2/MarkupSafe application bundle.
 
 ## Development rules

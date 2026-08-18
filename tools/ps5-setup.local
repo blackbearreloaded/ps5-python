@@ -18,3 +18,4 @@ _multiprocessing _multiprocessing/multiprocessing.c _multiprocessing/semaphore.c
 _posixshmem _multiprocessing/posixshmem.c
 mmap mmapmodule.c
 _heapq _heapqmodule.c
+array arraymodule.c
