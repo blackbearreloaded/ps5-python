@@ -238,6 +238,10 @@ build_runtime_bundle() {
     for module in "$source_dir"/Lib/compression/*.py; do
         cp "$module" "$runtime_dir/compression/$(basename "$module")"
     done
+    mkdir -p "$runtime_dir/compression/_common"
+    for module in "$source_dir"/Lib/compression/_common/*.py; do
+        cp "$module" "$runtime_dir/compression/_common/$(basename "$module")"
+    done
     mkdir -p "$runtime_dir/pathlib"
     for module in __init__.py _local.py _os.py types.py; do
         cp "$source_dir/Lib/pathlib/$module" "$runtime_dir/pathlib/$module"
