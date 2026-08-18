@@ -139,7 +139,7 @@ build_runtime_bundle() {
     rm -rf "$runtime_dir/logging"
     mkdir -p "$runtime_dir/logging"
     cp "$source_dir/Lib/logging/__init__.py" "$runtime_dir/logging/__init__.py"
-    for module in argparse.py gettext.py locale.py traceback.py pprint.py textwrap.py codeop.py tokenize.py token.py _colorize.py difflib.py inspect.py calendar.py quopri.py ipaddress.py; do
+    for module in __future__.py argparse.py gettext.py locale.py traceback.py pprint.py textwrap.py codeop.py tokenize.py token.py _colorize.py difflib.py inspect.py calendar.py quopri.py ipaddress.py; do
         cp "$source_dir/Lib/$module" "$runtime_dir/$module"
     done
     mkdir -p "$runtime_dir/string"
