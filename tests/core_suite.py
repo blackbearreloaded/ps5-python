@@ -35,6 +35,7 @@ TEST_FILES = (
     "test_concurrency.py",
     "test_data_formats.py",
     "test_import_runtime.py",
+    "test_filesystem.py",
     "test_diagnostics.py",
     "test_data_structures.py",
     "test_profiling.py",
