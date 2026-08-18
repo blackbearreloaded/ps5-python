@@ -61,6 +61,10 @@ assert not lock.locked()
 if sys.platform.startswith("freebsd"):
     import multiprocessing
 
+    def process_child(connection):
+        connection.send(("process", os.getpid()))
+        connection.close()
+
     assert multiprocessing.get_start_method() in ("fork", "forkserver", "spawn")
     assert multiprocessing.current_process().pid == os.getpid()
     assert multiprocessing.cpu_count() > 0
@@ -72,6 +76,15 @@ if sys.platform.startswith("freebsd"):
     finally:
         receiver.close()
         sender.close()
+
+    receiver, sender = multiprocessing.Pipe(False)
+    process = multiprocessing.Process(target=process_child, args=(sender,))
+    process.start()
+    sender.close()
+    assert receiver.recv()[0] == "process"
+    receiver.close()
+    process.join(2.0)
+    assert process.exitcode == 0
 
     try:
         queue = multiprocessing.Queue()
