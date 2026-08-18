@@ -54,6 +54,11 @@ cleaned on restart.
 It also includes the official `typing.py` dependency closure (`annotationlib`,
 `ast`, and `keyword`) and `datetime.py` over native `_typing` and `_datetime`;
 the timezone database remains outside the current subset.
+Tier 2 utility modules are also bundled from the same CPython 3.14.7 pin,
+including `argparse`, `logging`, `shutil`, `random`, `copy`, `enum`, `csv`,
+`unittest`, `subprocess` (import-only on PS5), `urllib`, `hashlib`, `io`,
+`traceback`, and `pprint`; their individual omissions are tracked in
+[`docs/stdlib-status.md`](docs/stdlib-status.md).
 
 ## Build the first PS5 ELF
 
@@ -141,7 +146,7 @@ PS5_HOST=192.168.4.30 make ps5-run SCRIPT=tests/stdlib/test_tls_handshake.py
 ```
 
 `ps5-core` and `ps5-web` only build artifacts; they do not run hardware tests.
-`ps5-test` builds the ELF, uploads the test bundle, and runs all 44 aggregate
+`ps5-test` builds the ELF, uploads the test bundle, and runs all 45 aggregate
 tests. `ps5-suite` adds the lifetime checks. `RUN_TIMEOUT` is set to 120
 seconds for the aggregate run.
 

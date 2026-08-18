@@ -41,6 +41,34 @@ The combined smoke test is `tests/stdlib/test_tier1.py`, adapted from
 `test_sys.py`, `test_typing.py`, and `datetimetester.py`; existing focused
 tests cover the other rows.
 
+## Tier 2 utility status
+
+These modules use the pinned CPython 3.14.7 `Lib/` sources and the focused
+`tests/stdlib/test_tier2.py` smoke test. The table records the supported
+surface and the remaining PS5-specific gap for every requested module.
+
+| Module | PS5 status | Included and tested | Missing or limited |
+| --- | --- | --- | --- |
+| `argparse` | Bundled | Parser construction, positional/optional arguments, and conversion | Full formatter, subparser, file-completion, and upstream regression coverage pending |
+| `logging` | Official package bundled | Logger, level filtering, `StreamHandler`, and formatter output | File handlers, multiprocessing handlers, and full upstream coverage pending |
+| `shutil` | Bundled with PS5 fallback | Copy/file operations and temporary-directory cleanup | fd-based `rmtree` hardening is unavailable because `os.scandir(fd)` is `ENOTSUP`; archive and metadata coverage pending |
+| `random` | Official wrapper plus native `_random` | Seeded `Random`, choices, and shuffle foundation | System entropy/provider edge cases and full statistical coverage pending |
+| `copy` | Official wrapper | Shallow and deep copy of nested data | Custom `__reduce__`/extension-object coverage pending |
+| `enum` | Official wrapper | Symbolic values and identity semantics | Full flag, verification, and pickle coverage pending |
+| `csv` | Official wrapper plus native `_csv` | Reader/writer round trip and dialect basics | Complete dialect/error/large-file coverage pending |
+| `unittest` | Official package bundled | `TestCase`, assertions, and test discovery imports | Full runner, discovery CLI, signal, and isolation coverage pending |
+| `subprocess` | Importable patched official wrapper | API import and unsupported-execution behavior | Child execution is unavailable: no `_posixsubprocess`, ELF broker, or reliable descriptor duplication |
+| `urllib` | Official `urllib`/`http`/`email` closure bundled | URL parsing, quoting, and `Request` construction | Live HTTP proxy/server, TLS verification, IPv6, and full coverage pending |
+| `hashlib` | Official wrapper plus OpenSSL `_hashlib` | MD5, SHA-256, SHA-3, and OpenSSL-backed BLAKE2 | HACL `_blake2`/native extras are not linked; provider edge cases pending |
+| `io` | Official wrapper plus native `_io` | `BytesIO` and `StringIO` read/write/seek behavior | File-backed, incremental-codec, nonblocking, and full coverage pending |
+| `traceback` | Official wrapper bundled | Exception-only formatting and logging dependency closure | Full chained/stack/source formatting coverage pending |
+| `pprint` | Official wrapper bundled | Stable readable formatting of nested structures | Width/recursive/custom-object and full coverage pending |
+
+The dependency closure needed by this tier is intentionally bundled as
+official CPython code (`gettext`, `locale`, `encodings.aliases`, `tokenize`,
+`inspect`, `email`, `http`, `string`, and `unittest` support modules), rather
+than weakening tests when an import exposed a missing dependency.
+
 ## `os`
 
 Status: Python-level POSIX wrapper and core filesystem operations included.
@@ -367,8 +395,9 @@ Present but unavailable or intentionally omitted:
 - `multiprocessing.Process` works with an explicit `fork` context. The default
   `forkserver`/`spawn` paths and cross-process shared state remain unavailable
   without subprocess/ELF-launch support.
-- `concurrent.futures._base` uses a tiny internal no-op logger. The full
-  `logging` package is not part of this runtime bundle.
+- `concurrent.futures._base` now uses the official bundled `logging` package;
+  file/network logging handlers remain subject to the filesystem and process
+  limitations recorded in the Tier 2 table.
 
 Source and tests:
 
@@ -477,10 +506,11 @@ The native `mmap` module is compiled and importable, but `mmap.mmap()` returns
 `ENOTSUP` in the current PS5 payload. The limitation is covered by
 `tests/stdlib/test_diagnostics.py`.
 
-`subprocess` remains unavailable: the PS5 payload cannot execute ordinary
-filesystem ELFs through libc `execve()`, and descriptor duplication is not
-supported. Process execution still requires the native kernel-assisted ELF
-broker described in the process-management section.
+`subprocess` imports through a PS5-patched official wrapper, but execution
+remains unavailable: the payload cannot execute ordinary filesystem ELFs
+through libc `execve()`, and descriptor duplication is not supported. Process
+execution still requires the native kernel-assisted ELF broker described in
+the process-management section.
 
 ## Collections, algorithms, and dataclasses
 
