@@ -16,3 +16,4 @@ _elementtree _elementtree.c
 _random _randommodule.c
 _multiprocessing _multiprocessing/multiprocessing.c _multiprocessing/semaphore.c
 _posixshmem _multiprocessing/posixshmem.c
+mmap mmapmodule.c
