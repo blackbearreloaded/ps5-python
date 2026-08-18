@@ -107,6 +107,12 @@ upload "$runtime_dir/selectors.py" "$remote_runtime/selectors.py"
 for module in os.py stat.py genericpath.py posixpath.py abc.py _collections_abc.py io.py socket.py enum.py types.py; do
     upload "$runtime_dir/$module" "$remote_runtime/$module"
 done
+for package in re json; do
+    mkdir_remote "$remote_runtime/$package"
+    while IFS= read -r -d '' module_file; do
+        upload "$module_file" "$remote_runtime/$package/$(basename "$module_file")"
+    done < <(find "$runtime_dir/$package" -maxdepth 1 -type f -name '*.py' -print0 | sort -z)
+done
 
 if [ -n "$remote_app_root" ]; then
     while IFS= read -r -d '' app_file; do

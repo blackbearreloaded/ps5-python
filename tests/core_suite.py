@@ -28,6 +28,8 @@ TEST_FILES = (
     "test_time.py",
     "test_io.py",
     "test_socket.py",
+    "test_dns.py",
+    "test_core_modules.py",
     "test_select.py",
     "test_selectors.py",
 )

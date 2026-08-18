@@ -11,3 +11,6 @@ ac_cv_func_pthread_set_name_np=no
 # fallback instead of reading that field.
 ac_cv_member_struct_tm_tm_zone=no
 ac_cv_have_decl_tzname=no
+ac_cv_var_timezone=no
+ac_cv_var_daylight=no
+ac_cv_var_tzname=no

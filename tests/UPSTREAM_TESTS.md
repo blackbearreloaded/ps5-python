@@ -38,6 +38,8 @@ adaptation policy, not a replacement for CPython's complete regression suite.
 | `stdlib/test_time.py` | `test_time.py` |
 | `stdlib/test_io.py` | `test_io.py` |
 | `stdlib/test_socket.py` | `test_socket.py` |
+| `stdlib/test_dns.py` | `test_socket.py` (`getaddrinfo`) |
+| `stdlib/test_core_modules.py` | `test_re.py`, `test_json`, `test_struct`, `test_math`, `test_unicodedata` |
 | `stdlib/test_select.py` | `test_select.py`, `test_selectors.py` |
 
 The standard-library tests are intentionally direct, import-light adaptations

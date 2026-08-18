@@ -134,13 +134,14 @@ Included and tested:
 - `getsockname` and `getpeername`
 - `send` and `recv`
 - `setsockopt` with `SO_REUSEADDR` and `TCP_NODELAY`
+- numeric and ASCII-hostname `getaddrinfo()` for IPv4 TCP and UDP
+- IPv4 UDP `sendto()` and `recvfrom()`
 
 Not yet covered or packaged:
 
-- `socket.makefile()` integration test
-- UDP behavior and IPv6
+- complete `socket.makefile()` regression coverage
+- IPv6 and advanced UDP behavior
 - non-blocking mode and `fcntl` flags
-- `select.select()` / `selectors` integration
 - complete upstream `test_socket.py` regression coverage
 
 Platform notes:
@@ -156,6 +157,9 @@ Platform notes:
   `tests/stdlib/test_socket.py`. The PS5 bundle uses a minimal IDNA codec for
   ordinary ASCII DNS names; internationalized Unicode domain names remain
   unsupported until full IDNA/Punycode support is added.
+- `apps/dns_demo` provides a hardware-facing DNS check. It always resolves
+  `localhost`; an external hostname can be selected with
+  `CPYTHONPS5_DNS_HOST`, but internet DNS is not a required suite criterion.
 
 Source and tests:
 
@@ -163,7 +167,43 @@ Source and tests:
 - `upstream/cpython/Modules/socketmodule.c`
 - `upstream/cpython/Modules/selectmodule.c`
 - `tests/stdlib/test_socket.py`
+- `tests/stdlib/test_dns.py` (requires working external DNS on PS5)
 - `tests/stdlib/test_select.py`
+
+## Core extension modules
+
+Status: statically linked and tested on PS5.
+
+Source:
+
+- `upstream/cpython/Modules/_sre/sre.c`
+- `upstream/cpython/Modules/_json.c`
+- `upstream/cpython/Modules/_struct.c`
+- `upstream/cpython/Modules/mathmodule.c`
+- `upstream/cpython/Modules/_codecsmodule.c`
+- `upstream/cpython/Modules/unicodedata.c`
+- matching `Lib/re/`, `Lib/json/`, and `Lib/codecs.py` wrappers
+
+Included and tested:
+
+- `re` pattern search through static `_sre`
+- `json.dumps()` and `json.loads()` through static `_json`
+- integer packing and unpacking through static `_struct`
+- `math.sqrt()` and floating-point comparison through static `math`
+- Unicode character categories through static `unicodedata`
+- static `_codecs` availability and existing UTF-8 runtime support
+
+Limitations:
+
+- This is focused coverage, not complete upstream regression coverage for
+  `re`, `json`, `struct`, `math`, `codecs`, or `unicodedata`.
+- The PS5 SDK emits warnings while compiling `mathmodule.c` because its
+  type-generic floating-point macros qualify lvalues; the build and runtime
+  tests pass.
+
+Tests:
+
+- `tests/stdlib/test_core_modules.py`
 
 ## Future module entries
 
