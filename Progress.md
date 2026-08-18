@@ -4,6 +4,17 @@
 
 2026-08-18
 
+## Follow-up
+
+- Host validation now passes all 42 discovered scripts. Tests that require PS5
+  capabilities (fork, `select.poll`, external DNS, and live TLS) skip cleanly
+  on desktop Python instead of making the host baseline nondeterministic.
+- Added `tests/stdlib/test_tls_handshake.py` as a separate live PS5 smoke test;
+  the PS5 handshake now passes with certificate checking disabled. A selected
+  PS5 CA bundle is the next TLS increment.
+- PS5 aggregate suite passes with the expanded official profiling wrapper:
+  `CPYTHON_CORE_SUITE: PASS (41 scripts)`.
+
 ## Completed Today
 
 ### Build performance
@@ -63,7 +74,9 @@ Static or bundled support now includes:
 - `_thread` and `contextvars` are available and tested.
 - Verified joinable thread creation, locks, thread identity, `ContextVar`,
   tokens, and context copying.
-- `_tracemalloc` is statically linked with a minimal wrapper.
+- `_tracemalloc` is statically linked with the official CPython
+  `tracemalloc.py` snapshot/statistics wrapper and its bundled dependency
+  closure.
 - Verified tracing start/stop and traced-memory counters.
 - `_multiprocessing` and `_posixshmem` are statically linked and import-tested.
 - `_ctypes` is statically linked against a PS5-built libffi 3.8.0 Unix SysV
@@ -109,8 +122,8 @@ the PS5 SDK `getaddrinfo()` behavior. Networking is currently IPv4-only.
 
 ### TLS
 
-OpenSSL is linked and TLS APIs import successfully, but a live HTTPS handshake
-and certificate verification have not yet been completed on PS5.
+OpenSSL is linked and a live HTTPS handshake now passes on PS5. Certificate
+verification and CA-store selection remain unimplemented.
 
 ### Hashing
 
@@ -126,9 +139,9 @@ does not implement every CPython decorator option or reflection helper.
 
 ### Tracemalloc
 
-The native tracing counters work. The full Python snapshot/statistics layer is
-not bundled because it requires more dependencies such as `linecache`,
-`pickle`, and broader collections support.
+The full Python snapshot/statistics layer is now bundled and passes the PS5
+aggregate suite. Long-running tracing, snapshot stress, and cross-process
+behavior remain unverified.
 
 ### Multiprocessing
 
@@ -161,13 +174,13 @@ coverage remain incomplete.
 
 ## What Is Missing
 
-- A real HTTPS client/server handshake test with certificate verification.
+- Certificate-verified HTTPS with an explicit PS5 CA-store strategy.
 - Static zlib, bzip2, and xz dependencies.
 - Full `multiprocessing` and subprocess integration.
 - Kernel-assisted process/ELF launching and cross-process descriptor transfer.
 - A complete ctypes native-library loading test.
-- Full pathlib, dataclasses, tracemalloc, SSL, and compression upstream test
-  coverage.
+- Full pathlib, dataclasses, SSL, and compression upstream test coverage;
+  long-running profiling stress remains unverified.
 - Higher-level `threading.py` and broader concurrency wrappers.
 - A complete HTTP server foundation suitable for Flask or Werkzeug.
 - Flask, Werkzeug, Jinja2, and MarkupSafe dependency validation.

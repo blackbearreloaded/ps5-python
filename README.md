@@ -108,8 +108,15 @@ Run those tests plus the repeated-process lifetime checks with:
 PS5_HOST=192.168.4.30 make ps5-suite
 ```
 
+The live TLS smoke test is intentionally separate from the aggregate suite
+because it requires external DNS and internet access:
+
+```sh
+PS5_HOST=192.168.4.30 make ps5-run SCRIPT=tests/stdlib/test_tls_handshake.py
+```
+
 `ps5-core` and `ps5-web` only build artifacts; they do not run hardware tests.
-`ps5-test` builds the ELF, uploads the test bundle, and runs all 24 aggregate
+`ps5-test` builds the ELF, uploads the test bundle, and runs all 41 aggregate
 tests. `ps5-suite` adds the lifetime checks. `RUN_TIMEOUT` is set to 120
 seconds for the aggregate run.
 

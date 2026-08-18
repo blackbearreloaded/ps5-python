@@ -60,7 +60,7 @@ printf 'hello from netcat\n' | nc 192.168.4.30 9091
 The complete PS5 aggregate suite currently passes:
 
 ```
-CPYTHON_CORE_SUITE: PASS (29 scripts)
+CPYTHON_CORE_SUITE: PASS (41 scripts)
 ```
 
 It includes the core tests plus:
@@ -71,6 +71,16 @@ It includes the core tests plus:
 - `tests/stdlib/test_socket.py`
 - `tests/stdlib/test_select.py`
 - `tests/stdlib/test_selectors.py`
+- `tests/stdlib/test_process.py`
+- `tests/stdlib/test_network.py`
+- `tests/stdlib/test_posix_boundary.py`
+- `tests/stdlib/test_ssl_hashlib.py`
+- `tests/stdlib/test_thread_context.py`
+- `tests/stdlib/test_data_formats.py`
+- `tests/stdlib/test_import_runtime.py`
+- `tests/stdlib/test_diagnostics.py`
+- `tests/stdlib/test_data_structures.py`
+- `tests/stdlib/test_profiling.py`
 
 Tests are adapted from official CPython names and concepts; provenance is in
 `tests/UPSTREAM_TESTS.md`. Standard-library status is tracked in
@@ -120,7 +130,7 @@ defaults to `/data/python`; override it with
 `PS5_RUNTIME_ROOT=/some/absolute/path`.
 
 When adding a runtime module, update all three paths:
-`tools/build_ps5.sh`, `tools/run_ps5.sh`, and `tools/run_ps5_web.sh).
+`tools/build_ps5.sh`, `tools/run_ps5.sh`, and `tools/run_ps5_web.sh`.
 A module can exist in the local build and still be absent on the PS5 if its
 upload step is missing.
 
@@ -134,8 +144,10 @@ native PS5 sleep hook is still needed.
 
 ### OS and IO
 
-Process creation and management (fork, exec, spawn, system, subprocess) are
-not implemented. Complete upstream os coverage is pending. IO currently
+`fork()` and `waitpid()` are verified for an immediate-exit child. `exec`,
+spawn, system, and subprocess remain unavailable because ordinary libc ELF
+launching and descriptor duplication are not supported. Complete upstream os
+coverage is pending. IO currently
 focuses on BytesIO and StringIO; file-backed buffered streams, full incremental
 codec layers, and complete upstream IO coverage remain incomplete.
 
@@ -145,21 +157,21 @@ The minimal IDNA codec in `tools/minimal_idna.py` supports ordinary ASCII
 hostnames such as `google.com`. Unicode internationalized domain names are
 unsupported because full IDNA/Punycode and unicodedata are not bundled.
 IPv6, advanced UDP behavior, full fcntl/nonblocking semantics, advanced socket
-options, complete upstream socket regression coverage, and TLS/SSL remain
-incomplete or unverified.
+options, complete upstream socket regression coverage, and live TLS remain
+incomplete or unverified. OpenSSL and the Python `ssl` APIs are already linked
+and import-tested.
 
 ## Recommended next steps
 
-1. Add a DNS demo using `getaddrinfo("localhost", 80)` and an external
-   hostname if PS5 networking permits it.
-2. Add and document the smallest useful fcntl/nonblocking subset.
-3. Extend selector tests for writable sockets, timeouts, multiple clients, and
-   closed descriptors.
-4. Build a minimal HTTP server or Werkzeug-compatible foundation.
-5. Implement a reliable PS5 sleep primitive.
-6. Add process identity and process-management APIs after checking sandbox
-   permissions.
-7. Add TLS only after plain HTTP works.
+1. Add a selected CA bundle and certificate verification to the passing
+   `tests/stdlib/test_tls_handshake.py` smoke test.
+2. Build and integrate static zlib, then add gzip/content-encoding tests.
+3. Bundle and test the higher-level `threading` wrapper.
+4. Build a minimal HTTP server on the verified IPv4 selector layer.
+5. Validate ctypes against a safe PS5-native test library or broker API.
+6. Investigate the kernel-assisted ELF broker for subprocess-compatible
+   workers.
+7. Attempt a minimal Flask/Werkzeug/Jinja2/MarkupSafe application bundle.
 
 ## Development rules
 
@@ -195,6 +207,5 @@ tests/UPSTREAM_TESTS.md
 apps/socket_server/main.py
 ```
 
-This imported workspace currently has no Git commits. Review generated files
-before creating the first commit.
-
+The repository has Git checkpoints through the current runtime and standard-
+library expansion. Review generated files before committing follow-up changes.

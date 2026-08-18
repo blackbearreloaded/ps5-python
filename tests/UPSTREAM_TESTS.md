@@ -41,6 +41,7 @@ adaptation policy, not a replacement for CPython's complete regression suite.
 | `stdlib/test_dns.py` | `test_socket.py` (`getaddrinfo`) |
 | `stdlib/test_core_modules.py` | `test_re.py`, `test_json`, `test_struct`, `test_math`, `test_unicodedata` |
 | `stdlib/test_ssl_hashlib.py` | `test_hashlib.py`, `test_ssl.py` |
+| `stdlib/test_tls_handshake.py` | `test_ssl.py`, `test_socket.py` |
 | `stdlib/test_thread_context.py` | `test_thread.py`, `test_contextvars.py` |
 | `stdlib/test_data_formats.py` | `test_csv.py`, `test_decimal.py`, `test_xml_etree.py` |
 | `stdlib/test_import_runtime.py` | `test_pathlib.py`, `test_zipimport.py`, `test_stat.py` |

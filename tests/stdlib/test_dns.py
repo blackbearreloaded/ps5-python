@@ -1,6 +1,12 @@
 """PS5 DNS resolution check for an external ASCII hostname."""
 
 import socket
+import sys
+
+
+if not sys.platform.startswith("freebsd"):
+    print("test_dns: SKIP (external PS5 DNS check)")
+    raise SystemExit(0)
 
 
 infos = socket.getaddrinfo("google.com", 80, socket.AF_INET, socket.SOCK_STREAM)

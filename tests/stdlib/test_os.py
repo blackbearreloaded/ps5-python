@@ -1,6 +1,7 @@
 """PS5 adaptation of CPython Lib/test/test_os.py."""
 
 import os
+import sys
 
 
 assert os.name in ("posix", "nt")
@@ -22,7 +23,7 @@ if hasattr(os, "getrandom"):
     assert len(random_c) == 16
     assert random_c != random_a
 
-test_base = "/data/python" if os.path.isdir("/data/python") else os.getcwd()
+test_base = "/data/python" if sys.platform.startswith("freebsd") else os.getcwd()
 test_root = os.path.join(test_base, ".cpython_ps5_os_test_{0}".format(os.getpid()))
 test_file = os.path.join(test_root, "sample.txt")
 renamed_file = os.path.join(test_root, "renamed.txt")
