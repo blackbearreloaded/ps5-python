@@ -185,7 +185,7 @@ case "${1:-core}" in
             configure_ps5
         fi
         CONFIG_SITE="$root_dir/tools/ps5.config.site" \
-            make -C "$build_dir" -j"$jobs" Modules/config.o libpython3.14.a
+            CC="$compiler_string" make -C "$build_dir" -j"$jobs" Modules/config.o libpython3.14.a
         build_launcher
         build_runtime_bundle
         echo "Built $launcher"
@@ -196,7 +196,7 @@ case "${1:-core}" in
             configure_ps5
         fi
         CONFIG_SITE="$root_dir/tools/ps5.config.site" \
-            make -C "$build_dir" -j"$jobs" Modules/config.o libpython3.14.a
+            CC="$compiler_string" make -C "$build_dir" -j"$jobs" Modules/config.o libpython3.14.a
         build_web_launcher
         build_runtime_bundle
         echo "Built $web_launcher"
