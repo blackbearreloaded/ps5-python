@@ -3,7 +3,8 @@
 Adapted from Lib/test/test_pickle.py, test_struct.py, test_bisect.py,
 test_heapq.py, test_array.py, test_fractions.py, test_base64.py,
 test_gzip.py, test_zipfile, test_tarfile.py, test_xml_etree.py,
-test_xml_dom_minidom.py, test_sax.py, test_glob.py, and test_fnmatch.py.
+test_xml_dom_minidom.py, test_sax.py, test_glob.py, test_fnmatch.py, and
+test_sqlite3.
 """
 
 import array
@@ -20,9 +21,11 @@ import operator
 import os
 import pickle
 import struct
+import sqlite3
 import tarfile
 import tempfile
 import zipfile
+import zlib
 from xml.dom import minidom
 from xml.sax import parseString
 from xml.sax.handler import ContentHandler
@@ -50,6 +53,11 @@ assert fractions.Fraction(1, 3) + fractions.Fraction(1, 6) == fractions.Fraction
 
 encoded = base64.b64encode(b"PS5 data")
 assert base64.b64decode(encoded) == b"PS5 data"
+
+payload = b"zlib stream payload\n"
+compressed_payload = zlib.compress(payload)
+assert zlib.decompress(compressed_payload) == payload
+assert zlib.crc32(payload) == 0x300A8D65
 
 compressed = io.BytesIO()
 with gzip.open(compressed, "wb") as handle:
@@ -83,6 +91,14 @@ if os.name != "nt":
 else:
     print("test_tier4_formats: filesystem glob checks skipped on host")
 assert fnmatch.fnmatch("source.txt", "*.txt")
+
+connection = sqlite3.connect(":memory:")
+connection.execute("create table records (name text, value integer)")
+connection.executemany("insert into records values (?, ?)", [("one", 1), ("two", 2)])
+assert connection.execute(
+    "select name, value from records order by value"
+).fetchall() == [("one", 1), ("two", 2)]
+connection.close()
 
 
 document = minidom.parseString("<root><item>value</item></root>")
