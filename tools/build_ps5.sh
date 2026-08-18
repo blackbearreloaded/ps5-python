@@ -351,7 +351,9 @@ case "${1:-core}" in
         configure_ps5
         ;;
     core)
-        if [ ! -f "$build_dir/Makefile" ]; then
+        if [ ! -f "$build_dir/Makefile" ] ||
+            ! grep -q '^_sqlite3 ' "$build_dir/Modules/Setup.local" 2>/dev/null ||
+            ! grep -q '^zlib ' "$build_dir/Modules/Setup.local" 2>/dev/null; then
             configure_ps5
         fi
         CONFIG_SITE="$root_dir/tools/ps5.config.site" \
@@ -362,7 +364,9 @@ case "${1:-core}" in
         echo "Runtime bundle: $runtime_dir"
         ;;
     web)
-        if [ ! -f "$build_dir/Makefile" ]; then
+        if [ ! -f "$build_dir/Makefile" ] ||
+            ! grep -q '^_sqlite3 ' "$build_dir/Modules/Setup.local" 2>/dev/null ||
+            ! grep -q '^zlib ' "$build_dir/Modules/Setup.local" 2>/dev/null; then
             configure_ps5
         fi
         CONFIG_SITE="$root_dir/tools/ps5.config.site" \
