@@ -30,8 +30,29 @@ fi
 source "$sdk_dir/toolchain/prospero.sh"
 
 compiler=("$sdk_dir/bin/prospero-clang")
-if [ "${PS5_CCACHE:-1}" != "0" ] && command -v ccache >/dev/null 2>&1; then
-    compiler=(ccache "${compiler[@]}")
+cache_tool="${PS5_CACHE:-auto}"
+if [ "${PS5_CCACHE:-1}" = "0" ]; then
+    cache_tool=none
+fi
+if [ "$cache_tool" = auto ]; then
+    if command -v ccache >/dev/null 2>&1; then
+        cache_tool=ccache
+    elif command -v sccache >/dev/null 2>&1; then
+        cache_tool=sccache
+    else
+        cache_tool=none
+    fi
+fi
+if [ "$cache_tool" != none ]; then
+    if ! command -v "$cache_tool" >/dev/null 2>&1; then
+        echo "Requested compiler cache not found: $cache_tool" >&2
+        exit 1
+    fi
+    compiler=("$cache_tool" "${compiler[@]}")
+fi
+linker_args=()
+if [ "${PS5_LINKER:-lld}" = mold ]; then
+    linker_args=(-fuse-ld=mold)
 fi
 compiler_string="${compiler[*]}"
 
@@ -49,7 +70,7 @@ configure_ps5() {
     mkdir -p "$build_dir"
     cd "$build_dir"
     CONFIG_SITE="$root_dir/tools/ps5.config.site" \
-    CC="$compiler_string" "$source_dir/configure" \
+    CC="$compiler_string" LDFLAGS="${linker_args[*]}" "$source_dir/configure" \
         --build=x86_64-pc-linux-gnu \
         --host=x86_64-pc-freebsd \
         --with-build-python="$build_python" \
@@ -105,6 +126,7 @@ build_launcher() {
         return
     fi
     "${compiler[@]}" \
+        "${linker_args[@]}" \
         -DCPYTHON_PS5 \
         -I"$root_dir/include" \
         -I"$build_dir" \
@@ -135,6 +157,7 @@ build_web_launcher() {
         return
     fi
     "${compiler[@]}" \
+        "${linker_args[@]}" \
         -DCPYTHON_PS5 \
         -I"$root_dir/include" \
         -I"$hb_dir/include" \
