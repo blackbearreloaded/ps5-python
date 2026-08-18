@@ -59,6 +59,12 @@ including `argparse`, `logging`, `shutil`, `random`, `copy`, `enum`, `csv`,
 `unittest`, `subprocess` (import-only on PS5), `urllib`, `hashlib`, `io`,
 `traceback`, and `pprint`; their individual omissions are tracked in
 [`docs/stdlib-status.md`](docs/stdlib-status.md).
+Tier 3 concurrency and networking modules are now included as well: official
+`asyncio`, `threading`, `multiprocessing`, and `concurrent.futures` wrappers,
+plus the native-backed `socket`, `ssl`, `http`, `queue`, `select`, and `signal`
+surfaces. Async event loops and IPv4 socket readiness are verified on PS5;
+process pools, child-process transports, IPv6, and certificate verification
+remain platform-limited as documented.
 
 ## Build the first PS5 ELF
 
@@ -146,7 +152,7 @@ PS5_HOST=192.168.4.30 make ps5-run SCRIPT=tests/stdlib/test_tls_handshake.py
 ```
 
 `ps5-core` and `ps5-web` only build artifacts; they do not run hardware tests.
-`ps5-test` builds the ELF, uploads the test bundle, and runs all 45 aggregate
+`ps5-test` builds the ELF, uploads the test bundle, and runs all 46 aggregate
 tests. `ps5-suite` adds the lifetime checks. `RUN_TIMEOUT` is set to 120
 seconds for the aggregate run.
 
