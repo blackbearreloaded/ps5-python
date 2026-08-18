@@ -122,7 +122,7 @@ build_runtime_bundle() {
     # os is the Python-level POSIX wrapper; its native posix/time/stat pieces
     # are already compiled into Modules/config.c.
     cp "$root_dir/tools/minimal_selectors.py" "$runtime_dir/selectors.py"
-    for module in os.py stat.py genericpath.py posixpath.py abc.py _collections_abc.py io.py socket.py enum.py types.py signal.py ssl.py base64.py warnings.py contextvars.py numbers.py contextlib.py weakref.py copy.py hmac.py random.py bisect.py; do
+    for module in os.py stat.py genericpath.py posixpath.py abc.py _collections_abc.py io.py socket.py enum.py types.py signal.py ssl.py base64.py warnings.py contextvars.py numbers.py contextlib.py weakref.py copy.py hmac.py random.py bisect.py glob.py fnmatch.py; do
         cp "$source_dir/Lib/$module" "$runtime_dir/$module"
     done
     cp "$source_dir/Lib/_py_warnings.py" "$runtime_dir/_py_warnings.py"
@@ -134,6 +134,11 @@ build_runtime_bundle() {
     cp "$source_dir/Lib/xml/etree/__init__.py" "$runtime_dir/xml/etree/__init__.py"
     cp "$source_dir/Lib/xml/etree/ElementTree.py" "$runtime_dir/xml/etree/ElementTree.py"
     cp "$source_dir/Lib/xml/etree/ElementPath.py" "$runtime_dir/xml/etree/ElementPath.py"
+    mkdir -p "$runtime_dir/pathlib"
+    for module in __init__.py _local.py _os.py types.py; do
+        cp "$source_dir/Lib/pathlib/$module" "$runtime_dir/pathlib/$module"
+    done
+    cp "$source_dir/Lib/zipimport.py" "$runtime_dir/zipimport.py"
     # OpenSSL supplies the available digest implementations; the bundled
     # hashlib wrapper must not promise unavailable builtin BLAKE2 modules.
     sed "/'blake2b', 'blake2s',/d" "$source_dir/Lib/hashlib.py" \

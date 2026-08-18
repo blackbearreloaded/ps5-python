@@ -104,7 +104,7 @@ upload "$runtime_dir/encodings/ascii.py" "$remote_runtime/encodings/ascii.py"
 upload "$runtime_dir/encodings/utf_8.py" "$remote_runtime/encodings/utf_8.py"
 upload "$runtime_dir/encodings/idna.py" "$remote_runtime/encodings/idna.py"
 upload "$runtime_dir/selectors.py" "$remote_runtime/selectors.py"
-for module in os.py stat.py genericpath.py posixpath.py abc.py _collections_abc.py io.py socket.py enum.py types.py signal.py hashlib.py ssl.py base64.py warnings.py contextvars.py _py_warnings.py _weakrefset.py csv.py decimal.py numbers.py contextlib.py weakref.py copy.py hmac.py random.py bisect.py; do
+for module in os.py stat.py genericpath.py posixpath.py abc.py _collections_abc.py io.py socket.py enum.py types.py signal.py hashlib.py ssl.py base64.py warnings.py contextvars.py _py_warnings.py _weakrefset.py csv.py decimal.py numbers.py contextlib.py weakref.py copy.py hmac.py random.py bisect.py glob.py fnmatch.py; do
     upload "$runtime_dir/$module" "$remote_runtime/$module"
 done
 mkdir_remote "$remote_runtime/xml"
@@ -113,6 +113,11 @@ upload "$runtime_dir/xml/__init__.py" "$remote_runtime/xml/__init__.py"
 upload "$runtime_dir/xml/etree/__init__.py" "$remote_runtime/xml/etree/__init__.py"
 upload "$runtime_dir/xml/etree/ElementTree.py" "$remote_runtime/xml/etree/ElementTree.py"
 upload "$runtime_dir/xml/etree/ElementPath.py" "$remote_runtime/xml/etree/ElementPath.py"
+mkdir_remote "$remote_runtime/pathlib"
+for module in __init__.py _local.py _os.py types.py; do
+    upload "$runtime_dir/pathlib/$module" "$remote_runtime/pathlib/$module"
+done
+upload "$runtime_dir/zipimport.py" "$remote_runtime/zipimport.py"
 for package in re json; do
     mkdir_remote "$remote_runtime/$package"
     while IFS= read -r -d '' module_file; do

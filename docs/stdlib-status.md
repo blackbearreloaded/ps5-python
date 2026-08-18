@@ -330,6 +330,27 @@ Source and tests:
 Compression modules `zlib`, `_bz2`, and `_lzma` remain disabled because their
 external PS5 dependencies are not yet built into this workspace.
 
+## Import runtime and paths
+
+Status: the native `_stat` module and Python-level `stat`, `posixpath`, and
+`pathlib` support are bundled and tested. The Python-level `zipimport` wrapper
+is also bundled over CPython's frozen import machinery.
+
+Included and tested:
+
+- `pathlib.PurePosixPath` path construction and inspection
+- `_stat` constants and `stat.S_ISDIR()`/`stat.S_ISREG()` predicates
+- `posixpath.join()`
+- direct `zipimport` availability
+
+Source and tests:
+
+- `upstream/cpython/Lib/pathlib/`
+- `upstream/cpython/Lib/zipimport.py`
+- `upstream/cpython/Lib/stat.py` and `Lib/posixpath.py`
+- `tests/stdlib/test_import_runtime.py`, adapted from `test_pathlib.py`,
+  `test_zipimport.py`, and `test_stat.py`.
+
 ## Core extension modules
 
 Status: statically linked and tested on PS5.
