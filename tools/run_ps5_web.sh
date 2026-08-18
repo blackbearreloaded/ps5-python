@@ -37,6 +37,7 @@ upload "$web_dir/app.js" /data/python/web/app.js
 upload "$runtime_dir/codecs.py" /data/python/runtime/cpython-lib/codecs.py
 upload "$runtime_dir/encodings/__init__.py" /data/python/runtime/cpython-lib/encodings/__init__.py
 upload "$runtime_dir/encodings/ascii.py" /data/python/runtime/cpython-lib/encodings/ascii.py
+upload "$runtime_dir/encodings/aliases.py" /data/python/runtime/cpython-lib/encodings/aliases.py
 upload "$runtime_dir/encodings/utf_8.py" /data/python/runtime/cpython-lib/encodings/utf_8.py
 upload "$runtime_dir/encodings/idna.py" /data/python/runtime/cpython-lib/encodings/idna.py
 upload "$runtime_dir/selectors.py" /data/python/runtime/cpython-lib/selectors.py
