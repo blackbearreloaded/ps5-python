@@ -86,6 +86,7 @@ configure_ps5() {
     ac_cv_header_ncurses_ncurses_h=no \
     ac_cv_lib_intl_textdomain=no \
     CC="$compiler_string" \
+    CPP="$compiler_string -E" \
     CPPFLAGS="-I$openssl_dir/include -I$libffi_dir/include -I$zlib_dir/include -I$sqlite_dir/include" \
     LDFLAGS="-L$openssl_dir/lib -lssl -lcrypto -L$libffi_dir/lib -lffi -L$zlib_dir/lib -lz -L$sqlite_dir/lib -lsqlite3 ${linker_args[*]}" \
     LIBFFI_CFLAGS="-I$libffi_dir/include" \
