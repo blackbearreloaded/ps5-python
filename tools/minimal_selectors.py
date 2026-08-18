@@ -17,12 +17,18 @@ class SelectorKey:
         self.data = data
 
 
+def _fileobj_fd(fileobj):
+    if isinstance(fileobj, int):
+        return fileobj
+    return fileobj.fileno()
+
+
 class DefaultSelector:
     def __init__(self):
         self._keys = {}
 
     def register(self, fileobj, events, data=None):
-        fd = fileobj.fileno()
+        fd = _fileobj_fd(fileobj)
         if not events & (EVENT_READ | EVENT_WRITE):
             raise ValueError("Invalid events")
         if fd in self._keys:
@@ -32,7 +38,7 @@ class DefaultSelector:
         return key
 
     def unregister(self, fileobj):
-        fd = fileobj.fileno()
+        fd = _fileobj_fd(fileobj)
         return self._keys.pop(fd)
 
     def modify(self, fileobj, events, data=None):
@@ -46,7 +52,7 @@ class DefaultSelector:
         ready_read, ready_write, _ = select.select(readable, writable, [], timeout)
         result = []
         for fileobj in ready_read + ready_write:
-            key = self._keys.get(fileobj.fileno())
+            key = self._keys.get(_fileobj_fd(fileobj))
             if key is None:
                 continue
             mask = 0
