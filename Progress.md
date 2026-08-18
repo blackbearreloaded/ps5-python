@@ -251,3 +251,5 @@ coverage remain incomplete.
 - `cbab5df` Mark unsupported PS5 process IPC explicitly
 - `0dc9393` Add concurrency and multiprocessing runtime support
 - `67fbbd1` Document fork process concurrency coverage
+- `65ee705` Bundle datetime and typing Tier 1 wrappers
+- `4e323e9` Bundle typing annotation dependencies
