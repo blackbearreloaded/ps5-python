@@ -107,7 +107,7 @@ upload "$runtime_dir/selectors.py" "$remote_runtime/selectors.py"
 for module in os.py stat.py genericpath.py posixpath.py abc.py _collections_abc.py io.py socket.py enum.py types.py signal.py hashlib.py ssl.py base64.py warnings.py contextvars.py _py_warnings.py _weakrefset.py tracemalloc.py csv.py decimal.py numbers.py contextlib.py weakref.py copy.py copyreg.py _compat_pickle.py hmac.py random.py bisect.py glob.py fnmatch.py functools.py operator.py reprlib.py linecache.py pickle.py struct.py timeit.py dis.py opcode.py _opcode_metadata.py; do
     upload "$runtime_dir/$module" "$remote_runtime/$module"
 done
-for module in threading.py queue.py logging.py runpy.py secrets.py tempfile.py shutil.py; do
+for module in threading.py queue.py logging.py runpy.py secrets.py tempfile.py datetime.py typing.py shutil.py; do
     upload "$runtime_dir/$module" "$remote_runtime/$module"
 done
 mkdir_remote "$remote_runtime/importlib"

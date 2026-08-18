@@ -140,6 +140,8 @@ build_runtime_bundle() {
     cp "$source_dir/Lib/runpy.py" "$runtime_dir/runpy.py"
     cp "$source_dir/Lib/secrets.py" "$runtime_dir/secrets.py"
     cp "$source_dir/Lib/tempfile.py" "$runtime_dir/tempfile.py"
+    cp "$source_dir/Lib/datetime.py" "$runtime_dir/datetime.py"
+    cp "$source_dir/Lib/typing.py" "$runtime_dir/typing.py"
     "$build_python" "$root_dir/tools/patch_shutil_rmtree.py" \
         "$source_dir/Lib/shutil.py" \
         "$runtime_dir/shutil.py"
