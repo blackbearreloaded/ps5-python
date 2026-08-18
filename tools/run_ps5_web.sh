@@ -40,9 +40,15 @@ upload "$runtime_dir/encodings/ascii.py" /data/python/runtime/cpython-lib/encodi
 upload "$runtime_dir/encodings/utf_8.py" /data/python/runtime/cpython-lib/encodings/utf_8.py
 upload "$runtime_dir/encodings/idna.py" /data/python/runtime/cpython-lib/encodings/idna.py
 upload "$runtime_dir/selectors.py" /data/python/runtime/cpython-lib/selectors.py
-for module in os.py stat.py genericpath.py posixpath.py abc.py _collections_abc.py io.py socket.py enum.py types.py signal.py hashlib.py ssl.py base64.py warnings.py contextvars.py _py_warnings.py; do
+for module in os.py stat.py genericpath.py posixpath.py abc.py _collections_abc.py io.py socket.py enum.py types.py signal.py hashlib.py ssl.py base64.py warnings.py contextvars.py _py_warnings.py _weakrefset.py csv.py decimal.py numbers.py contextlib.py weakref.py copy.py; do
     upload "$runtime_dir/$module" "/data/python/runtime/cpython-lib/$module"
 done
+mkdir_remote /data/python/runtime/cpython-lib/xml
+mkdir_remote /data/python/runtime/cpython-lib/xml/etree
+upload "$runtime_dir/xml/__init__.py" /data/python/runtime/cpython-lib/xml/__init__.py
+upload "$runtime_dir/xml/etree/__init__.py" /data/python/runtime/cpython-lib/xml/etree/__init__.py
+upload "$runtime_dir/xml/etree/ElementTree.py" /data/python/runtime/cpython-lib/xml/etree/ElementTree.py
+upload "$runtime_dir/xml/etree/ElementPath.py" /data/python/runtime/cpython-lib/xml/etree/ElementPath.py
 for package in re json; do
     mkdir_remote "/data/python/runtime/cpython-lib/$package"
     while IFS= read -r -d '' module_file; do

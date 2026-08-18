@@ -93,6 +93,8 @@ configure_ps5() {
     sed -i 's/^#define HAVE_DECL_TZNAME 0$/#undef HAVE_DECL_TZNAME/' pyconfig.h
     cp "$root_dir/tools/ps5-setup.local" "$build_dir/Modules/Setup.local"
     printf '%s\n' \
+        "pyexpat pyexpat.c -I$source_dir/Modules/expat" \
+        "_elementtree _elementtree.c -I$source_dir/Modules/expat" \
         "_ssl _ssl.c -I$openssl_dir/include -L$openssl_dir/lib -lssl -lcrypto" \
         "_hashlib _hashopenssl.c -I$openssl_dir/include -L$openssl_dir/lib -lcrypto" \
         >> "$build_dir/Modules/Setup.local"
@@ -120,10 +122,18 @@ build_runtime_bundle() {
     # os is the Python-level POSIX wrapper; its native posix/time/stat pieces
     # are already compiled into Modules/config.c.
     cp "$root_dir/tools/minimal_selectors.py" "$runtime_dir/selectors.py"
-    for module in os.py stat.py genericpath.py posixpath.py abc.py _collections_abc.py io.py socket.py enum.py types.py signal.py ssl.py base64.py warnings.py contextvars.py; do
+    for module in os.py stat.py genericpath.py posixpath.py abc.py _collections_abc.py io.py socket.py enum.py types.py signal.py ssl.py base64.py warnings.py contextvars.py numbers.py contextlib.py weakref.py copy.py; do
         cp "$source_dir/Lib/$module" "$runtime_dir/$module"
     done
     cp "$source_dir/Lib/_py_warnings.py" "$runtime_dir/_py_warnings.py"
+    cp "$source_dir/Lib/_weakrefset.py" "$runtime_dir/_weakrefset.py"
+    cp "$source_dir/Lib/csv.py" "$runtime_dir/csv.py"
+    cp "$source_dir/Lib/decimal.py" "$runtime_dir/decimal.py"
+    mkdir -p "$runtime_dir/xml/etree"
+    cp "$source_dir/Lib/xml/__init__.py" "$runtime_dir/xml/__init__.py"
+    cp "$source_dir/Lib/xml/etree/__init__.py" "$runtime_dir/xml/etree/__init__.py"
+    cp "$source_dir/Lib/xml/etree/ElementTree.py" "$runtime_dir/xml/etree/ElementTree.py"
+    cp "$source_dir/Lib/xml/etree/ElementPath.py" "$runtime_dir/xml/etree/ElementPath.py"
     # OpenSSL supplies the available digest implementations; the bundled
     # hashlib wrapper must not promise unavailable builtin BLAKE2 modules.
     sed "/'blake2b', 'blake2s',/d" "$source_dir/Lib/hashlib.py" \
@@ -137,7 +147,9 @@ build_launcher() {
         "$root_dir/src/ps5_time.c" \
         "$root_dir/platform/cpython_ps5_host.c" \
         "$build_dir/Modules/config.o" \
-        "$build_dir/libpython3.14.a"; then
+        "$build_dir/libpython3.14.a" \
+        "$build_dir/Modules/expat/libexpat.a" \
+        "$build_dir/Modules/_decimal/libmpdec/libmpdec.a"; then
         echo "Launcher unchanged: $launcher"
         return
     fi
@@ -156,6 +168,8 @@ build_launcher() {
         "$root_dir/platform/cpython_ps5_host.c" \
         "$build_dir/Modules/config.o" \
         "$build_dir/libpython3.14.a" \
+        "$build_dir/Modules/expat/libexpat.a" \
+        "$build_dir/Modules/_decimal/libmpdec/libmpdec.a" \
         -L"$openssl_dir/lib" -lssl -lcrypto \
         -Wl,--wrap=clock_nanosleep -ldl -lpthread
 }
@@ -169,6 +183,8 @@ build_web_launcher() {
         "$root_dir/platform/cpython_ps5_host.c" \
         "$build_dir/Modules/config.o" \
         "$build_dir/libpython3.14.a" \
+        "$build_dir/Modules/expat/libexpat.a" \
+        "$build_dir/Modules/_decimal/libmpdec/libmpdec.a" \
         "$hb_dir/lib/libmicrohttpd.a"; then
         echo "Web launcher unchanged: $web_launcher"
         return
@@ -189,6 +205,8 @@ build_web_launcher() {
         "$root_dir/platform/cpython_ps5_host.c" \
         "$build_dir/Modules/config.o" \
         "$build_dir/libpython3.14.a" \
+        "$build_dir/Modules/expat/libexpat.a" \
+        "$build_dir/Modules/_decimal/libmpdec/libmpdec.a" \
         -L"$hb_dir/lib" \
         -L"$openssl_dir/lib" -lssl -lcrypto \
         -Wl,--wrap=clock_nanosleep -lmicrohttpd -ldl -lpthread

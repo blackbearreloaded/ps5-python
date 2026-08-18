@@ -284,6 +284,30 @@ Source and tests:
 - `tests/stdlib/test_thread_context.py`, adapted from `Lib/test/test_thread.py`
   and `Lib/test/test_contextvars.py`.
 
+## `csv`, `decimal`, and XML parsing
+
+Status: native parser/arithmetic modules are statically linked and their
+Python-level wrappers are bundled.
+
+Included and tested:
+
+- `_csv` and `csv.reader`/`csv.writer`
+- `_decimal` and fixed-point arithmetic through `decimal.Decimal`
+- `pyexpat` and `_elementtree` through `xml.etree.ElementTree`
+
+Source and tests:
+
+- `upstream/cpython/Modules/_csv.c`
+- `upstream/cpython/Modules/_decimal/_decimal.c` and bundled `libmpdec`
+- `upstream/cpython/Modules/pyexpat.c` and bundled Expat sources
+- `upstream/cpython/Modules/_elementtree.c`
+- `upstream/cpython/Lib/csv.py`, `Lib/decimal.py`, and `Lib/xml/etree/`
+- `tests/stdlib/test_data_formats.py`, adapted from `test_csv.py`,
+  `test_decimal.py`, and `test_xml_etree.py`
+
+Compression modules `zlib`, `_bz2`, and `_lzma` remain disabled because their
+external PS5 dependencies are not yet built into this workspace.
+
 ## Core extension modules
 
 Status: statically linked and tested on PS5.
