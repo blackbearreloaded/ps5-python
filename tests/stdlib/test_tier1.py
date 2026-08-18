@@ -3,6 +3,7 @@
 import sys
 import typing
 from datetime import date, datetime, timedelta, timezone
+from functools import lru_cache, partial
 
 
 # CPython Lib/test/test_sys.py, Lib/test/test_typing.py, and
@@ -31,6 +32,17 @@ assert isinstance(SupportsValue, type)
 assert typing.get_origin(list[int]) is list
 assert typing.get_args(dict[str, int]) == (str, int)
 assert typing.cast(str, "typed") == "typed"
+
+
+@lru_cache(maxsize=2)
+def square(value):
+    return value * value
+
+
+add_two = partial(lambda left, right: left + right, 2)
+assert square(4) == 16
+assert square.cache_info().hits == 0
+assert add_two(3) == 5
 
 day = date(2024, 2, 29)
 assert day.isoformat() == "2024-02-29"
