@@ -2,6 +2,11 @@
 
 Experimental port of the CPython language runtime to the jailbroken PS5 payload environment.
 
+This repository currently targets **CPython 3.14.7**, pinned to upstream source
+commit `823f0323ee6ec1402088b73bce1a38473cac36dc`. The exact pin is recorded in
+[CPYTHON_VERSION.txt](CPYTHON_VERSION.txt); this is not an unpinned “latest
+Python” port.
+
 The first target is deliberately small: execute Python language semantics without depending on the Python standard library or third-party modules. The runtime will eventually be embedded in a native PS5 application, but this repository begins with a standalone interpreter proof of concept.
 
 ## Scope of the first milestone

@@ -7,6 +7,10 @@ environment. The long-term goal is a usable Python runtime for PS5 homebrew:
 standalone scripts first, packaged Python applications next, and eventually
 practical web servers and native launchers.
 
+The current runtime target is CPython **3.14.7**, pinned by
+`CPYTHON_VERSION.txt` to upstream source commit
+`823f0323ee6ec1402088b73bce1a38473cac36dc`.
+
 The current design is deliberately simple: one PS5 ELF, one external Python
 script, and a small runtime bundle.
 

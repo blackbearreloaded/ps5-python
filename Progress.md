@@ -1,5 +1,8 @@
 # CPythonPS5 Progress
 
+The runtime target is CPython **3.14.7**, pinned by `CPYTHON_VERSION.txt` to
+upstream source commit `823f0323ee6ec1402088b73bce1a38473cac36dc`.
+
 ## Date
 
 2026-08-18

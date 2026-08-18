@@ -1,5 +1,8 @@
 # Standard-library implementation status
 
+This status report applies to the pinned CPython **3.14.7** source listed in
+`CPYTHON_VERSION.txt`, not to an unspecified or moving CPython release.
+
 This file is the source of truth for the PS5 standard-library subset. Every
 new module implementation must record:
 
