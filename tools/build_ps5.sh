@@ -9,6 +9,8 @@ sdk_dir="${PS5_PAYLOAD_SDK:-/opt/ps5-payload-sdk}"
 hb_dir="$root_dir/build/ps5/deps/user/homebrew"
 openssl_dir="$root_dir/build/ps5/deps/openssl"
 libffi_dir="$root_dir/build/ps5/deps/libffi"
+zlib_dir="$root_dir/build/ps5/deps/zlib"
+sqlite_dir="$root_dir/build/ps5/deps/sqlite3"
 jobs="${PS5_JOBS:-$(nproc 2>/dev/null || echo 2)}"
 launcher="$build_dir/python.elf"
 web_launcher="$build_dir/python-web.elf"
@@ -71,14 +73,18 @@ needs_rebuild() {
 configure_ps5() {
     bash "$root_dir/tools/build_openssl_ps5.sh"
     bash "$root_dir/tools/build_libffi_ps5.sh"
+    bash "$root_dir/tools/build_zlib_ps5.sh"
+    bash "$root_dir/tools/build_sqlite3_ps5.sh"
     mkdir -p "$build_dir"
     cd "$build_dir"
     CONFIG_SITE="$root_dir/tools/ps5.config.site" \
     CC="$compiler_string" \
-    CPPFLAGS="-I$openssl_dir/include -I$libffi_dir/include" \
-    LDFLAGS="-L$openssl_dir/lib -lssl -lcrypto -L$libffi_dir/lib -lffi ${linker_args[*]}" \
+    CPPFLAGS="-I$openssl_dir/include -I$libffi_dir/include -I$zlib_dir/include -I$sqlite_dir/include" \
+    LDFLAGS="-L$openssl_dir/lib -lssl -lcrypto -L$libffi_dir/lib -lffi -L$zlib_dir/lib -lz -L$sqlite_dir/lib -lsqlite3 ${linker_args[*]}" \
     LIBFFI_CFLAGS="-I$libffi_dir/include" \
     LIBFFI_LIBS="-L$libffi_dir/lib -lffi" \
+    LIBSQLITE3_CFLAGS="-I$sqlite_dir/include" \
+    LIBSQLITE3_LIBS="-L$sqlite_dir/lib -lsqlite3 -lpthread" \
     PKG_CONFIG_PATH="$openssl_dir/lib/pkgconfig" \
     "$source_dir/configure" \
         --build=x86_64-pc-linux-gnu \
@@ -102,6 +108,8 @@ configure_ps5() {
         "_ctypes _ctypes/_ctypes.c _ctypes/callbacks.c _ctypes/callproc.c _ctypes/stgdict.c _ctypes/cfield.c -I$libffi_dir/include -L$libffi_dir/lib -lffi" \
         "_ssl _ssl.c -I$openssl_dir/include -L$openssl_dir/lib -lssl -lcrypto" \
         "_hashlib _hashopenssl.c -I$openssl_dir/include -L$openssl_dir/lib -lcrypto" \
+        "_sqlite3 _sqlite/blob.c _sqlite/connection.c _sqlite/cursor.c _sqlite/microprotocols.c _sqlite/module.c _sqlite/prepare_protocol.c _sqlite/row.c _sqlite/statement.c _sqlite/util.c -I$sqlite_dir/include -L$sqlite_dir/lib -lsqlite3 -lpthread" \
+        "zlib zlibmodule.c -I$zlib_dir/include -L$zlib_dir/lib -lz" \
         >> "$build_dir/Modules/Setup.local"
 }
 
@@ -129,7 +137,7 @@ build_runtime_bundle() {
     # os is the Python-level POSIX wrapper; its native posix/time/stat pieces
     # are already compiled into Modules/config.c.
     cp "$root_dir/tools/minimal_selectors.py" "$runtime_dir/selectors.py"
-    for module in os.py stat.py genericpath.py posixpath.py abc.py _collections_abc.py io.py socket.py enum.py types.py signal.py ssl.py base64.py warnings.py contextvars.py numbers.py contextlib.py weakref.py copy.py copyreg.py _compat_pickle.py hmac.py random.py bisect.py glob.py fnmatch.py functools.py operator.py reprlib.py linecache.py pickle.py struct.py timeit.py dis.py opcode.py; do
+    for module in os.py stat.py genericpath.py posixpath.py abc.py _collections_abc.py io.py socket.py enum.py types.py signal.py ssl.py base64.py warnings.py contextvars.py numbers.py contextlib.py weakref.py copy.py copyreg.py _compat_pickle.py hmac.py random.py bisect.py glob.py fnmatch.py functools.py operator.py reprlib.py linecache.py pickle.py struct.py timeit.py dis.py opcode.py fractions.py gzip.py tarfile.py; do
         cp "$source_dir/Lib/$module" "$runtime_dir/$module"
     done
     cp "$source_dir/Lib/_opcode_metadata.py" "$runtime_dir/_opcode_metadata.py"
@@ -210,6 +218,22 @@ build_runtime_bundle() {
     cp "$source_dir/Lib/xml/etree/__init__.py" "$runtime_dir/xml/etree/__init__.py"
     cp "$source_dir/Lib/xml/etree/ElementTree.py" "$runtime_dir/xml/etree/ElementTree.py"
     cp "$source_dir/Lib/xml/etree/ElementPath.py" "$runtime_dir/xml/etree/ElementPath.py"
+    for package in dom sax parsers; do
+        mkdir -p "$runtime_dir/xml/$package"
+        for module in "$source_dir"/Lib/xml/$package/*.py; do
+            cp "$module" "$runtime_dir/xml/$package/$(basename "$module")"
+        done
+    done
+    mkdir -p "$runtime_dir/zipfile/_path" "$runtime_dir/compression"
+    for module in "$source_dir"/Lib/zipfile/*.py; do
+        cp "$module" "$runtime_dir/zipfile/$(basename "$module")"
+    done
+    for module in "$source_dir"/Lib/zipfile/_path/*.py; do
+        cp "$module" "$runtime_dir/zipfile/_path/$(basename "$module")"
+    done
+    for module in "$source_dir"/Lib/compression/*.py; do
+        cp "$module" "$runtime_dir/compression/$(basename "$module")"
+    done
     mkdir -p "$runtime_dir/pathlib"
     for module in __init__.py _local.py _os.py types.py; do
         cp "$source_dir/Lib/pathlib/$module" "$runtime_dir/pathlib/$module"
@@ -268,7 +292,9 @@ build_launcher() {
         "$build_dir/Modules/expat/libexpat.a" \
         "$build_dir/Modules/_decimal/libmpdec/libmpdec.a" \
         -L"$openssl_dir/lib" -lssl -lcrypto \
+        -L"$sqlite_dir/lib" -lsqlite3 \
         -L"$libffi_dir/lib" -lffi \
+        -L"$zlib_dir/lib" -lz \
         -Wl,--wrap=clock_nanosleep -ldl -lpthread
 }
 
@@ -307,6 +333,8 @@ build_web_launcher() {
         "$build_dir/Modules/_decimal/libmpdec/libmpdec.a" \
         -L"$hb_dir/lib" \
         -L"$openssl_dir/lib" -lssl -lcrypto \
+        -L"$sqlite_dir/lib" -lsqlite3 \
+        -L"$zlib_dir/lib" -lz \
         -Wl,--wrap=clock_nanosleep -lmicrohttpd -ldl -lpthread
 }
 
