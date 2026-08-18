@@ -302,9 +302,9 @@ Included and tested:
 - `_thread.get_ident()`
 - `ContextVar` defaults, set/reset tokens, `Context`, and `copy_context()`
 
-The higher-level `threading.py` wrapper is not bundled yet because its full
-dependency tree and process-oriented APIs are not currently part of the PS5
-runtime target.
+The official `threading.py` wrapper is bundled for in-process thread
+coordination. Process-oriented concurrency remains platform-limited; see the
+Concurrency and parallelism section below.
 
 Source and tests:
 
@@ -313,6 +313,44 @@ Source and tests:
 - `upstream/cpython/Modules/_contextvarsmodule.c`
 - `tests/stdlib/test_thread_context.py`, adapted from `Lib/test/test_thread.py`
   and `Lib/test/test_contextvars.py`.
+
+## Concurrency and parallelism
+
+Status: the official CPython 3.14.7 thread-pool and multiprocessing wrappers
+are bundled where the PS5 payload supports their underlying primitives.
+
+Included and tested on PS5:
+
+- `threading.Thread`, `Event`, `Lock`, thread identities, and joins
+- `concurrent.futures.ThreadPoolExecutor`, `Future`, `map()`,
+  `as_completed()`, and worker-exception propagation
+- `multiprocessing` import, start-method discovery, current-process metadata,
+  CPU-count discovery, and bidirectional `Pipe`
+- native `array`, required by multiprocessing reduction support
+
+Present but unavailable or intentionally omitted:
+
+- `ProcessPoolExecutor` is not bundled; its official `process.py` depends on
+  process-launch and subprocess support that the PS5 payload does not provide.
+- `multiprocessing.Queue` and `multiprocessing.Semaphore` currently fail with
+  `ENOENT` because named semaphores are unavailable in the payload.
+- `multiprocessing.shared_memory.SharedMemory` currently fails with
+  `ENOTSUP` because file-backed `mmap` is unavailable.
+- `multiprocessing.Process`/spawn and cross-process shared state remain
+  unverified; `fork()` is only validated for the existing immediate-exit
+  process test.
+- `concurrent.futures._base` uses a tiny internal no-op logger. The full
+  `logging` package is not part of this runtime bundle.
+
+Source and tests:
+
+- `upstream/cpython/Lib/threading.py`, `Lib/queue.py`, and
+  `Lib/concurrent/futures/`
+- `upstream/cpython/Lib/multiprocessing/` (with a PS5-only `subprocess` import
+  fallback in `tools/patch_multiprocessing_util.py`)
+- `upstream/cpython/Modules/_multiprocessing/` and `Modules/arraymodule.c`
+- `tests/stdlib/test_concurrency.py`, adapted from `test_threading.py`,
+  `test_concurrent_futures.py`, and `_test_multiprocessing.py`
 
 ## `csv`, `decimal`, and XML parsing
 
@@ -362,8 +400,8 @@ Source and tests:
 ## Diagnostics and multiprocessing primitives
 
 Status: native `_tracemalloc`, `_multiprocessing`, and `_posixshmem` are
-statically linked. The official CPython `tracemalloc.py` wrapper is now
-bundled, while multiprocessing primitives remain import-tested only.
+statically linked. The official CPython `tracemalloc.py` wrapper and the
+supported multiprocessing Python wrappers are bundled.
 
 Included and tested:
 
@@ -372,15 +410,16 @@ Included and tested:
   `Snapshot.compare_to()`
 - `tracemalloc.Filter`, snapshot filtering, traceback lookup, and
   `Snapshot.dump()`/`Snapshot.load()` on the host
-- `_multiprocessing` import availability
-- `_posixshmem` import availability
+- `_multiprocessing` and `_posixshmem` import availability
+- supported `multiprocessing.Pipe` behavior (see the concurrency section)
 
 The full wrapper and dependency bundle pass the PS5 aggregate suite. Full
 upstream snapshot/filter coverage, long-running tracing, and cross-process
 tracing remain unverified.
 
-Full shared-memory/semaphore behavior remains unverified in the PS5 sandbox.
-The higher-level `multiprocessing` package and process pools are not bundled.
+Full shared-memory/semaphore behavior remains unavailable in the PS5 sandbox;
+the exact Queue, Semaphore, SharedMemory, and process-pool limitations are
+recorded in the concurrency section.
 
 The native `mmap` module is compiled and importable, but `mmap.mmap()` returns
 `ENOTSUP` in the current PS5 payload. The limitation is covered by
@@ -477,6 +516,7 @@ Source:
 - `upstream/cpython/Modules/mathmodule.c`
 - `upstream/cpython/Modules/_codecsmodule.c`
 - `upstream/cpython/Modules/unicodedata.c`
+- `upstream/cpython/Modules/arraymodule.c`
 - matching `Lib/re/`, `Lib/json/`, and `Lib/codecs.py` wrappers
 
 Included and tested:
@@ -487,6 +527,8 @@ Included and tested:
 - `math.sqrt()` and floating-point comparison through static `math`
 - Unicode character categories through static `unicodedata`
 - static `_codecs` availability and existing UTF-8 runtime support
+- native `array` is statically linked for multiprocessing reduction and
+  descriptor-passing support
 
 Limitations:
 

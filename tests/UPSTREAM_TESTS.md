@@ -43,6 +43,7 @@ adaptation policy, not a replacement for CPython's complete regression suite.
 | `stdlib/test_ssl_hashlib.py` | `test_hashlib.py`, `test_ssl.py` |
 | `stdlib/test_tls_handshake.py` | `test_ssl.py`, `test_socket.py` |
 | `stdlib/test_thread_context.py` | `test_thread.py`, `test_contextvars.py` |
+| `stdlib/test_concurrency.py` | `test_threading.py`, `test_concurrent_futures.py`, `_test_multiprocessing.py` |
 | `stdlib/test_data_formats.py` | `test_csv.py`, `test_decimal.py`, `test_xml_etree.py` |
 | `stdlib/test_import_runtime.py` | `test_pathlib.py`, `test_zipimport.py`, `test_stat.py` |
 | `stdlib/test_diagnostics.py` | `test_tracemalloc.py`, `test_multiprocessing.py` |
