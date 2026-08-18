@@ -29,7 +29,9 @@ static void
 cpython_ps5_configure_tempdir(void)
 {
     /* /user/temp is a PS5-managed writable directory cleaned on restart. */
-    if (getenv("TMPDIR") == NULL)
+    const char *tmpdir = getenv("TMPDIR");
+
+    if (tmpdir == NULL || tmpdir[0] == '\0')
         (void)setenv("TMPDIR", "/user/temp", 0);
 }
 #endif
