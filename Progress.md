@@ -225,3 +225,5 @@ coverage remain incomplete.
 - `e65ca71` Add profiling and diagnostics wrappers
 - `77543b3` Support multiprocessing SelectSelector alias
 - `cbab5df` Mark unsupported PS5 process IPC explicitly
+- `0dc9393` Add concurrency and multiprocessing runtime support
+- `67fbbd1` Document fork process concurrency coverage

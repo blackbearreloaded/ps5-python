@@ -16,7 +16,13 @@ The first target is deliberately small: execute Python language semantics withou
 - Execute a script supplied as a separate file, for example `main.py`.
 - Validate expressions, functions, classes, exceptions, generators, comprehensions, and garbage collection.
 
-The first milestone does not include the standard-library package tree, networking, SQLite, `pip`, native extension loading, GUI support, or subprocess APIs. The interpreter still contains CPython’s required built-in runtime modules; the test script itself must remain import-free. Initial hardware testing uses one ELF plus an external `/data/python/main.py` file.
+The first milestone did not include the standard-library package tree,
+networking, SQLite, `pip`, native extension loading, GUI support, or subprocess
+APIs. The current work selectively bundles tested CPython 3.14.7 standard
+library modules while retaining those broader exclusions. The interpreter
+still contains CPython’s required built-in runtime modules; the test script
+itself must remain import-free. Initial hardware testing uses one ELF plus an
+external `/data/python/main.py` file.
 
 ## References
 
