@@ -77,8 +77,9 @@ if sys.platform.startswith("freebsd"):
         receiver.close()
         sender.close()
 
-    receiver, sender = multiprocessing.Pipe(False)
-    process = multiprocessing.Process(target=process_child, args=(sender,))
+    fork_context = multiprocessing.get_context("fork")
+    receiver, sender = fork_context.Pipe(False)
+    process = fork_context.Process(target=process_child, args=(sender,))
     process.start()
     sender.close()
     assert receiver.recv()[0] == "process"
