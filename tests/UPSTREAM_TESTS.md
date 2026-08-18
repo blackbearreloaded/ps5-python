@@ -48,6 +48,7 @@ adaptation policy, not a replacement for CPython's complete regression suite.
 | `stdlib/test_import_runtime.py` | `test_pathlib.py`, `test_zipimport.py`, `test_stat.py` |
 | `stdlib/test_filesystem.py` | `test_pathlib.py`, `test_tempfile.py` |
 | `stdlib/test_tier1.py` | `test_sys.py`, `test_typing.py`, `datetimetester.py` |
+| `stdlib/test_tier2.py` | `test_argparse.py`, `test_logging.py`, `test_shutil.py`, `test_random.py`, `test_copy.py`, `test_enum.py`, `test_csv.py`, `test_subprocess.py`, `test_urllib.py`, `test_hashlib.py`, `test_io.py`, `test_traceback.py`, `test_pprint.py`, `test_unittest.py` |
 | `stdlib/test_diagnostics.py` | `test_tracemalloc.py`, `test_multiprocessing.py` |
 | `stdlib/test_data_structures.py` | `test_collections.py`, `test_itertools.py`, `test_heapq.py`, `test_dataclasses.py` |
 | `stdlib/test_profiling.py` | `test_timeit.py`, `test_dis.py`, `test_tracemalloc.py`, `test_struct.py` |

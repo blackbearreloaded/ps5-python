@@ -37,6 +37,7 @@ TEST_FILES = (
     "test_import_runtime.py",
     "test_filesystem.py",
     "test_tier1.py",
+    "test_tier2.py",
     "test_diagnostics.py",
     "test_data_structures.py",
     "test_profiling.py",
