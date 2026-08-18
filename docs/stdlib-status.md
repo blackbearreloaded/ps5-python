@@ -325,7 +325,8 @@ Included and tested on PS5:
 - `concurrent.futures.ThreadPoolExecutor`, `Future`, `map()`,
   `as_completed()`, and worker-exception propagation
 - `multiprocessing` import, start-method discovery, current-process metadata,
-  CPU-count discovery, and bidirectional `Pipe`
+  CPU-count discovery, bidirectional `Pipe`, and `Process` using an explicit
+  `fork` context
 - native `array`, required by multiprocessing reduction support
 
 Present but unavailable or intentionally omitted:
@@ -334,11 +335,12 @@ Present but unavailable or intentionally omitted:
   process-launch and subprocess support that the PS5 payload does not provide.
 - `multiprocessing.Queue` and `multiprocessing.Semaphore` currently fail with
   `ENOENT` because named semaphores are unavailable in the payload.
-- `multiprocessing.shared_memory.SharedMemory` currently fails with
-  `ENOTSUP` because file-backed `mmap` is unavailable.
-- `multiprocessing.Process`/spawn and cross-process shared state remain
-  unverified; `fork()` is only validated for the existing immediate-exit
-  process test.
+- `multiprocessing.shared_memory.SharedMemory` cannot complete resource
+  tracking because the `_posixsubprocess` launcher is unavailable; the
+  underlying file-backed `mmap` operation is also `ENOTSUP` in this payload.
+- `multiprocessing.Process` works with an explicit `fork` context. The default
+  `forkserver`/`spawn` paths and cross-process shared state remain unavailable
+  without subprocess/ELF-launch support.
 - `concurrent.futures._base` uses a tiny internal no-op logger. The full
   `logging` package is not part of this runtime bundle.
 
@@ -346,6 +348,8 @@ Source and tests:
 
 - `upstream/cpython/Lib/threading.py`, `Lib/queue.py`, and
   `Lib/concurrent/futures/`
+- `upstream/cpython/Lib/importlib/` (the small machinery/util closure needed
+  by multiprocessing's fork support)
 - `upstream/cpython/Lib/multiprocessing/` (with a PS5-only `subprocess` import
   fallback in `tools/patch_multiprocessing_util.py`)
 - `upstream/cpython/Modules/_multiprocessing/` and `Modules/arraymodule.c`
