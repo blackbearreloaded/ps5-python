@@ -260,6 +260,28 @@ Tests:
 - `tests/stdlib/test_ssl_hashlib.py`, adapted from `Lib/test/test_base64.py`
   and `Lib/test/test_warnings.py`.
 
+## `hmac` and `random`
+
+Status: the Python-level `hmac` and `random` wrappers are bundled. Native
+`_random` is statically linked; `hmac` uses OpenSSL-backed `_hashlib`.
+
+Included and tested:
+
+- HMAC-SHA256 construction and constant-time comparison through `_hashlib`
+- Deterministic seeded `random.Random` output
+- OpenSSL-backed SHA-3 and BLAKE2 digest construction through `_hashlib`
+
+The dedicated `_sha3` and `_blake2` HACL modules remain disabled; OpenSSL
+provides the tested modern digest implementations instead.
+
+Source and tests:
+
+- `upstream/cpython/Modules/hmacmodule.c`
+- `upstream/cpython/Modules/_randommodule.c`
+- `upstream/cpython/Lib/hmac.py` and `Lib/random.py`
+- `tests/stdlib/test_ssl_hashlib.py`, adapted from `test_hmac.py`,
+  `test_random.py`, and `test_hashlib.py`.
+
 ## `_thread` and `contextvars`
 
 Status: native `_thread` and `_contextvars` modules are compiled into the PS5

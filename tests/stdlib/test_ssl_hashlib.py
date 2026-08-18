@@ -7,6 +7,8 @@ import _ssl
 import base64
 import warnings
 import _py_warnings
+import hmac
+import random
 
 
 assert hashlib.sha256(b"CPythonPS5").hexdigest() == (
@@ -17,6 +19,12 @@ assert ssl.OPENSSL_VERSION.startswith("OpenSSL 3.5.")
 assert _hashlib.openssl_sha256(b"CPythonPS5").digest() == hashlib.sha256(
     b"CPythonPS5"
 ).digest()
+assert hashlib.sha3_256(b"CPythonPS5").digest_size == 32
+assert _hashlib.new("blake2b512", b"CPythonPS5").digest_size == 64
+assert hmac.compare_digest(hmac.new(b"key", b"payload", "sha256").hexdigest(),
+                           hmac.new(b"key", b"payload", "sha256").hexdigest())
+generator = random.Random(1234)
+assert generator.randrange(100) == random.Random(1234).randrange(100)
 context = ssl.create_default_context()
 assert context.minimum_version >= ssl.TLSVersion.TLSv1_2
 encoded = base64.b64encode(b"CPythonPS5")
