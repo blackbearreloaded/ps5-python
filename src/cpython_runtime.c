@@ -24,6 +24,16 @@ cpython_ps5_peak_rss(void)
     return -1;
 }
 
+#ifdef CPYTHON_PS5
+static void
+cpython_ps5_configure_tempdir(void)
+{
+    /* /user/temp is a PS5-managed writable directory cleaned on restart. */
+    if (getenv("TMPDIR") == NULL)
+        (void)setenv("TMPDIR", "/user/temp", 0);
+}
+#endif
+
 static int
 append_module_path(PyConfig *config, const char *path)
 {
@@ -84,6 +94,10 @@ cpython_ps5_run_file(const char *script_path,
     config.user_site_directory = 0;
     config.use_environment = 0;
     config.buffered_stdio = 0;
+
+#ifdef CPYTHON_PS5
+    cpython_ps5_configure_tempdir();
+#endif
 
     PyImport_AppendInittab("_codecs", PyInit__codecs);
 
