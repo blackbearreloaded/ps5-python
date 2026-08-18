@@ -84,8 +84,9 @@ Static or bundled support now includes:
 - `_multiprocessing` and `_posixshmem` are statically linked and import-tested.
 - Bundled official `threading.py`, `concurrent.futures.ThreadPoolExecutor`,
   and the supported `multiprocessing` package surface. PS5 verifies thread
-  pools and `multiprocessing.Pipe`; Queue/Semaphore/SharedMemory and
-  ProcessPoolExecutor are recorded as platform limitations.
+  pools, `multiprocessing.Pipe`, and `Process` with an explicit `fork`
+  context; Queue/Semaphore/SharedMemory and ProcessPoolExecutor are recorded
+  as platform limitations.
 - Statically linked native `array` for multiprocessing reduction support.
 - `_ctypes` is statically linked against a PS5-built libffi 3.8.0 Unix SysV
   backend.
@@ -153,10 +154,12 @@ behavior remain unverified.
 
 ### Multiprocessing and process pools
 
-The official Python wrappers are bundled. Thread pools and `Pipe` pass on PS5,
-but Queue/Semaphore fail because named semaphores are unavailable, SharedMemory
-fails because `mmap` is `ENOTSUP`, and ProcessPoolExecutor/process spawning is
-not bundled or supported without subprocess/ELF-launch integration.
+The official Python wrappers are bundled. Thread pools, `Pipe`, and an
+explicit-fork `Process` pass on PS5. Queue/Semaphore fail because named
+semaphores are unavailable; SharedMemory cannot start its resource tracker and
+file-backed `mmap` is `ENOTSUP`; ProcessPoolExecutor and default
+forkserver/spawn launching remain unsupported without subprocess/ELF
+integration.
 
 ### mmap
 

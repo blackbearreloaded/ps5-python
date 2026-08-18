@@ -121,7 +121,8 @@ if sys.platform.startswith("freebsd"):
         try:
             shared = SharedMemory(create=True, size=16)
         except (ImportError, OSError) as error:
-            # mmap is currently ENOTSUP in the PS5 payload.
+            # SharedMemory needs the unavailable resource-tracker launcher;
+            # its file-backed mmap path is also unsupported on PS5.
             if isinstance(error, OSError):
                 assert error.errno in (2, 38, 45, 95)
             print("test_concurrency: SharedMemory unavailable")
