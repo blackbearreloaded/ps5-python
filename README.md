@@ -40,6 +40,23 @@ make host-build
 make ps5-core
 ```
 
+PS5 builds use all WSL CPU threads by default and automatically use `ccache`
+when available. Select the compiler cache explicitly with `PS5_CACHE=ccache`
+or `PS5_CACHE=sccache`; disable caching with `PS5_CACHE=none` (or the legacy
+`PS5_CCACHE=0`). The cache applies to both CPython compilation and launcher
+link commands.
+
+The SDK uses LLVM `lld` by default. `mold` is supported as an opt-in
+experiment:
+
+```sh
+PS5_LINKER=mold make ps5-core
+```
+
+Use `PS5_JOBS=8` to override automatic parallelism. `sccache` must be
+installed inside WSL and available on its `PATH`; the same applies to `ccache`
+and `mold`.
+
 The core artifacts are:
 
 - `build/ps5/python.elf` — the standalone PS5 interpreter launcher.
