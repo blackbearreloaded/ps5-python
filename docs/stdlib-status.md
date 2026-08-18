@@ -15,6 +15,32 @@ new module implementation must record:
 The goal is explicit compatibility reporting. A module must not be described
 as complete merely because it imports successfully.
 
+## Tier 1 daily-driver status
+
+The requested CPython 3.14.7 Tier 1 modules are covered by the focused PS5
+tests below. “Subset” means the public foundation works, while the omitted
+APIs are recorded rather than implied to be complete.
+
+| Module | PS5 status | Coverage and remaining gap |
+| --- | --- | --- |
+| `sys` | Built in and available | Interpreter state, streams, version, and arguments in `test_tier1.py`; full startup/configuration coverage remains pending. |
+| `os` | Bundled | POSIX filesystem, environment, pipes, and process checks pass; advanced descriptor/process APIs remain limited. |
+| `pathlib` | Bundled | Concrete `Path` and `PurePosixPath` operations pass; full upstream pathlib coverage is pending. |
+| `typing` | Official wrapper plus native `_typing` | `TypeVar`, `Generic`, `Protocol`, aliases, and `cast` pass; `TypedDict` and annotation introspection still require the unbundled `annotationlib`. |
+| `collections` | Bundled with native `_collections` | `deque`, `defaultdict`, `Counter`, and `namedtuple` pass; full upstream coverage is pending. |
+| `dataclasses` | PS5-compatible subset | Core generation, equality, defaults, and frozen instances pass; advanced decorator/reflection options are omitted. |
+| `json` | Official wrappers plus native `_json` | Encoding/decoding pass; complete upstream regression coverage is pending. |
+| `datetime` | Official wrapper plus native `_datetime` | Date, timezone, timedelta, and aware-datetime operations pass; timezone database/`zoneinfo` is not bundled. |
+| `time` | Native built in | Wall, monotonic, performance clocks, nanosecond clocks, and sleep support are tested. |
+| `math` | Native static module | Core floating-point functions pass; complete upstream math coverage is pending. |
+| `re` | Official wrapper plus native `_sre` | Pattern search and groups pass; complete upstream regex coverage is pending. |
+| `functools` | Official wrapper | `lru_cache` and `partial` pass; broader helper coverage is pending. |
+| `itertools` | Native static module | `count`, `islice`, and `permutations` pass; broader iterator coverage is pending. |
+
+The combined smoke test is `tests/stdlib/test_tier1.py`, adapted from
+`test_sys.py`, `test_typing.py`, and `datetimetester.py`; existing focused
+tests cover the other rows.
+
 ## `os`
 
 Status: Python-level POSIX wrapper and core filesystem operations included.
@@ -540,10 +566,16 @@ Source:
 - `upstream/cpython/Modules/_json.c`
 - `upstream/cpython/Modules/_struct.c`
 - `upstream/cpython/Modules/mathmodule.c`
+- `upstream/cpython/Modules/_datetimemodule.c`
+- `upstream/cpython/Modules/_typingmodule.c`
+- `upstream/cpython/Modules/_collectionsmodule.c`
+- `upstream/cpython/Modules/_functoolsmodule.c`
+- `upstream/cpython/Modules/itertoolsmodule.c`
 - `upstream/cpython/Modules/_codecsmodule.c`
 - `upstream/cpython/Modules/unicodedata.c`
 - `upstream/cpython/Modules/arraymodule.c`
-- matching `Lib/re/`, `Lib/json/`, and `Lib/codecs.py` wrappers
+- matching `Lib/re/`, `Lib/json/`, `Lib/datetime.py`, `Lib/typing.py`,
+  `Lib/functools.py`, and `Lib/codecs.py` wrappers
 
 Included and tested:
 

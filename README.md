@@ -51,6 +51,9 @@ semaphores, file-backed `mmap`, and an ELF process broker. See
 The same bundle includes `pathlib.Path` and `tempfile`; the PS5 launcher
 defaults temporary files to the managed `/user/temp` directory, which is
 cleaned on restart.
+It also includes the official `typing.py` and `datetime.py` wrappers over the
+native `_typing` and `_datetime` modules; `TypedDict` annotation introspection
+and the timezone database remain outside the current subset.
 
 ## Build the first PS5 ELF
 

@@ -63,6 +63,9 @@ Static or bundled support now includes:
 - `pathlib`, `stat`, `_stat`, `posixpath`, and `zipimport`
 - `tempfile.TemporaryDirectory`, `NamedTemporaryFile`, and `mkstemp` using the
   PS5-managed `/user/temp` directory
+- `sys`, `datetime`, and `typing` (TypeVar, Generic, Protocol, aliases, and
+  cast) with native `_datetime` and `_typing` support
+- `functools.lru_cache` and `functools.partial`
 - `timeit` and `dis`
 
 ### Security and hashing
@@ -149,6 +152,15 @@ the Python-level wrappers.
 The bundled dataclasses implementation covers core decoration, generated
 initialization, representation, equality, defaults, and frozen instances. It
 does not implement every CPython decorator option or reflection helper.
+
+### Typing and datetime
+
+The official `typing.py` and `datetime.py` wrappers are bundled over native
+`_typing` and `_datetime`. Type variables, generic classes, protocols, aliases,
+casts, dates, aware datetimes, timezones, and timedeltas pass the PS5 Tier 1
+test. `TypedDict` and annotation introspection remain unavailable until the
+pure-Python `annotationlib` dependency is bundled; the timezone database and
+`zoneinfo` are also not included.
 
 ### Tracemalloc
 
