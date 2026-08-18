@@ -178,7 +178,7 @@ Not yet covered or packaged:
 
 - complete `socket.makefile()` regression coverage
 - IPv6 and advanced UDP behavior
-- non-blocking mode and `fcntl` flags
+- advanced non-blocking mode and `fcntl` flags
 - complete upstream `test_socket.py` regression coverage
 
 Platform notes:
@@ -187,6 +187,8 @@ Platform notes:
   Python `selectors` dependency tree is not bundled yet.
 - `select.select()` is compiled into the interpreter and verified by
   `tests/stdlib/test_select.py`.
+- `select.poll()` and non-blocking IPv4 TCP readiness are verified by
+  `tests/stdlib/test_network.py`.
 - The PS5 bundle now includes a small `selectors.DefaultSelector` wrapper over
   `select.select()`, with register/modify/unregister, read/write events, and
   context-manager cleanup verified by `tests/stdlib/test_selectors.py`.
@@ -206,6 +208,23 @@ Source and tests:
 - `tests/stdlib/test_socket.py`
 - `tests/stdlib/test_dns.py` (requires working external DNS on PS5)
 - `tests/stdlib/test_select.py`
+- `tests/stdlib/test_network.py` for `select.poll()` and non-blocking TCP
+  readiness behavior
+
+IPv6 remains disabled by the PS5 configure path: enabling it causes CPython's
+cross-build probe to reject the SDK `getaddrinfo()` behavior. The current
+socket subset is therefore IPv4-only.
+
+## `_ssl`, `_hashlib`, and `hashlib`
+
+Status: not yet bundled. The PS5 configure probe does not find OpenSSL, and the
+OpenSSL PacBrew repository currently contains only a `PKGBUILD`, not an
+installed PS5 library in this workspace. CPython's builtin HACL hash objects
+also require generated objects that are not currently linked by this port.
+
+The next implementation step is to build the PacBrew OpenSSL package as a
+static dependency, then enable CPython's `_ssl` and `_hashlib` modules together
+and add HTTPS/hash tests. TLS is not claimed until that end-to-end build passes.
 
 ## Core extension modules
 
