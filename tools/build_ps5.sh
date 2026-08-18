@@ -8,6 +8,7 @@ build_python="$root_dir/build/host/python.exe"
 sdk_dir="${PS5_PAYLOAD_SDK:-/opt/ps5-payload-sdk}"
 hb_dir="$root_dir/build/ps5/deps/user/homebrew"
 openssl_dir="$root_dir/build/ps5/deps/openssl"
+libffi_dir="$root_dir/build/ps5/deps/libffi"
 jobs="${PS5_JOBS:-$(nproc 2>/dev/null || echo 2)}"
 launcher="$build_dir/python.elf"
 web_launcher="$build_dir/python-web.elf"
@@ -69,12 +70,15 @@ needs_rebuild() {
 
 configure_ps5() {
     bash "$root_dir/tools/build_openssl_ps5.sh"
+    bash "$root_dir/tools/build_libffi_ps5.sh"
     mkdir -p "$build_dir"
     cd "$build_dir"
     CONFIG_SITE="$root_dir/tools/ps5.config.site" \
     CC="$compiler_string" \
-    CPPFLAGS="-I$openssl_dir/include" \
-    LDFLAGS="-L$openssl_dir/lib -lssl -lcrypto ${linker_args[*]}" \
+    CPPFLAGS="-I$openssl_dir/include -I$libffi_dir/include" \
+    LDFLAGS="-L$openssl_dir/lib -lssl -lcrypto -L$libffi_dir/lib -lffi ${linker_args[*]}" \
+    LIBFFI_CFLAGS="-I$libffi_dir/include" \
+    LIBFFI_LIBS="-L$libffi_dir/lib -lffi" \
     PKG_CONFIG_PATH="$openssl_dir/lib/pkgconfig" \
     "$source_dir/configure" \
         --build=x86_64-pc-linux-gnu \
@@ -95,6 +99,7 @@ configure_ps5() {
     printf '%s\n' \
         "pyexpat pyexpat.c -I$source_dir/Modules/expat" \
         "_elementtree _elementtree.c -I$source_dir/Modules/expat" \
+        "_ctypes _ctypes/_ctypes.c _ctypes/callbacks.c _ctypes/callproc.c _ctypes/stgdict.c _ctypes/cfield.c -I$libffi_dir/include -L$libffi_dir/lib -lffi" \
         "_ssl _ssl.c -I$openssl_dir/include -L$openssl_dir/lib -lssl -lcrypto" \
         "_hashlib _hashopenssl.c -I$openssl_dir/include -L$openssl_dir/lib -lcrypto" \
         >> "$build_dir/Modules/Setup.local"
@@ -140,6 +145,18 @@ build_runtime_bundle() {
         cp "$source_dir/Lib/pathlib/$module" "$runtime_dir/pathlib/$module"
     done
     cp "$source_dir/Lib/zipimport.py" "$runtime_dir/zipimport.py"
+    rm -rf "$runtime_dir/ctypes" "$runtime_dir/sysconfig"
+    cp "$root_dir/tools/minimal_sysconfig.py" "$runtime_dir/sysconfig.py"
+    mkdir -p "$runtime_dir/ctypes"
+    for module in __init__.py _endian.py _layout.py _aix.py util.py wintypes.py; do
+        if [ "$module" = __init__.py ]; then
+            sed -e '/import sysconfig as _sysconfig/d' \
+                -e 's/_sysconfig.get_config_var("LDLIBRARY")/None/' \
+                "$source_dir/Lib/ctypes/$module" > "$runtime_dir/ctypes/$module"
+        else
+            cp "$source_dir/Lib/ctypes/$module" "$runtime_dir/ctypes/$module"
+        fi
+    done
     # OpenSSL supplies the available digest implementations; the bundled
     # hashlib wrapper must not promise unavailable builtin BLAKE2 modules.
     sed "/'blake2b', 'blake2s',/d" "$source_dir/Lib/hashlib.py" \
@@ -177,6 +194,7 @@ build_launcher() {
         "$build_dir/Modules/expat/libexpat.a" \
         "$build_dir/Modules/_decimal/libmpdec/libmpdec.a" \
         -L"$openssl_dir/lib" -lssl -lcrypto \
+        -L"$libffi_dir/lib" -lffi \
         -Wl,--wrap=clock_nanosleep -ldl -lpthread
 }
 

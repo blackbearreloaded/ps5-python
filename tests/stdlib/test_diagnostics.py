@@ -1,6 +1,7 @@
 """PS5 adaptations of CPython test_tracemalloc and multiprocessing imports."""
 
 import tracemalloc
+import ctypes
 
 
 tracemalloc.start()
@@ -11,6 +12,8 @@ assert peak >= current
 tracemalloc.stop()
 assert not tracemalloc.is_tracing()
 del values
+assert ctypes.sizeof(ctypes.c_int) >= 2
+assert ctypes.c_int(42).value == 42
 
 try:
     import _multiprocessing
