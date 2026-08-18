@@ -260,6 +260,30 @@ Tests:
 - `tests/stdlib/test_ssl_hashlib.py`, adapted from `Lib/test/test_base64.py`
   and `Lib/test/test_warnings.py`.
 
+## `_thread` and `contextvars`
+
+Status: native `_thread` and `_contextvars` modules are compiled into the PS5
+interpreter; the Python-level `contextvars` wrapper is bundled.
+
+Included and tested:
+
+- `_thread.allocate_lock()`
+- `_thread.start_joinable_thread()` and `ThreadHandle.join()`
+- `_thread.get_ident()`
+- `ContextVar` defaults, set/reset tokens, `Context`, and `copy_context()`
+
+The higher-level `threading.py` wrapper is not bundled yet because its full
+dependency tree and process-oriented APIs are not currently part of the PS5
+runtime target.
+
+Source and tests:
+
+- `upstream/cpython/Lib/contextvars.py`
+- `upstream/cpython/Modules/_threadmodule.c`
+- `upstream/cpython/Modules/_contextvarsmodule.c`
+- `tests/stdlib/test_thread_context.py`, adapted from `Lib/test/test_thread.py`
+  and `Lib/test/test_contextvars.py`.
+
 ## Core extension modules
 
 Status: statically linked and tested on PS5.
