@@ -9,14 +9,14 @@ upstream source commit `823f0323ee6ec1402088b73bce1a38473cac36dc`.
 
 ## Follow-up
 
-- Host validation now passes all 45 discovered scripts. Tests that require PS5
+- Host validation now passes all 46 discovered scripts. Tests that require PS5
   capabilities (fork, `select.poll`, external DNS, and live TLS) skip cleanly
   on desktop Python instead of making the host baseline nondeterministic.
 - Added `tests/stdlib/test_tls_handshake.py` as a separate live PS5 smoke test;
   the PS5 handshake now passes with certificate checking disabled. A selected
   PS5 CA bundle is the next TLS increment.
-- PS5 aggregate suite passes with the profiling and concurrency wrappers:
-  `CPYTHON_CORE_SUITE: PASS (44 scripts)`.
+- PS5 aggregate suite passes with the profiling, concurrency, and Tier 2
+  utility wrappers: `CPYTHON_CORE_SUITE: PASS (45 scripts)`.
 
 ## Completed Today
 
@@ -68,6 +68,9 @@ Static or bundled support now includes:
   and `_typing` support
 - `functools.lru_cache` and `functools.partial`
 - `timeit` and `dis`
+- Tier 2 utility wrappers: `argparse`, official `logging`, `shutil`, `random`,
+  `copy`, `enum`, `csv`, `unittest`, patched-import `subprocess`, `urllib`,
+  `hashlib`, `io`, `traceback`, and `pprint`
 
 ### Security and hashing
 
@@ -108,12 +111,26 @@ Static or bundled support now includes:
 - Verified `fork()`, `_exit()`, and `waitpid()` with an immediate-exit child.
 - Added `signal` wrapper support and safe signal inspection.
 
+### Tier 2 utilities
+
+- Bundled the pinned CPython 3.14.7 implementations and recursive pure-Python
+  dependencies for all requested Tier 2 modules.
+- Extended the PS5 dataclasses foundation with `MISSING`, `Field`, `field()`,
+  keyword-only dataclasses, default factories, generated field metadata, and
+  `__post_init__` so the official logging colorization dependency imports.
+- Patched only the `_posixsubprocess` import boundary in official
+  `subprocess.py`; the module imports and reports the platform execution limit
+  instead of pretending child ELF execution works.
+- Added `tests/stdlib/test_tier2.py`, adapted from the pinned CPython
+  `Lib/test/test_*.py` files, and recorded every requested module's gaps in
+  `docs/stdlib-status.md`.
+
 ## Verification
 
 The final PS5 aggregate run completed with:
 
 ```text
-CPYTHON_CORE_SUITE: PASS (44 scripts)
+CPYTHON_CORE_SUITE: PASS (45 scripts)
 ```
 
 The suite includes adapted tests based on the pinned CPython `Lib/test` tree.
@@ -197,7 +214,8 @@ callbacks, and calling native PS5 APIs remain unverified.
 
 ### Subprocess and executable launching
 
-`subprocess` is unavailable. Ordinary libc `execve()` cannot execute PS5 ELFs,
+`subprocess` imports through the patched official wrapper but execution is
+unavailable. Ordinary libc `execve()` cannot execute PS5 ELFs,
 standard executable paths are unavailable in the payload filesystem, and
 `dup()`/`dup2()` return `ENOTSUP`. A kernel-assisted native ELF broker based on
 the `shsrv` resource project is still required.
@@ -213,6 +231,8 @@ coverage remain incomplete.
 - Certificate-verified HTTPS with an explicit PS5 CA-store strategy.
 - Static zlib, bzip2, and xz dependencies.
 - Full `multiprocessing` and subprocess integration.
+- Full upstream regression coverage for the Tier 2 utility modules; the
+  supported subset and each known gap are listed in `docs/stdlib-status.md`.
 - Kernel-assisted process/ELF launching and cross-process descriptor transfer.
 - A complete ctypes native-library loading test.
 - Full pathlib, dataclasses, SSL, and compression upstream test coverage;
