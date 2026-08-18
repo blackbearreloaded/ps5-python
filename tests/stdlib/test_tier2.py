@@ -67,7 +67,7 @@ assert hashlib.sha256(b"PS5").hexdigest() == (
     "215a8ba2edc6187348afcd37a61f6992afd326f2f5dd5b8b579d4d88fca4f94e"
 )
 assert io.BytesIO(b"PS5").read() == b"PS5"
-assert "ValueError" in "".join(traceback.format_exception_only(ValueError, "bad"))
+assert "ValueError" in "".join(traceback.format_exception_only(ValueError("bad")))
 assert "{'name': 'PS5'}" in pprint.pformat({"name": "PS5"})
 
 query = urlencode({"q": "PS5", "page": 1})
