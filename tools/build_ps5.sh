@@ -143,7 +143,7 @@ build_runtime_bundle() {
     for module in "$source_dir"/Lib/logging/*.py; do
         cp "$module" "$runtime_dir/logging/$(basename "$module")"
     done
-    for module in __future__.py argparse.py gettext.py locale.py traceback.py pprint.py textwrap.py codeop.py tokenize.py token.py _colorize.py difflib.py inspect.py calendar.py quopri.py ipaddress.py; do
+    for module in __future__.py argparse.py gettext.py locale.py traceback.py pprint.py textwrap.py codeop.py tokenize.py token.py _colorize.py difflib.py inspect.py calendar.py quopri.py ipaddress.py socketserver.py; do
         cp "$source_dir/Lib/$module" "$runtime_dir/$module"
     done
     mkdir -p "$runtime_dir/string"
