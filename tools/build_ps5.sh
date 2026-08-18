@@ -142,6 +142,9 @@ build_runtime_bundle() {
     cp "$source_dir/Lib/tempfile.py" "$runtime_dir/tempfile.py"
     cp "$source_dir/Lib/datetime.py" "$runtime_dir/datetime.py"
     cp "$source_dir/Lib/typing.py" "$runtime_dir/typing.py"
+    cp "$source_dir/Lib/annotationlib.py" "$runtime_dir/annotationlib.py"
+    cp "$source_dir/Lib/ast.py" "$runtime_dir/ast.py"
+    cp "$source_dir/Lib/keyword.py" "$runtime_dir/keyword.py"
     "$build_python" "$root_dir/tools/patch_shutil_rmtree.py" \
         "$source_dir/Lib/shutil.py" \
         "$runtime_dir/shutil.py"

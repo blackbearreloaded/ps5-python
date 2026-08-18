@@ -64,7 +64,8 @@ Static or bundled support now includes:
 - `tempfile.TemporaryDirectory`, `NamedTemporaryFile`, and `mkstemp` using the
   PS5-managed `/user/temp` directory
 - `sys`, `datetime`, and `typing` (TypeVar, Generic, Protocol, aliases, and
-  cast) with native `_datetime` and `_typing` support
+  cast, TypedDict, and basic annotation introspection) with native `_datetime`
+  and `_typing` support
 - `functools.lru_cache` and `functools.partial`
 - `timeit` and `dis`
 
@@ -155,12 +156,12 @@ does not implement every CPython decorator option or reflection helper.
 
 ### Typing and datetime
 
-The official `typing.py` and `datetime.py` wrappers are bundled over native
-`_typing` and `_datetime`. Type variables, generic classes, protocols, aliases,
-casts, dates, aware datetimes, timezones, and timedeltas pass the PS5 Tier 1
-test. `TypedDict` and annotation introspection remain unavailable until the
-pure-Python `annotationlib` dependency is bundled; the timezone database and
-`zoneinfo` are also not included.
+The official `typing.py`, `annotationlib.py`, `ast.py`, `keyword.py`, and
+`datetime.py` wrappers are bundled over native `_typing` and `_datetime`.
+Type variables, generic classes, protocols, aliases, casts, TypedDict,
+annotation introspection, dates, aware datetimes, timezones, and timedeltas
+pass the PS5 Tier 1 test. The timezone database and `zoneinfo` are not
+included.
 
 ### Tracemalloc
 

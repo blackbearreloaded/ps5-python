@@ -26,9 +26,16 @@ class SupportsValue(typing.Protocol):
     value: str
 
 
+class Named(typing.TypedDict):
+    name: str
+    active: bool
+
+
 box: Box[int] = Box(42)
 assert box.value == 42
 assert isinstance(SupportsValue, type)
+assert typing.is_typeddict(Named)
+assert typing.get_type_hints(Named) == {"name": str, "active": bool}
 assert typing.get_origin(list[int]) is list
 assert typing.get_args(dict[str, int]) == (str, int)
 assert typing.cast(str, "typed") == "typed"
