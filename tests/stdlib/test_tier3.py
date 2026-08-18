@@ -32,7 +32,9 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
 
 assert threading.current_thread() is not None
 assert multiprocessing.get_start_method() in ("fork", "forkserver", "spawn")
-assert isinstance(queue.Queue(), queue.Queue)
+thread_queue = queue.Queue()
+thread_queue.put("thread-safe")
+assert thread_queue.get_nowait() == "thread-safe"
 assert http.client.responses[200] == "OK"
 assert http.server.BaseHTTPRequestHandler is not None
 assert socket.AF_INET > 0
