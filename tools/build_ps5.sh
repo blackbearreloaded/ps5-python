@@ -218,6 +218,10 @@ build_runtime_bundle() {
     cp "$source_dir/Lib/xml/etree/__init__.py" "$runtime_dir/xml/etree/__init__.py"
     cp "$source_dir/Lib/xml/etree/ElementTree.py" "$runtime_dir/xml/etree/ElementTree.py"
     cp "$source_dir/Lib/xml/etree/ElementPath.py" "$runtime_dir/xml/etree/ElementPath.py"
+    mkdir -p "$runtime_dir/sqlite3"
+    for module in __init__.py __main__.py dbapi2.py dump.py; do
+        cp "$source_dir/Lib/sqlite3/$module" "$runtime_dir/sqlite3/$module"
+    done
     for package in dom sax parsers; do
         mkdir -p "$runtime_dir/xml/$package"
         for module in "$source_dir"/Lib/xml/$package/*.py; do
@@ -239,6 +243,17 @@ build_runtime_bundle() {
         cp "$source_dir/Lib/pathlib/$module" "$runtime_dir/pathlib/$module"
     done
     cp "$source_dir/Lib/zipimport.py" "$runtime_dir/zipimport.py"
+    cp "$source_dir/Lib/gzip.py" "$runtime_dir/gzip.py"
+    cp "$source_dir/Lib/tarfile.py" "$runtime_dir/tarfile.py"
+    mkdir -p "$runtime_dir/zipfile"
+    cp "$source_dir/Lib/zipfile/__init__.py" "$runtime_dir/zipfile/__init__.py"
+    mkdir -p "$runtime_dir/zipfile/_path"
+    cp "$source_dir/Lib/zipfile/_path/__init__.py" "$runtime_dir/zipfile/_path/__init__.py"
+    cp "$source_dir/Lib/zipfile/_path/glob.py" "$runtime_dir/zipfile/_path/glob.py"
+    mkdir -p "$runtime_dir/compression/_common"
+    cp "$source_dir/Lib/compression/__init__.py" "$runtime_dir/compression/__init__.py"
+    cp "$source_dir/Lib/compression/_common/__init__.py" "$runtime_dir/compression/_common/__init__.py"
+    cp "$source_dir/Lib/compression/_common/_streams.py" "$runtime_dir/compression/_common/_streams.py"
     mkdir -p "$runtime_dir/collections"
     cp "$source_dir/Lib/collections/__init__.py" "$runtime_dir/collections/__init__.py"
     cp "$source_dir/Lib/heapq.py" "$runtime_dir/heapq.py"

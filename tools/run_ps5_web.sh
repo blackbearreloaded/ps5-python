@@ -41,13 +41,13 @@ upload "$runtime_dir/encodings/aliases.py" /data/python/runtime/cpython-lib/enco
 upload "$runtime_dir/encodings/utf_8.py" /data/python/runtime/cpython-lib/encodings/utf_8.py
 upload "$runtime_dir/encodings/idna.py" /data/python/runtime/cpython-lib/encodings/idna.py
 upload "$runtime_dir/selectors.py" /data/python/runtime/cpython-lib/selectors.py
-for module in os.py stat.py genericpath.py posixpath.py abc.py _collections_abc.py io.py socket.py enum.py types.py signal.py hashlib.py ssl.py base64.py warnings.py contextvars.py _py_warnings.py _weakrefset.py tracemalloc.py csv.py decimal.py numbers.py contextlib.py weakref.py copy.py copyreg.py _compat_pickle.py hmac.py random.py bisect.py glob.py fnmatch.py functools.py operator.py reprlib.py linecache.py pickle.py struct.py timeit.py dis.py opcode.py _opcode_metadata.py; do
+for module in os.py stat.py genericpath.py posixpath.py abc.py _collections_abc.py io.py socket.py enum.py types.py signal.py hashlib.py ssl.py base64.py warnings.py contextvars.py _py_warnings.py _weakrefset.py tracemalloc.py csv.py decimal.py numbers.py contextlib.py weakref.py copy.py copyreg.py _compat_pickle.py hmac.py random.py bisect.py glob.py fnmatch.py functools.py operator.py reprlib.py linecache.py pickle.py struct.py timeit.py dis.py opcode.py _opcode_metadata.py fractions.py gzip.py tarfile.py; do
     upload "$runtime_dir/$module" "/data/python/runtime/cpython-lib/$module"
 done
 for module in threading.py queue.py runpy.py secrets.py tempfile.py datetime.py typing.py annotationlib.py ast.py keyword.py __future__.py argparse.py gettext.py locale.py traceback.py pprint.py textwrap.py codeop.py tokenize.py token.py _colorize.py difflib.py inspect.py calendar.py quopri.py ipaddress.py socketserver.py mimetypes.py subprocess.py shutil.py; do
     upload "$runtime_dir/$module" "/data/python/runtime/cpython-lib/$module"
 done
-for package in logging string urllib http email unittest asyncio html; do
+for package in logging string urllib http email unittest asyncio html compression zipfile xml; do
     mkdir_remote "/data/python/runtime/cpython-lib/$package"
     while IFS= read -r -d '' module_file; do
         relative_file="${module_file#"$runtime_dir/$package/"}"
@@ -72,12 +72,6 @@ for package in concurrent multiprocessing; do
         upload "$module_file" "$remote_file"
     done < <(find "$runtime_dir/$package" -type f -name '*.py' -print0 | sort -z)
 done
-mkdir_remote /data/python/runtime/cpython-lib/xml
-mkdir_remote /data/python/runtime/cpython-lib/xml/etree
-upload "$runtime_dir/xml/__init__.py" /data/python/runtime/cpython-lib/xml/__init__.py
-upload "$runtime_dir/xml/etree/__init__.py" /data/python/runtime/cpython-lib/xml/etree/__init__.py
-upload "$runtime_dir/xml/etree/ElementTree.py" /data/python/runtime/cpython-lib/xml/etree/ElementTree.py
-upload "$runtime_dir/xml/etree/ElementPath.py" /data/python/runtime/cpython-lib/xml/etree/ElementPath.py
 mkdir_remote /data/python/runtime/cpython-lib/pathlib
 for module in __init__.py _local.py _os.py types.py; do
     upload "$runtime_dir/pathlib/$module" "/data/python/runtime/cpython-lib/pathlib/$module"
