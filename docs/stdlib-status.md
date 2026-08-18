@@ -380,26 +380,47 @@ Source and tests:
 Compression modules `zlib`, `_bz2`, and `_lzma` remain disabled because their
 external PS5 dependencies are not yet built into this workspace.
 
-## Import runtime and paths
+## Import runtime, filesystem paths, and temporary files
 
-Status: the native `_stat` module and Python-level `stat`, `posixpath`, and
-`pathlib` support are bundled and tested. The Python-level `zipimport` wrapper
-is also bundled over CPython's frozen import machinery.
+Status: the native `_stat` module and Python-level `stat`, `posixpath`,
+`pathlib`, and `tempfile` wrappers are bundled and tested. The Python-level
+`zipimport` wrapper is also bundled over CPython's frozen import machinery.
 
 Included and tested:
 
-- `pathlib.PurePosixPath` path construction and inspection
+- `pathlib.PurePosixPath` composition and inspection
+- concrete `pathlib.Path` joins, directory creation, text I/O, iteration, and
+  file/directory predicates
+- `tempfile.TemporaryDirectory` context-manager cleanup
+- `tempfile.NamedTemporaryFile` read/write behavior and automatic unlinking
+- `tempfile.mkstemp` creation, descriptor I/O, and explicit cleanup
 - `_stat` constants and `stat.S_ISDIR()`/`stat.S_ISREG()` predicates
 - `posixpath.join()`
 - direct `zipimport` availability
 
+PS5 limitations:
+
+- The payload has no usable `/tmp`, `/var/tmp`, or `/usr/tmp`, so
+  `tempfile.gettempdir()` and default temporary-file calls fail. Callers must
+  pass the writable `/data/python` directory (or configure `tempfile.tempdir`).
+- `shutil.rmtree` uses CPython's path-based fallback because PS5
+  `os.scandir(fd)` returns `ENOTSUP`; the fallback still provides automatic
+  `TemporaryDirectory` cleanup but does not provide fd-based symlink-race
+  hardening.
+- Complete upstream `test_pathlib.py` and `test_tempfile.py` coverage remains
+  out of scope for the portable PS5 suite.
+
 Source and tests:
 
 - `upstream/cpython/Lib/pathlib/`
+- `upstream/cpython/Lib/tempfile.py` and `Lib/shutil.py`
 - `upstream/cpython/Lib/zipimport.py`
 - `upstream/cpython/Lib/stat.py` and `Lib/posixpath.py`
+- `tools/patch_shutil_rmtree.py`
 - `tests/stdlib/test_import_runtime.py`, adapted from `test_pathlib.py`,
-  `test_zipimport.py`, and `test_stat.py`.
+  `test_zipimport.py`, and `test_stat.py`
+- `tests/stdlib/test_filesystem.py`, adapted from `test_pathlib.py` and
+  `test_tempfile.py`
 
 ## Diagnostics and multiprocessing primitives
 

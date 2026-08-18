@@ -61,6 +61,8 @@ Static or bundled support now includes:
 - `heapq` and `_heapq`
 - A PS5-compatible `dataclasses` subset
 - `pathlib`, `stat`, `_stat`, `posixpath`, and `zipimport`
+- `tempfile.TemporaryDirectory`, `NamedTemporaryFile`, and `mkstemp` using an
+  explicit writable PS5 directory
 - `timeit` and `dis`
 
 ### Security and hashing
@@ -88,6 +90,8 @@ Static or bundled support now includes:
   context; Queue/Semaphore/SharedMemory and ProcessPoolExecutor are recorded
   as platform limitations.
 - Statically linked native `array` for multiprocessing reduction support.
+- Verified concrete `pathlib.Path` operations and tempfile context cleanup;
+  patched `shutil.rmtree` to use its PS5-compatible path-based fallback.
 - `_ctypes` is statically linked against a PS5-built libffi 3.8.0 Unix SysV
   backend.
 - Verified basic `ctypes.c_int` construction and sizing.
@@ -165,6 +169,14 @@ integration.
 
 The native `mmap` module is compiled and importable, but `mmap.mmap()` returns
 `ENOTSUP` in the current PS5 payload.
+
+### Temporary files
+
+`tempfile` works when callers provide the writable `/data/python` directory.
+The payload has no usable default `/tmp`-style directory, so default temp-file
+creation and `gettempdir()` fail. `TemporaryDirectory` cleanup works through
+the path-based `shutil.rmtree` fallback because fd-based `os.scandir` is
+`ENOTSUP`.
 
 ### ctypes
 

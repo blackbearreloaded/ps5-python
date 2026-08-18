@@ -48,6 +48,9 @@ verified on PS5; Queue/Semaphore, POSIX `SharedMemory`, and
 `ProcessPoolExecutor` remain unavailable until the payload gains named
 semaphores, file-backed `mmap`, and an ELF process broker. See
 [`docs/stdlib-status.md`](docs/stdlib-status.md) for the per-module contract.
+The same bundle includes `pathlib.Path` and `tempfile`; temporary-file callers
+must currently pass the writable `/data/python` directory because the payload
+does not expose a usable default `/tmp` directory.
 
 ## Build the first PS5 ELF
 
