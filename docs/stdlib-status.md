@@ -46,13 +46,22 @@ Included and tested:
   system entropy source
 - `os.getpid()`, `os.getenv()`, `os.putenv()`, and `os.unsetenv()`
 - `os.pipe()` and descriptor read/write operations
+- `os.fork()`, `os._exit()`, and `os.waitpid()` for a validated immediate-exit
+  child process
 
 Not yet covered:
 
-- process creation and management (`fork`, `exec*`, `spawn*`, `system`)
+- process creation and management (`exec*`, `spawn*`, `system`)
 - subprocess integration
 - file-descriptor and terminal helpers
 - `os.dup()` and `os.dup2()` return `ENOTSUP` in the current PS5 payload
+
+`fork()` and `waitpid()` are validated by `tests/stdlib/test_process.py`.
+`exec*()` and `posix_spawn()` are exposed, but no standard executable path is
+available in the current payload filesystem; failed child `execve()` attempts
+can leave the payload launcher waiting. `os.system()` is exposed but currently
+returns a shell failure status. None of these are yet suitable for a WSGI
+process manager.
 - extended filesystem metadata and platform-specific permission behavior
 - `os.access()` is exposed, but its readability result is not reliable in the
   current PS5 sandbox and is therefore not a passing criterion yet
