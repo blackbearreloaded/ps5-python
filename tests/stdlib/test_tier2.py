@@ -7,6 +7,8 @@ import enum
 import hashlib
 import io
 import logging
+import logging.config
+import logging.handlers
 import pprint
 import random
 import shutil
@@ -37,6 +39,8 @@ logger.info("ready")
 handler.flush()
 assert "ready" in log_stream.getvalue()
 logger.removeHandler(handler)
+assert logging.handlers.MemoryHandler is not None
+assert logging.config.dictConfig is not None
 
 if sys.platform.startswith("win32"):
     print("test_tier2: tempfile/shutil file checks skipped on host")
