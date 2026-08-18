@@ -4,6 +4,9 @@ import hashlib
 import ssl
 import _hashlib
 import _ssl
+import base64
+import warnings
+import _py_warnings
 
 
 assert hashlib.sha256(b"CPythonPS5").hexdigest() == (
@@ -16,5 +19,13 @@ assert _hashlib.openssl_sha256(b"CPythonPS5").digest() == hashlib.sha256(
 ).digest()
 context = ssl.create_default_context()
 assert context.minimum_version >= ssl.TLSVersion.TLSv1_2
+encoded = base64.b64encode(b"CPythonPS5")
+assert encoded == b"Q1B5dGhvblBTNQ=="
+assert base64.b64decode(encoded) == b"CPythonPS5"
+with warnings.catch_warnings(record=True) as caught:
+    warnings.simplefilter("always")
+    warnings.warn("PS5 warning", UserWarning)
+    assert len(caught) == 1
+assert hasattr(_py_warnings, "warn")
 
 print("test_ssl_hashlib: PASS")

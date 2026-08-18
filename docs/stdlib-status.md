@@ -239,6 +239,27 @@ Limitations:
 - The `hashlib` wrapper omits BLAKE2 because CPython's generated HACL BLAKE2
   objects are not linked; OpenSSL-backed algorithms remain available.
 
+## `base64`, `warnings`, and `_py_warnings`
+
+Status: Python-level modules bundled and tested as dependencies of `ssl`.
+
+Source:
+
+- `upstream/cpython/Lib/base64.py`
+- `upstream/cpython/Lib/warnings.py`
+- `upstream/cpython/Lib/_py_warnings.py`
+
+Included and tested:
+
+- Base64 encoding and decoding
+- Warning filters, capture, and warning emission
+- The pure-Python warning implementation fallback
+
+Tests:
+
+- `tests/stdlib/test_ssl_hashlib.py`, adapted from `Lib/test/test_base64.py`
+  and `Lib/test/test_warnings.py`.
+
 ## Core extension modules
 
 Status: statically linked and tested on PS5.
