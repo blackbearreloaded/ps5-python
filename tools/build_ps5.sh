@@ -7,6 +7,7 @@ build_dir="$root_dir/build/ps5"
 build_python="$root_dir/build/host/python.exe"
 sdk_dir="${PS5_PAYLOAD_SDK:-/opt/ps5-payload-sdk}"
 hb_dir="$root_dir/build/ps5/deps/user/homebrew"
+openssl_dir="$root_dir/build/ps5/deps/openssl"
 jobs="${PS5_JOBS:-$(nproc 2>/dev/null || echo 2)}"
 launcher="$build_dir/python.elf"
 web_launcher="$build_dir/python-web.elf"
@@ -67,10 +68,15 @@ needs_rebuild() {
 }
 
 configure_ps5() {
+    bash "$root_dir/tools/build_openssl_ps5.sh"
     mkdir -p "$build_dir"
     cd "$build_dir"
     CONFIG_SITE="$root_dir/tools/ps5.config.site" \
-    CC="$compiler_string" LDFLAGS="${linker_args[*]}" "$source_dir/configure" \
+    CC="$compiler_string" \
+    CPPFLAGS="-I$openssl_dir/include" \
+    LDFLAGS="-L$openssl_dir/lib -lssl -lcrypto ${linker_args[*]}" \
+    PKG_CONFIG_PATH="$openssl_dir/lib/pkgconfig" \
+    "$source_dir/configure" \
         --build=x86_64-pc-linux-gnu \
         --host=x86_64-pc-freebsd \
         --with-build-python="$build_python" \
@@ -80,11 +86,16 @@ configure_ps5() {
         --disable-shared \
         --with-static-libpython \
         --disable-ipv6 \
-        --with-libm=no
+        --with-libm=no \
+        --with-builtin-hashlib-hashes=
     # The SDK exposes timezone() as a function, not the POSIX timezone variable.
     sed -i 's/^#define HAVE_TZNAME 1$/#undef HAVE_TZNAME/' pyconfig.h
     sed -i 's/^#define HAVE_DECL_TZNAME 0$/#undef HAVE_DECL_TZNAME/' pyconfig.h
     cp "$root_dir/tools/ps5-setup.local" "$build_dir/Modules/Setup.local"
+    printf '%s\n' \
+        "_ssl _ssl.c -I$openssl_dir/include -L$openssl_dir/lib -lssl -lcrypto" \
+        "_hashlib _hashopenssl.c -I$openssl_dir/include -L$openssl_dir/lib -lcrypto" \
+        >> "$build_dir/Modules/Setup.local"
 }
 
 build_runtime_bundle() {
@@ -109,9 +120,14 @@ build_runtime_bundle() {
     # os is the Python-level POSIX wrapper; its native posix/time/stat pieces
     # are already compiled into Modules/config.c.
     cp "$root_dir/tools/minimal_selectors.py" "$runtime_dir/selectors.py"
-    for module in os.py stat.py genericpath.py posixpath.py abc.py _collections_abc.py io.py socket.py enum.py types.py signal.py; do
+    for module in os.py stat.py genericpath.py posixpath.py abc.py _collections_abc.py io.py socket.py enum.py types.py signal.py ssl.py base64.py warnings.py; do
         cp "$source_dir/Lib/$module" "$runtime_dir/$module"
     done
+    cp "$source_dir/Lib/_py_warnings.py" "$runtime_dir/_py_warnings.py"
+    # OpenSSL supplies the available digest implementations; the bundled
+    # hashlib wrapper must not promise unavailable builtin BLAKE2 modules.
+    sed "/'blake2b', 'blake2s',/d" "$source_dir/Lib/hashlib.py" \
+        > "$runtime_dir/hashlib.py"
 }
 
 build_launcher() {
@@ -140,6 +156,7 @@ build_launcher() {
         "$root_dir/platform/cpython_ps5_host.c" \
         "$build_dir/Modules/config.o" \
         "$build_dir/libpython3.14.a" \
+        -L"$openssl_dir/lib" -lssl -lcrypto \
         -Wl,--wrap=clock_nanosleep -ldl -lpthread
 }
 
@@ -173,6 +190,7 @@ build_web_launcher() {
         "$build_dir/Modules/config.o" \
         "$build_dir/libpython3.14.a" \
         -L"$hb_dir/lib" \
+        -L"$openssl_dir/lib" -lssl -lcrypto \
         -Wl,--wrap=clock_nanosleep -lmicrohttpd -ldl -lpthread
 }
 

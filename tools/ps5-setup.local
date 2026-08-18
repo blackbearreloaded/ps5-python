@@ -8,3 +8,4 @@ _struct _struct.c
 math mathmodule.c
 _codecs _codecsmodule.c
 unicodedata unicodedata.c
+binascii binascii.c

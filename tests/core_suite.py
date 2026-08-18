@@ -30,6 +30,7 @@ TEST_FILES = (
     "test_socket.py",
     "test_dns.py",
     "test_core_modules.py",
+    "test_ssl_hashlib.py",
     "test_posix_boundary.py",
     "test_process.py",
     "test_network.py",

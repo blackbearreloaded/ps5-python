@@ -217,14 +217,27 @@ socket subset is therefore IPv4-only.
 
 ## `_ssl`, `_hashlib`, and `hashlib`
 
-Status: not yet bundled. The PS5 configure probe does not find OpenSSL, and the
-OpenSSL PacBrew repository currently contains only a `PKGBUILD`, not an
-installed PS5 library in this workspace. CPython's builtin HACL hash objects
-also require generated objects that are not currently linked by this port.
+Status: statically linked and imported successfully on PS5.
 
-The next implementation step is to build the PacBrew OpenSSL package as a
-static dependency, then enable CPython's `_ssl` and `_hashlib` modules together
-and add HTTPS/hash tests. TLS is not claimed until that end-to-end build passes.
+Source:
+
+- OpenSSL 3.5.2, built from the PacBrew `PKGBUILD` configuration
+- `upstream/cpython/Modules/_ssl.c`
+- `upstream/cpython/Modules/_hashopenssl.c`
+- matching `Lib/ssl.py` and `Lib/hashlib.py` wrappers
+
+Included and tested:
+
+- `_ssl` and `_hashlib` static extension modules
+- `ssl.OPENSSL_VERSION`
+- `ssl.create_default_context()` and TLS 1.2 minimum configuration
+- SHA-256 and MD5 through `hashlib` and `_hashlib`
+
+Limitations:
+
+- A live HTTPS handshake and certificate verification are not yet tested.
+- The `hashlib` wrapper omits BLAKE2 because CPython's generated HACL BLAKE2
+  objects are not linked; OpenSSL-backed algorithms remain available.
 
 ## Core extension modules
 
