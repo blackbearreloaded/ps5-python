@@ -396,6 +396,27 @@ Tests:
 - `tests/stdlib/test_data_structures.py`, adapted from `test_collections.py`,
   `test_itertools.py`, `test_heapq.py`, and `test_dataclasses.py`.
 
+## Profiling and diagnostics wrappers
+
+Status: `timeit`, `dis`, `struct`, and a minimal `tracemalloc` wrapper are
+bundled and tested.
+
+Included and tested:
+
+- `timeit.timeit()` execution timing
+- `dis.get_instructions()` bytecode inspection
+- `struct.pack()` and `struct.unpack()` binary conversion
+- native tracemalloc start/stop and traced-memory counters
+
+The full Python `tracemalloc` snapshot/statistics layer is not bundled because
+it requires additional modules such as `linecache`, `pickle`, and the full
+collections dependency tree.
+
+Tests:
+
+- `tests/stdlib/test_profiling.py`, adapted from `test_timeit.py`, `test_dis.py`,
+  `test_tracemalloc.py`, and `test_struct.py`.
+
 `_ctypes` is now statically linked against a PS5-built libffi 3.8.0 Unix SysV
 backend. The Python wrapper is bundled with a reduced PS5 `sysconfig` surface.
 Basic `ctypes.c_int` construction and sizing pass on PS5; loading arbitrary
