@@ -11,6 +11,7 @@ import pprint
 import random
 import shutil
 import subprocess
+import sys
 import tempfile
 import traceback
 import unittest
@@ -73,11 +74,20 @@ assert Request("https://example.com/").full_url == "https://example.com/"
 case = unittest.TestCase()
 case.assertEqual(2 + 2, 4)
 
-try:
-    subprocess.run(["true"], check=True)
-except (NotImplementedError, OSError):
-    print("test_tier2: subprocess execution unavailable")
+if sys.platform.startswith("freebsd"):
+    try:
+        subprocess.run(["true"], check=True)
+    except (NotImplementedError, OSError):
+        print("test_tier2: subprocess execution unavailable")
+    else:
+        raise AssertionError("PS5 subprocess unexpectedly executed a child ELF")
 else:
-    raise AssertionError("PS5 subprocess unexpectedly executed a child ELF")
+    completed = subprocess.run(
+        [sys.executable, "-c", "print('subprocess')"],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    assert completed.stdout.strip() == "subprocess"
 
 print("test_tier2: PASS")
