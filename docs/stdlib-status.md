@@ -44,18 +44,26 @@ Included and tested:
 - `os.path.exists()` and `os.path.isfile()`
 - `os.urandom()` for secure random byte generation through the available
   system entropy source
+- `os.getpid()`, `os.getenv()`, `os.putenv()`, and `os.unsetenv()`
+- `os.pipe()` and descriptor read/write operations
 
 Not yet covered:
 
 - process creation and management (`fork`, `exec*`, `spawn*`, `system`)
 - subprocess integration
 - file-descriptor and terminal helpers
+- `os.dup()` and `os.dup2()` return `ENOTSUP` in the current PS5 payload
 - extended filesystem metadata and platform-specific permission behavior
 - `os.access()` is exposed, but its readability result is not reliable in the
   current PS5 sandbox and is therefore not a passing criterion yet
 - `getentropy()` and `getrandom()` are not available in the PS5 build; CPython
   uses its `/dev/urandom` fallback for `os.urandom()`
 - complete upstream `test_os.py` regression coverage
+
+The safe in-process POSIX boundary is tested by
+`tests/stdlib/test_posix_boundary.py`. Process creation and child management
+remain intentionally unverified on PS5 until sandbox permissions and payload
+lifetime behavior are established.
 
 ## `time`
 
@@ -95,6 +103,26 @@ Tests:
 
 - `tests/stdlib/test_os.py`, adapted from CPython's `Lib/test/test_os.py`.
 - `tests/stdlib/test_time.py`, adapted from CPython's `Lib/test/test_time.py`.
+
+## `_signal` and `signal`
+
+Status: the native `signal` module is compiled into the interpreter and safe
+signal inspection is available.
+
+Included and tested:
+
+- `signal.SIGINT`
+- `signal.getsignal()`
+
+Not yet verified:
+
+- installing handlers for `SIGINT`, `SIGTERM`, or `SIGCHLD`
+- signal-driven worker management
+
+Tests:
+
+- `tests/stdlib/test_posix_boundary.py`, adapted from CPython's
+  `Lib/test/test_os.py` and `Lib/test/test_signal.py`.
 
 ## `io`
 

@@ -72,7 +72,7 @@ build_runtime_bundle() {
     # os is the Python-level POSIX wrapper; its native posix/time/stat pieces
     # are already compiled into Modules/config.c.
     cp "$root_dir/tools/minimal_selectors.py" "$runtime_dir/selectors.py"
-    for module in os.py stat.py genericpath.py posixpath.py abc.py _collections_abc.py io.py socket.py enum.py types.py; do
+    for module in os.py stat.py genericpath.py posixpath.py abc.py _collections_abc.py io.py socket.py enum.py types.py signal.py; do
         cp "$source_dir/Lib/$module" "$runtime_dir/$module"
     done
 }

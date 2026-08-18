@@ -40,7 +40,7 @@ upload "$runtime_dir/encodings/ascii.py" /data/python/runtime/cpython-lib/encodi
 upload "$runtime_dir/encodings/utf_8.py" /data/python/runtime/cpython-lib/encodings/utf_8.py
 upload "$runtime_dir/encodings/idna.py" /data/python/runtime/cpython-lib/encodings/idna.py
 upload "$runtime_dir/selectors.py" /data/python/runtime/cpython-lib/selectors.py
-for module in os.py stat.py genericpath.py posixpath.py abc.py _collections_abc.py io.py socket.py enum.py types.py; do
+for module in os.py stat.py genericpath.py posixpath.py abc.py _collections_abc.py io.py socket.py enum.py types.py signal.py; do
     upload "$runtime_dir/$module" "/data/python/runtime/cpython-lib/$module"
 done
 for package in re json; do
