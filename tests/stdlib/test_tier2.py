@@ -38,14 +38,17 @@ handler.flush()
 assert "ready" in log_stream.getvalue()
 logger.removeHandler(handler)
 
-with tempfile.TemporaryDirectory() as directory:
-    source = directory + "/source.txt"
-    target = directory + "/target.txt"
-    with open(source, "w", encoding="utf-8") as handle:
-        handle.write("copy")
-    shutil.copyfile(source, target)
-    with open(target, encoding="utf-8") as handle:
-        assert handle.read() == "copy"
+if sys.platform.startswith("win32"):
+    print("test_tier2: tempfile/shutil file checks skipped on host")
+else:
+    with tempfile.TemporaryDirectory() as directory:
+        source = directory + "/source.txt"
+        target = directory + "/target.txt"
+        with open(source, "w", encoding="utf-8") as handle:
+            handle.write("copy")
+        shutil.copyfile(source, target)
+        with open(target, encoding="utf-8") as handle:
+            assert handle.read() == "copy"
 
 rng = random.Random(7)
 assert rng.choice(["PS5"]) == "PS5"
