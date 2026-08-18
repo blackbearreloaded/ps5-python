@@ -167,6 +167,10 @@ build_runtime_bundle() {
     for module in "$source_dir"/Lib/unittest/*.py; do
         cp "$module" "$runtime_dir/unittest/$(basename "$module")"
     done
+    mkdir -p "$runtime_dir/asyncio"
+    for module in "$source_dir"/Lib/asyncio/*.py; do
+        cp "$module" "$runtime_dir/asyncio/$(basename "$module")"
+    done
     cp "$source_dir/Lib/pprint.py" "$runtime_dir/pprint.py"
     cp "$source_dir/Lib/runpy.py" "$runtime_dir/runpy.py"
     cp "$source_dir/Lib/secrets.py" "$runtime_dir/secrets.py"
