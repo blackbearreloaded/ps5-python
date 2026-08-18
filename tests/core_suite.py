@@ -34,6 +34,7 @@ TEST_FILES = (
     "test_thread_context.py",
     "test_data_formats.py",
     "test_import_runtime.py",
+    "test_diagnostics.py",
     "test_posix_boundary.py",
     "test_process.py",
     "test_network.py",

@@ -127,6 +127,7 @@ build_runtime_bundle() {
     done
     cp "$source_dir/Lib/_py_warnings.py" "$runtime_dir/_py_warnings.py"
     cp "$source_dir/Lib/_weakrefset.py" "$runtime_dir/_weakrefset.py"
+    cp "$root_dir/tools/minimal_tracemalloc.py" "$runtime_dir/tracemalloc.py"
     cp "$source_dir/Lib/csv.py" "$runtime_dir/csv.py"
     cp "$source_dir/Lib/decimal.py" "$runtime_dir/decimal.py"
     mkdir -p "$runtime_dir/xml/etree"
