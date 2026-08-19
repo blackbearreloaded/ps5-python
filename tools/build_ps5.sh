@@ -11,6 +11,8 @@ openssl_dir="$root_dir/build/ps5/deps/openssl"
 libffi_dir="$root_dir/build/ps5/deps/libffi"
 zlib_dir="$root_dir/build/ps5/deps/zlib"
 sqlite_dir="$root_dir/build/ps5/deps/sqlite3"
+bzip2_dir="$root_dir/build/ps5/deps/bzip2"
+xz_dir="$root_dir/build/ps5/deps/xz"
 jobs="${PS5_JOBS:-$(nproc 2>/dev/null || echo 2)}"
 launcher="$build_dir/python.elf"
 web_launcher="$build_dir/python-web.elf"
@@ -75,6 +77,8 @@ configure_ps5() {
     bash "$root_dir/tools/build_libffi_ps5.sh"
     bash "$root_dir/tools/build_zlib_ps5.sh"
     bash "$root_dir/tools/build_sqlite3_ps5.sh"
+    bash "$root_dir/tools/build_bzip2_ps5.sh"
+    bash "$root_dir/tools/build_xz_ps5.sh"
     mkdir -p "$build_dir"
     cd "$build_dir"
     CONFIG_SITE="$root_dir/tools/ps5.config.site" \
@@ -87,8 +91,8 @@ configure_ps5() {
     ac_cv_lib_intl_textdomain=no \
     CC="$compiler_string" \
     CPP="$compiler_string -E" \
-    CPPFLAGS="-I$openssl_dir/include -I$libffi_dir/include -I$zlib_dir/include -I$sqlite_dir/include" \
-    LDFLAGS="-L$openssl_dir/lib -lssl -lcrypto -L$libffi_dir/lib -lffi -L$zlib_dir/lib -lz -L$sqlite_dir/lib -lsqlite3 ${linker_args[*]}" \
+    CPPFLAGS="-I$openssl_dir/include -I$libffi_dir/include -I$zlib_dir/include -I$sqlite_dir/include -I$bzip2_dir/include -I$xz_dir/include" \
+    LDFLAGS="-L$openssl_dir/lib -lssl -lcrypto -L$libffi_dir/lib -lffi -L$zlib_dir/lib -lz -L$sqlite_dir/lib -lsqlite3 -L$bzip2_dir/lib -lbz2 -L$xz_dir/lib -llzma ${linker_args[*]}" \
     LIBFFI_CFLAGS="-I$libffi_dir/include" \
     LIBFFI_LIBS="-L$libffi_dir/lib -lffi" \
     LIBSQLITE3_CFLAGS="-I$sqlite_dir/include" \
@@ -118,6 +122,8 @@ configure_ps5() {
         "_hashlib _hashopenssl.c -I$openssl_dir/include -L$openssl_dir/lib -lcrypto" \
         "_sqlite3 _sqlite/blob.c _sqlite/connection.c _sqlite/cursor.c _sqlite/microprotocols.c _sqlite/module.c _sqlite/prepare_protocol.c _sqlite/row.c _sqlite/statement.c _sqlite/util.c -I$sqlite_dir/include -L$sqlite_dir/lib -lsqlite3 -lpthread" \
         "zlib zlibmodule.c -I$zlib_dir/include -L$zlib_dir/lib -lz" \
+        "_bz2 _bz2module.c -I$bzip2_dir/include -L$bzip2_dir/lib -lbz2" \
+        "_lzma _lzmamodule.c -I$xz_dir/include -L$xz_dir/lib -llzma -lpthread" \
         "cmath cmathmodule.c" \
         "_zoneinfo _zoneinfo.c" \
         "_lsprof _lsprof.c rotatingtree.c" \
@@ -152,7 +158,7 @@ build_runtime_bundle() {
     # os is the Python-level POSIX wrapper; its native posix/time/stat pieces
     # are already compiled into Modules/config.c.
     cp "$root_dir/tools/minimal_selectors.py" "$runtime_dir/selectors.py"
-    for module in os.py stat.py genericpath.py posixpath.py abc.py _collections_abc.py io.py socket.py enum.py types.py signal.py ssl.py base64.py warnings.py contextvars.py numbers.py contextlib.py weakref.py copy.py copyreg.py _compat_pickle.py hmac.py random.py bisect.py glob.py fnmatch.py functools.py operator.py reprlib.py linecache.py pickle.py struct.py timeit.py dis.py opcode.py fractions.py gzip.py tarfile.py uuid.py filecmp.py platform.py tty.py profile.py pstats.py cProfile.py; do
+    for module in os.py stat.py genericpath.py posixpath.py abc.py _collections_abc.py io.py socket.py enum.py types.py signal.py ssl.py base64.py warnings.py contextvars.py numbers.py contextlib.py weakref.py copy.py copyreg.py _compat_pickle.py hmac.py random.py bisect.py glob.py fnmatch.py functools.py operator.py reprlib.py linecache.py pickle.py struct.py timeit.py dis.py opcode.py fractions.py gzip.py bz2.py lzma.py shelve.py tarfile.py uuid.py filecmp.py platform.py tty.py profile.py pstats.py cProfile.py; do
         cp "$source_dir/Lib/$module" "$runtime_dir/$module"
     done
     cp "$source_dir/Lib/_opcode_metadata.py" "$runtime_dir/_opcode_metadata.py"
@@ -256,6 +262,10 @@ build_runtime_bundle() {
     for module in __init__.py __main__.py dbapi2.py dump.py; do
         cp "$source_dir/Lib/sqlite3/$module" "$runtime_dir/sqlite3/$module"
     done
+    mkdir -p "$runtime_dir/dbm"
+    for module in "$source_dir"/Lib/dbm/*.py; do
+        cp "$module" "$runtime_dir/dbm/$(basename "$module")"
+    done
     for package in dom sax parsers; do
         mkdir -p "$runtime_dir/xml/$package"
         for module in "$source_dir"/Lib/xml/$package/*.py; do
@@ -310,12 +320,16 @@ build_runtime_bundle() {
 ensure_tier4_native_modules() {
     local setup_file="$build_dir/Modules/Setup.local"
     if grep -q '^_sqlite3 ' "$setup_file" 2>/dev/null &&
-        grep -q '^zlib ' "$setup_file" 2>/dev/null; then
+        grep -q '^zlib ' "$setup_file" 2>/dev/null &&
+        grep -q '^_bz2 ' "$setup_file" 2>/dev/null &&
+        grep -q '^_lzma ' "$setup_file" 2>/dev/null; then
         return
     fi
     printf '%s\n' \
         "_sqlite3 _sqlite/blob.c _sqlite/connection.c _sqlite/cursor.c _sqlite/microprotocols.c _sqlite/module.c _sqlite/prepare_protocol.c _sqlite/row.c _sqlite/statement.c _sqlite/util.c -I$sqlite_dir/include -L$sqlite_dir/lib -lsqlite3 -lpthread" \
         "zlib zlibmodule.c -I$zlib_dir/include -L$zlib_dir/lib -lz" \
+        "_bz2 _bz2module.c -I$bzip2_dir/include -L$bzip2_dir/lib -lbz2" \
+        "_lzma _lzmamodule.c -I$xz_dir/include -L$xz_dir/lib -llzma -lpthread" \
         >> "$setup_file"
     rm -f "$build_dir/Modules/config.o" "$build_dir/libpython3.14.a"
 }
@@ -391,8 +405,10 @@ build_launcher() {
         "$build_dir/Modules/_decimal/libmpdec/libmpdec.a" \
         -L"$openssl_dir/lib" -lssl -lcrypto \
         -L"$sqlite_dir/lib" -lsqlite3 \
+        -L"$bzip2_dir/lib" -lbz2 \
         -L"$libffi_dir/lib" -lffi \
         -L"$zlib_dir/lib" -lz \
+        -L"$xz_dir/lib" -llzma \
         -Wl,--wrap=clock_nanosleep -ldl -lpthread
 }
 
@@ -432,7 +448,9 @@ build_web_launcher() {
         -L"$hb_dir/lib" \
         -L"$openssl_dir/lib" -lssl -lcrypto \
         -L"$sqlite_dir/lib" -lsqlite3 \
+        -L"$bzip2_dir/lib" -lbz2 \
         -L"$zlib_dir/lib" -lz \
+        -L"$xz_dir/lib" -llzma \
         -Wl,--wrap=clock_nanosleep -lmicrohttpd -ldl -lpthread
 }
 
@@ -446,6 +464,8 @@ case "${1:-core}" in
         fi
         bash "$root_dir/tools/build_zlib_ps5.sh"
         bash "$root_dir/tools/build_sqlite3_ps5.sh"
+        bash "$root_dir/tools/build_bzip2_ps5.sh"
+        bash "$root_dir/tools/build_xz_ps5.sh"
         ensure_tier4_native_modules
         ensure_tier7_native_modules
         ensure_tier8_native_modules
@@ -463,6 +483,8 @@ case "${1:-core}" in
         fi
         bash "$root_dir/tools/build_zlib_ps5.sh"
         bash "$root_dir/tools/build_sqlite3_ps5.sh"
+        bash "$root_dir/tools/build_bzip2_ps5.sh"
+        bash "$root_dir/tools/build_xz_ps5.sh"
         ensure_tier4_native_modules
         ensure_tier7_native_modules
         ensure_tier8_native_modules
