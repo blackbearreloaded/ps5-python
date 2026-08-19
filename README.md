@@ -31,6 +31,8 @@ external `/data/python/main.py` file.
 - [PS5 PacBrew packages](https://github.com/ps5-payload-dev/pacbrew-repo)
 
 See [PLAN.md](PLAN.md) for the implementation roadmap and acceptance criteria.
+The Web Launcher product roadmap is tracked separately in
+[roadmap.md](roadmap.md).
 The language-core test provenance and portable-subset rules are documented in
 [`tests/UPSTREAM_TESTS.md`](tests/UPSTREAM_TESTS.md).
 
