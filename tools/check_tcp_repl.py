@@ -22,9 +22,11 @@ def main():
     with socket.create_connection((args.host, args.port), timeout=5) as connection:
         connection.settimeout(5)
         banner = read_until(connection, b">>> ")
-        connection.sendall(b"print(123)\n")
+        connection.sendall(b"print(123)\r")
         output = read_until(connection, b">>> ")
-    if b"123" not in output or b">>> " not in banner:
+        connection.sendall(b"1 + 1\r\n")
+        output += read_until(connection, b">>> ")
+    if b"123" not in output or b"2" not in output or b">>> " not in banner:
         raise AssertionError(f"unexpected TCP REPL output: {banner + output!r}")
     print("TCP_REPL_CHECK: PASS")
 

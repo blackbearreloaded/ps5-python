@@ -25,6 +25,9 @@ The default URL is:
 http://<PS5-IP>:8090/
 ```
 
+The Interpreter menu is the first and default view. Its URL is
+`?view=interpreter`; the Applications menu uses `?view=applications`.
+
 Port 8080 is intentionally avoided because the existing PS5 `websrv` commonly
 uses it. Override the port with `PS5_WEB_PORT`.
 
@@ -110,8 +113,9 @@ history. Ctrl+L clears the visible terminal screen without restarting the
 interpreter. Expressions use interactive-display behavior, while multi-line
 input is executed as a block. Variables and imports persist between
 evaluations until **Restart interpreter** is selected. Opening the Interpreter
-menu adds `?view=interpreter` to the URL so a browser refresh returns to that
-view. Command text and its result are joined with a single terminal line break;
+menu adds `?view=interpreter` to the URL, while Applications uses
+`?view=applications`, so a browser refresh returns to the selected view.
+Command text and its result are joined with a single terminal line break;
 the launcher does not insert an extra blank line after each command.
 Output and tracebacks are captured per evaluation, so they do not corrupt the
 app log stream. The runtime serializes app execution and REPL evaluation

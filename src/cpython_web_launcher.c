@@ -688,6 +688,26 @@ tcp_repl_send(int fd, const char *text)
     return send_all(fd, text, strlen(text));
 }
 
+static int
+tcp_repl_execute_line(int fd, char *line, size_t *line_length, char *output)
+{
+    size_t output_length;
+
+    line[*line_length] = '\0';
+    (void)cpython_ps5_runtime_eval(line, output, 8192);
+    output_length = strlen(output);
+    if (output_length > 0 && send_all(fd, output, output_length) != 0)
+        return -1;
+    if (output_length == 0 || output[output_length - 1] != '\n') {
+        if (tcp_repl_send(fd, "\r\n") != 0)
+            return -1;
+    }
+    if (tcp_repl_send(fd, ">>> ") != 0)
+        return -1;
+    *line_length = 0;
+    return 0;
+}
+
 static void *
 tcp_repl_client_worker(void *data)
 {
@@ -696,9 +716,9 @@ tcp_repl_client_worker(void *data)
     char *output;
     unsigned char input[1024];
     size_t line_length = 0;
-    size_t output_length;
     ssize_t received;
     size_t i;
+    int pending_cr = 0;
 
     free(data);
     line = malloc(TCP_REPL_LINE_CAPACITY + 1);
@@ -712,8 +732,17 @@ tcp_repl_client_worker(void *data)
         if (received <= 0 || server_stop)
             break;
         for (i = 0; i < (size_t)received; i++) {
-            if (input[i] == '\r')
+            if (pending_cr) {
+                pending_cr = 0;
+                if (input[i] == '\n')
+                    continue;
+            }
+            if (input[i] == '\r') {
+                if (tcp_repl_execute_line(fd, line, &line_length, output) != 0)
+                    goto done;
+                pending_cr = 1;
                 continue;
+            }
             if (input[i] != '\n') {
                 if (line_length + 1 >= TCP_REPL_LINE_CAPACITY) {
                     if (tcp_repl_send(fd, "input line too long\r\n>>> ") != 0)
@@ -724,18 +753,8 @@ tcp_repl_client_worker(void *data)
                 }
                 continue;
             }
-            line[line_length] = '\0';
-            (void)cpython_ps5_runtime_eval(line, output, 8192);
-            output_length = strlen(output);
-            if (output_length > 0 && send_all(fd, output, output_length) != 0)
+            if (tcp_repl_execute_line(fd, line, &line_length, output) != 0)
                 goto done;
-            if (output_length == 0 || output[output_length - 1] != '\n') {
-                if (tcp_repl_send(fd, "\r\n") != 0)
-                    goto done;
-            }
-            if (tcp_repl_send(fd, ">>> ") != 0)
-                goto done;
-            line_length = 0;
         }
     }
 done:
