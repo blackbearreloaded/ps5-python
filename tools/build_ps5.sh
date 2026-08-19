@@ -132,6 +132,8 @@ build_runtime_bundle() {
         "$runtime_dir/encodings/aliases.py"
     cp "$source_dir/Lib/encodings/utf_8.py" \
         "$runtime_dir/encodings/utf_8.py"
+    cp "$source_dir/Lib/encodings/cp437.py" \
+        "$runtime_dir/encodings/cp437.py"
     cp "$root_dir/tools/minimal_idna.py" "$runtime_dir/encodings/idna.py"
     mkdir -p "$runtime_dir/re" "$runtime_dir/json"
     cp "$source_dir/Lib/re/__init__.py" "$runtime_dir/re/__init__.py"
