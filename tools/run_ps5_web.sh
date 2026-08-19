@@ -47,10 +47,10 @@ upload "$runtime_dir/selectors.py" /data/python/runtime/cpython-lib/selectors.py
 for module in os.py stat.py genericpath.py posixpath.py abc.py _collections_abc.py io.py socket.py enum.py types.py signal.py hashlib.py ssl.py base64.py warnings.py contextvars.py _py_warnings.py _weakrefset.py tracemalloc.py csv.py decimal.py numbers.py contextlib.py weakref.py copy.py copyreg.py _compat_pickle.py hmac.py random.py bisect.py glob.py fnmatch.py functools.py operator.py reprlib.py linecache.py pickle.py struct.py timeit.py dis.py opcode.py _opcode_metadata.py fractions.py gzip.py tarfile.py uuid.py filecmp.py platform.py tty.py profile.py pstats.py cProfile.py; do
     upload "$runtime_dir/$module" "/data/python/runtime/cpython-lib/$module"
 done
-for module in threading.py queue.py runpy.py secrets.py getpass.py tempfile.py datetime.py typing.py annotationlib.py ast.py _ast_unparse.py keyword.py __future__.py argparse.py gettext.py locale.py traceback.py pprint.py textwrap.py codeop.py tokenize.py token.py _colorize.py difflib.py inspect.py calendar.py quopri.py ipaddress.py socketserver.py mimetypes.py doctest.py py_compile.py compileall.py code.py rlcompleter.py subprocess.py shutil.py; do
+for module in threading.py queue.py runpy.py secrets.py getpass.py tempfile.py datetime.py typing.py annotationlib.py ast.py _ast_unparse.py keyword.py __future__.py argparse.py gettext.py locale.py traceback.py pprint.py textwrap.py codeop.py tokenize.py token.py _colorize.py difflib.py inspect.py calendar.py quopri.py ipaddress.py socketserver.py mimetypes.py doctest.py py_compile.py compileall.py code.py cmd.py bdb.py pdb.py rlcompleter.py readline.py subprocess.py shutil.py; do
     upload "$runtime_dir/$module" "/data/python/runtime/cpython-lib/$module"
 done
-for package in logging string urllib http email unittest asyncio html compression zipfile xml sqlite3 sysconfig; do
+for package in logging string urllib http email unittest asyncio html compression zipfile xml sqlite3 sysconfig _pyrepl; do
     mkdir_remote "/data/python/runtime/cpython-lib/$package"
     while IFS= read -r -d '' module_file; do
         relative_file="${module_file#"$runtime_dir/$package/"}"
