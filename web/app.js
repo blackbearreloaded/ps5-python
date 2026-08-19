@@ -15,6 +15,7 @@
   const replConsole = document.getElementById("repl-console");
   const menuApps = document.getElementById("menu-apps");
   const menuRepl = document.getElementById("menu-repl");
+  const replShell = document.querySelector(".repl-shell");
   const replTerminal = document.getElementById("repl-terminal");
   const replForm = document.getElementById("repl-form");
   const replInput = document.getElementById("repl-input");
@@ -67,13 +68,17 @@
   }
   function appendRepl(text) {
     replTerminal.textContent += text;
-    replTerminal.scrollTop = replTerminal.scrollHeight;
+    replShell.scrollTop = replShell.scrollHeight;
   }
   function resetReplPrompt() {
     replTerminal.textContent = "CPython 3.14.7 WebREPL\n" +
       "Connected to the running python-web.elf.\n" +
-      "Use Enter to evaluate a line; Shift+Enter inserts a new line.\n\n>>> ";
-    replTerminal.scrollTop = replTerminal.scrollHeight;
+      "Use Enter to evaluate a line; Shift+Enter inserts a new line.\n\n";
+    replShell.scrollTop = replShell.scrollHeight;
+  }
+  function resizeReplInput() {
+    replInput.style.height = "auto";
+    replInput.style.height = Math.min(replInput.scrollHeight, 150) + "px";
   }
   function renderApps(apps) {
     appsElement.textContent = "";
@@ -153,7 +158,6 @@
       replConnection.className = event.ok ? "repl-hint" : "repl-hint repl-error";
       const data = event.data || "";
       if (data) appendRepl(data.endsWith("\n") ? data : data + "\n");
-      appendRepl(">>> ");
       state.replBusy = false;
       replInput.disabled = false;
       replInput.focus();
@@ -252,9 +256,10 @@
     state.replHistory = state.replHistory.filter((item) => item !== source);
     state.replHistory.push(source);
     state.replHistoryIndex = -1;
-    appendRepl(source + "\n");
+    appendRepl(">>> " + source + "\n");
     state.socket.send(source.endsWith("\n") ? source : source + "\n");
     replInput.value = "";
+    resizeReplInput();
     state.replBusy = true;
     replInput.disabled = true;
     replConnection.textContent = "Evaluating…";
@@ -271,18 +276,22 @@
       if (state.replHistoryIndex < state.replHistory.length - 1)
         state.replHistoryIndex += 1;
       replInput.value = state.replHistory[state.replHistory.length - 1 - state.replHistoryIndex];
+      resizeReplInput();
       replInput.setSelectionRange(replInput.value.length, replInput.value.length);
     } else if (event.key === "ArrowDown" && !event.shiftKey && state.replHistoryIndex >= 0) {
       event.preventDefault();
       state.replHistoryIndex -= 1;
       replInput.value = state.replHistoryIndex < 0 ? "" :
         state.replHistory[state.replHistory.length - 1 - state.replHistoryIndex];
+      resizeReplInput();
       replInput.setSelectionRange(replInput.value.length, replInput.value.length);
     }
   });
+  replInput.addEventListener("input", resizeReplInput);
   replClear.addEventListener("click", () => {
     resetReplPrompt();
     replInput.value = "";
+    resizeReplInput();
     state.replHistoryIndex = -1;
   });
   menuApps.addEventListener("click", () => showView("apps"));
