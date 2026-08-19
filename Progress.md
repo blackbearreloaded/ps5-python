@@ -9,14 +9,14 @@ upstream source commit `823f0323ee6ec1402088b73bce1a38473cac36dc`.
 
 ## Follow-up
 
-- Host validation now passes all 54 discovered scripts. Tests that require PS5
+- Host validation now passes all 56 discovered scripts. Tests that require PS5
   capabilities (fork, `select.poll`, external DNS, and live TLS) skip cleanly
   on desktop Python instead of making the host baseline nondeterministic.
 - Added `tests/stdlib/test_tls_handshake.py` as a separate live PS5 smoke test;
   the PS5 handshake now passes with certificate checking disabled. A selected
   PS5 CA bundle is the next TLS increment.
 - PS5 aggregate suite passes with the profiling, concurrency, Tier 3, Tier 4,
-  Tier 5, and Tier 6 wrappers: `CPYTHON_CORE_SUITE: PASS (53 scripts)`.
+  Tier 5, Tier 6, and Tier 7 wrappers: `CPYTHON_CORE_SUITE: PASS (55 scripts)`.
 
 ## Completed Today
 
@@ -84,6 +84,9 @@ Static or bundled support now includes:
   `gettext`, `locale`, `unicodedata`, `string`, `textwrap`, `difflib`,
   `mimetypes`, `uuid`, `stat`, `filecmp`, `termios`, `tty`, `fcntl`, and
   `resource`
+- Tier 7 developer-tool wrappers: `pdb`, `timeit`, `cProfile`, `profile`,
+  `pstats`, `tracemalloc`, `doctest`, `py_compile`, `compileall`, `code`,
+  `codeop`, `readline`, and `rlcompleter`
 
 ### Security and hashing
 
@@ -182,12 +185,25 @@ Static or bundled support now includes:
 - Added focused tests derived from the pinned CPython Tier 6 test modules;
   Windows-only modules are intentionally excluded from this PS5 target.
 
+### Tier 7 developer tools and profiling
+
+- Statically linked native `_lsprof` and bundled official `cProfile.py`,
+  `profile.py`, and `pstats.py`; extended the profiling test with deterministic
+  call collection and report checks.
+- Bundled official `doctest.py`, `py_compile.py`, `compileall.py`, `code.py`,
+  and `codeop.py` with recursive compiler/test dependencies.
+- Bundled `pdb.py`, `bdb.py`, `cmd.py`, and `rlcompleter.py`; added a PS5-safe
+  history/completion `readline` layer because no linkable GNU/editline backend
+  is available in the SDK.
+- Added focused tests derived from CPython’s doctest, compile, code, pdb,
+  readline, and profiler test modules.
+
 ## Verification
 
 The final PS5 aggregate run completed with:
 
 ```text
-CPYTHON_CORE_SUITE: PASS (53 scripts)
+CPYTHON_CORE_SUITE: PASS (55 scripts)
 ```
 
 The suite includes adapted tests based on the pinned CPython `Lib/test` tree.
@@ -368,3 +384,11 @@ coverage remain incomplete.
 - `ba353e0` Map POSIX Tier 6 tests to CPython
 - `6d4fccb` Restore Tier 6 runtime upload closure
 - `fae618a` Bundle platform dependency for uuid
+- `1ac663a` Bundle Tier 7 compilation and doctest modules
+- `de79eb7` Test Tier 7 profiling wrappers
+- `5f7d4f4` Make tracemalloc profiling test runner-safe
+- `4404a69` Document Tier 7 profiling support
+- `7a6809b` Add PS5 interactive developer tools
+- `3b2ef93` Complete Tier 7 test and runtime closure
+- `60f8187` Relax readline completer identity test
+- `e4623cf` Use portable tracemalloc filter pattern

@@ -77,6 +77,10 @@ Tier 6 security, text, and POSIX utilities are included too: `secrets`, `hmac`,
 `getpass`, `gettext`, `locale`, `unicodedata`, `string`, `textwrap`, `difflib`,
 `mimetypes`, `uuid`, `stat`, `filecmp`, `termios`, `tty`, `fcntl`, and
 `resource`. Windows-only modules are intentionally excluded.
+Tier 7 developer tools are included as well: `pdb`, `timeit`, `cProfile`,
+`profile`, `pstats`, `tracemalloc`, `doctest`, `py_compile`, `compileall`,
+`code`, `codeop`, `readline`, and `rlcompleter`. PS5 uses a compatibility
+readline layer without GNU/editline native line editing.
 
 ## Build the first PS5 ELF
 
@@ -164,7 +168,7 @@ PS5_HOST=192.168.4.30 make ps5-run SCRIPT=tests/stdlib/test_tls_handshake.py
 ```
 
 `ps5-core` and `ps5-web` only build artifacts; they do not run hardware tests.
-`ps5-test` builds the ELF, uploads the test bundle, and runs all 53 aggregate
+`ps5-test` builds the ELF, uploads the test bundle, and runs all 55 aggregate
 tests. `ps5-suite` adds the lifetime checks. `RUN_TIMEOUT` is set to 120
 seconds for the aggregate run.
 
