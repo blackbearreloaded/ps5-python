@@ -91,7 +91,7 @@ code { color: #b8cced; font: 11px ui-monospace, SFMono-Regular, Consolas, monosp
 .terminal-placeholder { color: #5f6e86; }
 .console-footer { padding-top: 14px; color: var(--muted); font-size: 12px; }
 .repl-shell { min-height: 0; max-height: calc(100vh - 250px); flex: 1; overflow-x: hidden; overflow-y: auto; scrollbar-gutter: stable; border: 1px solid rgba(149, 172, 211, 0.18); border-radius: 15px; background: #070b12; box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.28); }
-.repl-shell .repl-terminal { min-height: 0; overflow: visible; border: 0; border-radius: 0; box-shadow: none; }
+.repl-shell .repl-terminal { min-height: 0; padding-bottom: 0; overflow: visible; border: 0; border-radius: 0; box-shadow: none; }
 .repl-form { display: flex; align-items: flex-start; gap: 10px; margin: 0; padding: 0 22px 22px; background: #070b12; }
 .repl-prompt { padding-top: 1px; color: var(--accent); font: 13px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; }
 .repl-form textarea { width: 100%; min-height: 22px; max-height: 150px; resize: none; padding: 0; border: 0; outline: none; color: var(--text); background: transparent; caret-color: var(--accent); font: 13px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; }
