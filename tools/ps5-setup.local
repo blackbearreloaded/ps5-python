@@ -19,3 +19,6 @@ _posixshmem _multiprocessing/posixshmem.c
 mmap mmapmodule.c
 _heapq _heapqmodule.c
 array arraymodule.c
+fcntl fcntlmodule.c
+resource resource.c
+termios termios.c
