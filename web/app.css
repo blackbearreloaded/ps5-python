@@ -89,9 +89,13 @@ code { color: #b8cced; font: 11px ui-monospace, SFMono-Regular, Consolas, monosp
 }
 .terminal-placeholder { color: #5f6e86; }
 .console-footer { padding-top: 14px; color: var(--muted); font-size: 12px; }
-.repl-form { display: grid; gap: 10px; margin-top: 14px; }
-.repl-form textarea { width: 100%; resize: vertical; padding: 12px; border: 1px solid rgba(149, 172, 211, 0.2); border-radius: 10px; outline: none; color: var(--text); background: #0b111d; font: 13px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; }
-.repl-form textarea:focus { border-color: rgba(105, 166, 255, 0.7); box-shadow: 0 0 0 3px rgba(105, 166, 255, 0.12); }
+.repl-shell { display: flex; min-height: 480px; flex: 1; flex-direction: column; overflow: hidden; border: 1px solid rgba(149, 172, 211, 0.18); border-radius: 15px; background: #070b12; box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.28); }
+.repl-shell .repl-terminal { min-height: 0; border: 0; border-radius: 0; box-shadow: none; }
+.repl-form { display: flex; align-items: flex-start; gap: 10px; margin: 0; padding: 12px 22px 17px; border-top: 1px solid rgba(149, 172, 211, 0.14); background: #0b111d; }
+.repl-prompt { padding-top: 1px; color: var(--accent); font: 13px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; }
+.repl-form textarea { width: 100%; min-height: 22px; max-height: 150px; resize: none; padding: 0; border: 0; outline: none; color: var(--text); background: transparent; font: 13px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; }
+.repl-form textarea:focus { box-shadow: none; }
+.repl-form textarea:disabled { cursor: wait; opacity: 0.65; }
 .repl-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .repl-hint { color: var(--muted); font-size: 12px; }
 .repl-connected { color: var(--green); }
@@ -105,5 +109,5 @@ code { color: #b8cced; font: 11px ui-monospace, SFMono-Regular, Consolas, monosp
   .workspace { grid-template-columns: 1fr; }
   .sidebar { border-right: 0; border-bottom: 1px solid var(--line); }
   .sidebar-note { margin-top: 20px; }
-  .terminal { min-height: 360px; }
+  .terminal, .repl-shell { min-height: 360px; }
 }
