@@ -56,7 +56,7 @@ payload manager using the same ELF if desired.
 | --- | --- |
 | `/` | Browser manager page |
 | `/api/apps` | Lists app IDs and display names |
-| `/api/status` | Reports launch state and exit code |
+| `/api/status` | Reports the launcher PID, launch state, and exit code |
 | `/api/launch?app=hello` | Starts one app bundle |
 | `/api/logs?since=0` | Returns new stdout/stderr bytes and `X-Log-Next` |
 | `/api/logs/clear` | Clears the server-side log buffer and connected consoles |
@@ -70,7 +70,7 @@ again. The cursor API remains available for diagnostics and automation.
 
 WebSocket messages are JSON objects. Log events have the form
 `{"type":"log","data":"..."}`; status events contain `type`, `running`,
-`finished`, and `exit_code` fields. A newly connected browser receives the
+`pid`, `finished`, and `exit_code` fields. A newly connected browser receives the
 current status and buffered output before live events.
 
 ## Interactive interpreter
@@ -95,6 +95,11 @@ This follows the MicroPython WebREPL pattern: the network server remains in
 the ELF, the interpreter session remains local to that process, and the
 browser is only a transport and terminal UI. The current implementation is
 intended for trusted LAN use; it has no authentication or encryption.
+
+For test recovery when a payload is wedged, read `pid` from `/api/status` and
+use the test-only helper documented in
+[`docs/ps5-process-recovery.md`](ps5-process-recovery.md). The helper requires
+an already-known PID and does not enumerate or broadcast signals.
 
 The manager runs one app at a time. After an app exits, the same page can launch
 it again or select another app; the output buffer is reset for each run and
