@@ -67,8 +67,9 @@ process pools, child-process transports, IPv6, and certificate verification
 remain platform-limited as documented.
 Tier 4 data structures and formats are also included: static SQLite 3.46.1,
 static zlib 1.3.1, `pickle`, `struct`, `bisect`, `heapq`, `array`, `operator`,
-`decimal`, `fractions`, `gzip`, `zipfile`, `tarfile`, `base64`, XML, `tempfile`,
-`glob`, and `fnmatch`. bzip2/lzma compression remains pending.
+`decimal`, `fractions`, `zlib`, `gzip`, `bz2`, `lzma`, `zipfile`, `tarfile`,
+`base64`, XML, `tempfile`, `glob`, and `fnmatch`. bzip2 1.0.8 and xz/liblzma
+5.6.3 are statically linked for the tested compression subset.
 Tier 5 metaprogramming and inspection modules are included as well: `inspect`,
 `ast`, `dis`, `importlib`, `abc`, `contextlib`, `gc`, `site`, `sysconfig`,
 `weakref`, `codecs`, and `types`. Their PS5-specific startup and source-layout
@@ -82,9 +83,11 @@ Tier 7 developer tools are included as well: `pdb`, `timeit`, `cProfile`,
 `code`, `codeop`, `readline`, and `rlcompleter`. PS5 uses a compatibility
 readline layer without GNU/editline native line editing.
 Tier 8's feasible utility subset is included too: `graphlib`, `statistics`,
-`cmath`, `ipaddress`, `colorsys`, `calendar`, `zoneinfo`, `wave`, and
-`binascii`. Named timezone data is not bundled, and GUI, Windows-only, dbm,
-and desktop terminal modules remain outside the PS5 target.
+`cmath`, `ipaddress`, `colorsys`, `calendar`, `zoneinfo`, `wave`, `binascii`,
+`ftplib`, `poplib`, `imaplib`, `smtplib`, `mailbox`, `email`, `shelve`, and
+pure `dbm.dumb`. Named timezone data is not bundled; `tkinter`, `curses`,
+native dbm backends, `smtpd`, Windows-only modules, and desktop terminal
+integrations remain outside the PS5 target.
 
 ## Build the first PS5 ELF
 
