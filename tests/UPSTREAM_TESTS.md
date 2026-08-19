@@ -50,7 +50,7 @@ adaptation policy, not a replacement for CPython's complete regression suite.
 | `stdlib/test_tier1.py` | `test_sys.py`, `test_typing.py`, `datetimetester.py` |
 | `stdlib/test_tier2.py` | `test_argparse.py`, `test_logging.py`, `test_shutil.py`, `test_random.py`, `test_copy.py`, `test_enum.py`, `test_csv.py`, `test_subprocess.py`, `test_urllib.py`, `test_hashlib.py`, `test_io.py`, `test_traceback.py`, `test_pprint.py`, `test_unittest.py` |
 | `stdlib/test_tier3.py` | `test_asyncio`, `test_threading.py`, `test_multiprocessing.py`, `test_concurrent_futures.py`, `test_socket.py`, `test_ssl.py`, `test_httpservers.py`, `test_queue.py`, `test_select.py`, `test_signal.py` |
-| `stdlib/test_tier4_formats.py` | `test_pickle.py`, `test_struct.py`, `test_bisect.py`, `test_heapq.py`, `test_array.py`, `test_fractions.py`, `test_base64.py`, `test_gzip.py`, `test_zipfile`, `test_tarfile.py`, `test_xml_etree.py`, `test_xml_dom_minidom.py`, `test_sax.py`, `test_glob.py`, `test_fnmatch.py` |
+| `stdlib/test_tier4_formats.py` | `test_pickle.py`, `test_struct.py`, `test_bisect.py`, `test_heapq.py`, `test_array.py`, `test_fractions.py`, `test_base64.py`, `test_zlib.py`, `test_gzip.py`, `test_zipfile`, `test_tarfile.py`, `test_sqlite3`, `test_xml_etree.py`, `test_xml_dom_minidom.py`, `test_sax.py`, `test_glob.py`, `test_fnmatch.py` |
 | `stdlib/test_diagnostics.py` | `test_tracemalloc.py`, `test_multiprocessing.py` |
 | `stdlib/test_data_structures.py` | `test_collections.py`, `test_itertools.py`, `test_heapq.py`, `test_dataclasses.py` |
 | `stdlib/test_profiling.py` | `test_timeit.py`, `test_dis.py`, `test_tracemalloc.py`, `test_struct.py` |

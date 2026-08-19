@@ -65,6 +65,10 @@ plus the native-backed `socket`, `ssl`, `http`, `queue`, `select`, and `signal`
 surfaces. Async event loops and IPv4 socket readiness are verified on PS5;
 process pools, child-process transports, IPv6, and certificate verification
 remain platform-limited as documented.
+Tier 4 data structures and formats are also included: static SQLite 3.46.1,
+static zlib 1.3.1, `pickle`, `struct`, `bisect`, `heapq`, `array`, `operator`,
+`decimal`, `fractions`, `gzip`, `zipfile`, `tarfile`, `base64`, XML, `tempfile`,
+`glob`, and `fnmatch`. bzip2/lzma compression remains pending.
 
 ## Build the first PS5 ELF
 
@@ -152,7 +156,7 @@ PS5_HOST=192.168.4.30 make ps5-run SCRIPT=tests/stdlib/test_tls_handshake.py
 ```
 
 `ps5-core` and `ps5-web` only build artifacts; they do not run hardware tests.
-`ps5-test` builds the ELF, uploads the test bundle, and runs all 46 aggregate
+`ps5-test` builds the ELF, uploads the test bundle, and runs all 47 aggregate
 tests. `ps5-suite` adds the lifetime checks. `RUN_TIMEOUT` is set to 120
 seconds for the aggregate run.
 

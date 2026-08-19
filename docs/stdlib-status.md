@@ -94,6 +94,36 @@ socket, TLS, select, signal, and concurrency tests.
 `selectors` wrapper over `select.select()`. Child-process asyncio transports
 inherit the documented `subprocess`/ELF-launch limitation.
 
+## Tier 4 data structures, algorithms, and formats
+
+These modules use the pinned CPython 3.14.7 `Lib/` sources and the focused
+`tests/stdlib/test_tier4_formats.py` smoke test. Native dependencies are built
+and statically linked where the upstream module requires them.
+
+| Module | PS5 status | Included and tested | Missing or limited |
+| --- | --- | --- | --- |
+| `sqlite3` | Official wrapper plus static SQLite 3.46.1 `_sqlite3` | In-memory DB-API connection, schema, inserts, and queries | Loadable extensions, URI/filesystem locking edge cases, and full upstream coverage pending |
+| `pickle` | Official wrapper | Nested object round trip | Cross-version protocol stress and complete regression coverage pending |
+| `struct` | Official wrapper plus native `_struct` | Network-order packing/unpacking | Full format/error coverage pending |
+| `bisect` | Official wrapper | Sorted insertion | Key-function and full regression coverage pending |
+| `heapq` | Official wrapper plus native `_heapq` | Heap push/pop priority ordering | Max-heap and full regression coverage pending |
+| `array` | Native static module | Integer array creation, append, and conversion | Type-code and buffer-protocol edge coverage pending |
+| `operator` | Native static module plus official wrapper | Callable arithmetic operation | Full operator and attr/item helper coverage pending |
+| `decimal` | Official wrapper plus native `_decimal` | Fixed-point arithmetic | Context, signal, and full arithmetic coverage pending |
+| `fractions` | Official wrapper | Rational reduction and arithmetic | Decimal/string conversion and full regression coverage pending |
+| `zlib` | Static zlib 1.3.1 plus native `zlib` module | Compress/decompress and CRC32 | Streaming/error stress and full upstream coverage pending |
+| `gzip` | Official wrapper over zlib | File-object compression round trip | Multi-member, metadata, and full coverage pending |
+| `zipfile` | Official package over zlib | In-memory ZIP write/read, including cp437 metadata | Encryption, path traversal policy, large archives, and full coverage pending |
+| `tarfile` | Official wrapper over zlib | In-memory TAR write/read | Full filter/security, sparse, and compression-mode coverage pending |
+| `base64` | Official wrapper | Base64 encode/decode | Full Base16/Base32/Base85/error coverage pending |
+| `xml` | Official `xml.etree`, `xml.dom`, and `xml.sax` wrappers plus native Expat/ElementTree | ElementTree, minidom, and SAX parsing | External entities, validation, and full parser regression coverage pending |
+| `tempfile` | Official wrapper using `/user/temp` | Temporary directory/file behavior and cleanup | fd-hardening and full upstream coverage pending |
+| `glob` | Official wrapper | Wildcard expansion in the PS5 temporary directory | Recursive hidden-file and dirfd behavior pending |
+| `fnmatch` | Official wrapper | Shell-style filename matching | Case-normalization and full regression coverage pending |
+
+Static dependencies are reproducibly built by `tools/build_zlib_ps5.sh` and
+`tools/build_sqlite3_ps5.sh`. bzip2/lzma support is not yet linked.
+
 ## `os`
 
 Status: Python-level POSIX wrapper and core filesystem operations included.
@@ -458,8 +488,9 @@ Source and tests:
 - `tests/stdlib/test_data_formats.py`, adapted from `test_csv.py`,
   `test_decimal.py`, and `test_xml_etree.py`
 
-Compression modules `zlib`, `_bz2`, and `_lzma` remain disabled because their
-external PS5 dependencies are not yet built into this workspace.
+The static zlib 1.3.1 dependency and native `zlib` module are now bundled and
+tested. `_bz2` and `_lzma` remain disabled because their external PS5
+dependencies are not yet built into this workspace.
 
 ## Import runtime, filesystem paths, and temporary files
 
