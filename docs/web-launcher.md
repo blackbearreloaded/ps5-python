@@ -101,6 +101,12 @@ the ELF, the interpreter session remains local to that process, and the
 browser is only a transport and terminal UI. The current implementation is
 intended for trusted LAN use; it has no authentication or encryption.
 
+The protocol comparison and compatibility boundary for the reference
+implementations are recorded in
+[`docs/webrepl-reference.md`](webrepl-reference.md). That note distinguishes
+the official MicroPython terminal protocol from the separate
+`socketserverREPL` server pattern and the `pyWebREPL` host-side client.
+
 For test recovery when a payload is wedged, read `pid` from `/api/status` and
 use the test-only helper documented in
 [`docs/ps5-process-recovery.md`](ps5-process-recovery.md). The helper requires
