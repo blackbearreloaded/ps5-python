@@ -208,9 +208,12 @@ evaluate_source_locked(const char *source, char *output, size_t output_size)
     PyObject *globals;
     PyObject *result = NULL;
     PyObject *text = NULL;
+    PyObject *repr = NULL;
+    PyObject *write_result = NULL;
+    PyObject *newline_result = NULL;
     char *source_text = NULL;
     size_t source_length;
-    int mode;
+    int single_line;
     int failed = 0;
 
     if (!runtime_active || source == NULL || output == NULL || output_size == 0)
@@ -229,6 +232,8 @@ evaluate_source_locked(const char *source, char *output, size_t output_size)
     if (source_length == 0 || source_text[source_length - 1] != '\n')
         source_text[source_length++] = '\n';
     source_text[source_length] = '\0';
+    single_line = strchr(source, '\n') == NULL ||
+        strchr(source, '\n')[1] == '\0';
     main_module = PyImport_AddModule("__main__");
     globals = main_module ? PyModule_GetDict(main_module) : NULL;
     io = PyImport_ImportModule("io");
@@ -245,12 +250,42 @@ evaluate_source_locked(const char *source, char *output, size_t output_size)
     }
     PySys_SetObject("stdout", capture);
     PySys_SetObject("stderr", capture);
-    mode = strchr(source, '\n') != NULL ? Py_file_input : Py_single_input;
-    result = PyRun_StringFlags(source_text, mode, globals, globals, NULL);
+    if (single_line) {
+        result = PyRun_StringFlags(source_text, Py_eval_input,
+                                   globals, globals, NULL);
+        if (result == NULL && PyErr_ExceptionMatches(PyExc_SyntaxError)) {
+            PyErr_Clear();
+            result = PyRun_StringFlags(source_text, Py_single_input,
+                                       globals, globals, NULL);
+        }
+    } else {
+        result = PyRun_StringFlags(source_text, Py_file_input,
+                                   globals, globals, NULL);
+    }
     if (result == NULL) {
         PyErr_PrintEx(0);
         failed = 1;
+    } else if (single_line && result != Py_None) {
+        repr = PyObject_Repr(result);
+        if (repr == NULL || capture == NULL) {
+            PyErr_PrintEx(0);
+            failed = 1;
+        } else {
+            write_result = PyObject_CallMethod(capture, "write", "O", repr);
+            if (write_result == NULL)
+                failed = 1;
+            else
+                newline_result = PyObject_CallMethod(capture, "write", "s",
+                                                     "\n");
+            if (newline_result == NULL) {
+                PyErr_PrintEx(0);
+                failed = 1;
+            }
+        }
     }
+    Py_XDECREF(newline_result);
+    Py_XDECREF(write_result);
+    Py_XDECREF(repr);
     Py_XDECREF(result);
 
 restore:
