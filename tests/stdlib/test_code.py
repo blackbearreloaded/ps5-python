@@ -73,7 +73,7 @@ if os.name != "nt":
             os.path.join(nested, "__pycache__")
         )
 else:
-    print("test_tier7_compile: filesystem compilation skipped on host")
+    print("test_code: filesystem compilation skipped on host")
 
 
-print("test_tier7_compile: PASS")
+print("test_code: PASS")

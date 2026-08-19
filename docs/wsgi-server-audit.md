@@ -34,7 +34,7 @@ httpd = make_server(
 httpd.serve_forever()
 ```
 
-The focused `tests/stdlib/test_wsgi.py` smoke test uses loopback, a small WSGI
+The focused `tests/stdlib/test_wsgiref.py` smoke test uses loopback, a small WSGI
 application, and a controlling thread to verify the status line, headers,
 body, WSGI environment, and request shutdown. Its threaded companion and the
 Flask/Gunicorn integration test now provide the next framework boundary.
@@ -62,7 +62,7 @@ Gunicorn 23.0.0 is now vendored for the supported sync pre-fork path; see
 `docs/gunicorn-foundation.md` for its lifecycle contract and limitations.
 Flask 3.1.3 and its pure-Python dependency closure are now bundled and tested
 through Gunicorn's sync WSGI worker; the framework-specific coverage is listed
-in `docs/stdlib-status.md`. Flask's development server is not the production
+in `docs/web-stack-status.md`. Flask's development server is not the production
 target here: its reloader/debugger and multi-process paths remain disabled.
 Waitress remains a possible later candidate for a separate threaded server.
 

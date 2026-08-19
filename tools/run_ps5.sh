@@ -201,6 +201,10 @@ if [ "$script_path" = "$root_dir/tests/core_suite.py" ]; then
         "$root_dir"/tests/stdlib/*.py; do
         upload "$test_file" "$remote_root/core-tests/$(basename "$test_file")"
     done
+    mkdir_remote "$remote_root/core-tests/integration"
+    for test_file in "$root_dir"/tests/integration/*.py; do
+        upload "$test_file" "$remote_root/core-tests/integration/$(basename "$test_file")"
+    done
 fi
 
 encoded_script="${remote_script#/}"

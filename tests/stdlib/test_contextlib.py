@@ -86,4 +86,4 @@ assert mapping["answer"] == 42
 template = lambda: None
 assert isinstance(types.FunctionType(template.__code__, globals()), types.FunctionType)
 
-print("test_tier5_runtime: PASS")
+print("test_contextlib: PASS")

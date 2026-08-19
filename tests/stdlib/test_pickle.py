@@ -89,7 +89,7 @@ if os.name != "nt":
             handle.write(b"archive data\n")
         assert glob.glob(os.path.join(directory, "*.txt")) == [source]
 else:
-    print("test_tier4_formats: filesystem glob checks skipped on host")
+        print("test_pickle: filesystem glob checks skipped on host")
 assert fnmatch.fnmatch("source.txt", "*.txt")
 
 connection = sqlite3.connect(":memory:")
@@ -117,4 +117,4 @@ handler = _ContentHandler()
 parseString("<root>value</root>", handler)
 assert "value" in handler.characters_seen
 
-print("test_tier4_formats: PASS")
+print("test_pickle: PASS")

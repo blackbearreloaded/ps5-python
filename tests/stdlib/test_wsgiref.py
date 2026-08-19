@@ -48,4 +48,4 @@ assert response.status == 200
 assert response.getheader("Content-Type") == "text/plain"
 assert body == b"GET /wsgi?target=ps5 loopback"
 
-print("test_wsgi: PASS")
+print("test_wsgiref: PASS")

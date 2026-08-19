@@ -60,4 +60,4 @@ assert unicodedata.category("A") == "Lu"
 assert unicodedata.lookup("SNOWMAN") == "\u2603"
 assert unicodedata.normalize("NFC", "e" + chr(0x0301)) == chr(0x00e9)
 
-print("test_tier6_security_i18n: PASS")
+print("test_secrets: PASS")

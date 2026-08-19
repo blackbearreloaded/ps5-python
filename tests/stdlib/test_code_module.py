@@ -54,4 +54,4 @@ debugger = pdb.Pdb(stdin=io.StringIO(), stdout=io.StringIO(), readrc=False)
 assert debugger.prompt == "(Pdb) "
 assert debugger.canonic("./sample.py").endswith("sample.py")
 
-print("test_tier7_interactive: PASS")
+print("test_code_module: PASS")

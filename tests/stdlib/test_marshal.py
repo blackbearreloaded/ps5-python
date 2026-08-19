@@ -46,4 +46,4 @@ assert not lock.locked()
 assert __main__.__name__ == "__main__"
 assert builtins.ValueError is ValueError
 
-print("test_tier9_core: PASS")
+print("test_marshal: PASS")

@@ -81,4 +81,4 @@ assert webbrowser.get("tier9-dummy") is browser
 assert browser.open_new_tab("https://example.com") is True
 assert browser.request == ("https://example.com", 2, True)
 
-print("test_tier9_legacy: PASS")
+print("test_shlex: PASS")

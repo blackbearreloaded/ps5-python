@@ -216,4 +216,4 @@ def test_mailbox():
 for check in (test_ftp, test_pop3, test_imap, test_smtp_and_email, test_mailbox):
     check()
 
-print("test_tier8_protocols: PASS")
+print("test_ftplib: PASS")

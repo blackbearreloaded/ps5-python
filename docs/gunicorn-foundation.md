@@ -8,7 +8,7 @@ Gunicorn.
 
 Gunicorn 23.0.0 is vendored under `third_party/gunicorn` and copied into the
 CPython **3.14.7** PS5 runtime bundle. The supported path is the official
-sync worker with an IPv4 TCP listener. `tests/stdlib/test_gunicorn_server.py`
+sync worker with an IPv4 TCP listener. `tests/integration/test_gunicorn_server.py`
 is adapted from the pinned CPython `Lib/test/test_wsgiref.py`,
 `test_httpservers.py`, `test_os.py`, and `test_signal.py` behavior checks. On
 PS5 it verifies:

@@ -83,4 +83,4 @@ if os.name != "nt":
         filecmp.clear_cache()
         assert not filecmp._cache
 
-print("test_tier6_text_formats: PASS")
+print("test_filecmp: PASS")

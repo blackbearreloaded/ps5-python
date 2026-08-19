@@ -64,4 +64,4 @@ assert isinstance(finder, importlib.abc.MetaPathFinder)
 assert finder.find_spec("missing_module") is None
 assert sys.modules["importlib.abc"] is importlib.abc
 
-print("test_tier5_import: PASS")
+print("test_abc: PASS")
