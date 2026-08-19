@@ -545,20 +545,31 @@ static void
 ws_send_repl_result(ws_client_t *client, const unsigned char *source,
                     size_t source_length)
 {
-    char source_text[WS_FRAME_CAPACITY + 1];
-    char output[8192];
+    char *source_text;
+    char *output;
     char *message;
     size_t at;
+    const size_t output_capacity = 8192;
     int result;
 
     if (source_length > WS_FRAME_CAPACITY)
         return;
+    source_text = malloc(source_length + 1);
+    output = malloc(output_capacity);
+    if (source_text == NULL || output == NULL) {
+        free(source_text);
+        free(output);
+        return;
+    }
     memcpy(source_text, source, source_length);
     source_text[source_length] = '\0';
-    result = cpython_ps5_runtime_eval(source_text, output, sizeof output);
+    result = cpython_ps5_runtime_eval(source_text, output, output_capacity);
     message = malloc(strlen(output) * 2 + 96);
-    if (message == NULL)
+    if (message == NULL) {
+        free(source_text);
+        free(output);
         return;
+    }
     at = (size_t)snprintf(message, strlen(output) * 2 + 96,
                           "{\"type\":\"repl\",\"ok\":%s,\"data\":\"",
                           result == 0 ? "true" : "false");
@@ -567,6 +578,8 @@ ws_send_repl_result(ws_client_t *client, const unsigned char *source,
                            "\"}");
     ws_send_text(client, message);
     free(message);
+    free(source_text);
+    free(output);
 }
 
 static void *
