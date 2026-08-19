@@ -181,8 +181,8 @@ Run those tests plus the repeated-process lifetime checks with:
 PS5_HOST=192.168.4.30 make ps5-suite
 ```
 
-The live TLS smoke test is intentionally separate from the aggregate suite
-because it requires external DNS and internet access:
+The live TLS smoke test can also be run directly when external DNS and internet
+access are available:
 
 ```sh
 PS5_HOST=192.168.4.30 make ps5-run SCRIPT=tests/stdlib/test_tls_handshake.py
