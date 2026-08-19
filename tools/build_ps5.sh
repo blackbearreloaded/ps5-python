@@ -200,6 +200,10 @@ build_runtime_bundle() {
     for module in __init__.py client.py cookiejar.py cookies.py server.py; do
         cp "$source_dir/Lib/http/$module" "$runtime_dir/http/$module"
     done
+    mkdir -p "$runtime_dir/wsgiref"
+    for module in "$source_dir"/Lib/wsgiref/*.py; do
+        cp "$module" "$runtime_dir/wsgiref/$(basename "$module")"
+    done
     mkdir -p "$runtime_dir/email"
     # email.mime and the other subpackages are required by smtplib/mailbox.
     # Keep the complete official package tree so imports do not depend on the
