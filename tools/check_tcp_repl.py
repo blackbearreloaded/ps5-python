@@ -26,11 +26,14 @@ def main():
         output = read_until(connection, b">>> ")
         connection.sendall(b"1 + 1\r\n")
         output += read_until(connection, b">>> ")
+        connection.sendall(b"\r")
+        blank_output = read_until(connection, b">>> ")
         connection.sendall(b"import sys; sys.exit()\r")
         exit_output = read_until(connection, b">>> ")
     if (b"123" not in output or b"2" not in output or
+            b"SyntaxError" in blank_output or
             b"SystemExit" not in exit_output or b">>> " not in banner):
-        raise AssertionError(f"unexpected TCP REPL output: {banner + output!r}")
+        raise AssertionError(f"unexpected TCP REPL output: {banner + output + blank_output!r}")
     print("TCP_REPL_CHECK: PASS")
 
 

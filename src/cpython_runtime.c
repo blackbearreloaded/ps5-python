@@ -246,6 +246,10 @@ evaluate_source_locked(const char *source, char *output, size_t output_size)
         return -1;
     output[0] = '\0';
     source_length = strlen(source);
+    if (strspn(source, " \t\r\n") == source_length) {
+        runtime_detach_thread(thread_state);
+        return 0;
+    }
     source_text = malloc(source_length + 2);
     if (source_text == NULL) {
         runtime_detach_thread(thread_state);
