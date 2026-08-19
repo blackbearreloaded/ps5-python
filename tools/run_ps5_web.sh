@@ -146,6 +146,8 @@ fi
 echo "Python web launcher: http://$ps5_host:$web_port/"
 
 if [ "${PS5_WEB_CHECK:-0}" = "1" ]; then
+    python3 "$root_dir/tools/check_web_repl.py" \
+        --host "$ps5_host" --port "$web_port"
     echo "Apps:"
     curl --fail --silent --show-error "http://$ps5_host:$web_port/api/apps"
     echo

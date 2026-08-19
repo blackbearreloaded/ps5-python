@@ -24,6 +24,13 @@
 
     <section class="workspace">
       <aside class="sidebar">
+        <div class="menu-tabs" role="tablist" aria-label="Launcher menus">
+          <button id="menu-apps" class="menu-tab active" type="button"
+                  role="tab" aria-selected="true">Applications</button>
+          <button id="menu-repl" class="menu-tab" type="button"
+                  role="tab" aria-selected="false">Interpreter</button>
+        </div>
+        <div id="apps-sidebar">
         <div class="panel-heading">
           <div>
             <p class="eyebrow">Library</p>
@@ -39,9 +46,11 @@
           <span class="note-icon">i</span>
           <span>Apps are loaded from <code>/data/python/apps</code>.</span>
         </div>
+        </div>
       </aside>
 
       <main class="console-panel">
+        <section id="app-console" class="menu-view">
         <div class="console-heading">
           <div>
             <p class="eyebrow">Execution console</p>
@@ -54,6 +63,29 @@
           <span class="live-indicator"><span class="live-dot"></span>Live output</span>
           <span id="exit-code">Waiting for a run</span>
         </div>
+        </section>
+        <section id="repl-console" class="menu-view hidden" aria-hidden="true">
+          <div class="console-heading">
+            <div>
+              <p class="eyebrow">Embedded WebREPL</p>
+              <h2>Interactive Python interpreter</h2>
+            </div>
+            <button id="repl-clear" class="secondary-button" type="button">Clear</button>
+          </div>
+          <pre id="repl-terminal" class="terminal repl-terminal" role="log" aria-live="polite">CPython 3.14.7 WebREPL
+Connected to the running python-web.elf.
+Use the input below to evaluate code in a persistent interpreter session.
+
+>>> </pre>
+          <form id="repl-form" class="repl-form">
+            <textarea id="repl-input" rows="3" spellcheck="false"
+                      placeholder="print('hello from PS5')"></textarea>
+            <div class="repl-actions">
+              <span id="repl-connection" class="repl-hint">Waiting for WebSocket…</span>
+              <button class="primary-button" type="submit">Evaluate</button>
+            </div>
+          </form>
+        </section>
       </main>
     </section>
 

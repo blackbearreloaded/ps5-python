@@ -457,7 +457,8 @@ ws_read_bytes(ws_client_t *client, void *output, size_t length)
 }
 
 static int
-ws_receive_frame(ws_client_t *client)
+ws_receive_frame(ws_client_t *client, unsigned *opcode_output,
+                  unsigned char **payload_output, size_t *length_output)
 {
     unsigned char header[2];
     unsigned char mask[4];
@@ -505,10 +506,48 @@ ws_receive_frame(ws_client_t *client)
         free(payload);
         return 1;
     }
-    if (opcode == 9)
+    if (opcode == 9) {
         ws_send_frame(client, 10, payload, (size_t)length);
-    free(payload);
+        free(payload);
+        return 0;
+    }
+    if (opcode_output != NULL)
+        *opcode_output = opcode;
+    if (payload_output != NULL)
+        *payload_output = payload;
+    else
+        free(payload);
+    if (length_output != NULL)
+        *length_output = (size_t)length;
     return 0;
+}
+
+static void
+ws_send_repl_result(ws_client_t *client, const unsigned char *source,
+                    size_t source_length)
+{
+    char source_text[WS_FRAME_CAPACITY + 1];
+    char output[8192];
+    char *message;
+    size_t at;
+    int result;
+
+    if (source_length > WS_FRAME_CAPACITY)
+        return;
+    memcpy(source_text, source, source_length);
+    source_text[source_length] = '\0';
+    result = cpython_ps5_runtime_eval(source_text, output, sizeof output);
+    message = malloc(strlen(output) * 2 + 96);
+    if (message == NULL)
+        return;
+    at = (size_t)snprintf(message, strlen(output) * 2 + 96,
+                          "{\"type\":\"repl\",\"ok\":%s,\"data\":\"",
+                          result == 0 ? "true" : "false");
+    at = json_append(message, at, strlen(output) * 2 + 96, output);
+    at += (size_t)snprintf(message + at, strlen(output) * 2 + 96 - at,
+                           "\"}");
+    ws_send_text(client, message);
+    free(message);
 }
 
 static void *
@@ -519,6 +558,9 @@ ws_client_worker(void *data)
     char message[192];
     char *snapshot = NULL;
     size_t snapshot_length;
+    unsigned opcode;
+    unsigned char *payload;
+    size_t payload_length;
 
     flags = fcntl(client->fd, F_GETFL, 0);
     if (flags >= 0)
@@ -556,8 +598,13 @@ ws_client_worker(void *data)
     free(snapshot);
 
     while (client->active && !server_stop) {
-        if (ws_receive_frame(client) != 0)
+        payload = NULL;
+        payload_length = 0;
+        if (ws_receive_frame(client, &opcode, &payload, &payload_length) != 0)
             break;
+        if (opcode == 1 && payload != NULL)
+            ws_send_repl_result(client, payload, payload_length);
+        free(payload);
     }
     pthread_mutex_lock(&ws_mutex);
     client->active = 0;
@@ -1156,23 +1203,34 @@ main(int argc, char **argv)
 {
     unsigned long port = DEFAULT_PORT;
     struct MHD_Daemon *daemon;
+    cpython_run_options_t runtime_options;
 
     if (argc > 1)
         port = strtoul(argv[1], NULL, 10);
     if (port == 0 || port > 65535)
         return 2;
-    signal(SIGPIPE, SIG_IGN);
-    if (start_log_capture() != 0)
+    runtime_options.runtime_path = "/data/python/runtime/cpython-lib";
+    runtime_options.app_root_path = NULL;
+    runtime_options.app_lib_path = NULL;
+    if (cpython_ps5_runtime_start(&runtime_options) != 0)
         return 1;
+    signal(SIGPIPE, SIG_IGN);
+    if (start_log_capture() != 0) {
+        cpython_ps5_runtime_stop();
+        return 1;
+    }
     daemon = MHD_start_daemon(MHD_USE_INTERNAL_POLLING_THREAD |
                                   MHD_USE_THREAD_PER_CONNECTION | MHD_USE_ITC |
                                   MHD_ALLOW_UPGRADE,
                               (uint16_t)port, NULL, NULL, access_handler, NULL,
                               MHD_OPTION_END);
-    if (daemon == NULL)
+    if (daemon == NULL) {
+        cpython_ps5_runtime_stop();
         return 1;
+    }
     while (!server_stop)
         sleep(1);
     MHD_stop_daemon(daemon);
+    cpython_ps5_runtime_stop();
     return 0;
 }

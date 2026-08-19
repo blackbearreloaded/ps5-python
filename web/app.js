@@ -1,6 +1,7 @@
 (() => {
   const state = { cursor: 0, launching: false, selectedId: null,
-    socket: null, socketConnected: false, pollTimer: null, fallbackTimer: null };
+    socket: null, socketConnected: false, pollTimer: null, fallbackTimer: null,
+    view: "apps" };
   const appsElement = document.getElementById("apps");
   const statusElement = document.getElementById("status");
   const statusText = statusElement.querySelector(".status-text");
@@ -9,6 +10,30 @@
   const exitCode = document.getElementById("exit-code");
   const refreshButton = document.getElementById("refresh-apps");
   const clearButton = document.getElementById("clear-output");
+  const appsSidebar = document.getElementById("apps-sidebar");
+  const appConsole = document.getElementById("app-console");
+  const replConsole = document.getElementById("repl-console");
+  const menuApps = document.getElementById("menu-apps");
+  const menuRepl = document.getElementById("menu-repl");
+  const replTerminal = document.getElementById("repl-terminal");
+  const replForm = document.getElementById("repl-form");
+  const replInput = document.getElementById("repl-input");
+  const replClear = document.getElementById("repl-clear");
+  const replConnection = document.getElementById("repl-connection");
+
+  function showView(view) {
+    state.view = view;
+    const repl = view === "repl";
+    appsSidebar.classList.toggle("hidden", repl);
+    appConsole.classList.toggle("hidden", repl);
+    replConsole.classList.toggle("hidden", !repl);
+    replConsole.setAttribute("aria-hidden", repl ? "false" : "true");
+    menuApps.classList.toggle("active", !repl);
+    menuRepl.classList.toggle("active", repl);
+    menuApps.setAttribute("aria-selected", repl ? "false" : "true");
+    menuRepl.setAttribute("aria-selected", repl ? "true" : "false");
+    if (repl) replInput.focus();
+  }
 
   function setStatus(label, kind) {
     statusText.textContent = label;
@@ -113,6 +138,12 @@
       return;
     }
     if (event.type === "log") appendOutput(event.data || "");
+    if (event.type === "repl") {
+      replConnection.textContent = event.ok ? "Evaluation complete" : "Evaluation failed";
+      replConnection.className = event.ok ? "repl-hint" : "repl-hint repl-error";
+      replTerminal.textContent += (event.data || "") + (event.data ? "\n" : "");
+      replTerminal.scrollTop = replTerminal.scrollHeight;
+    }
     if (event.type === "clear") {
       state.cursor = 0;
       setOutput("");
@@ -144,6 +175,8 @@
           state.pollTimer = null;
         }
         setStatus("Live link", "ready");
+        replConnection.textContent = "WebREPL connected";
+        replConnection.className = "repl-hint repl-connected";
       };
       socket.onmessage = (event) => handleSocketMessage(event.data);
       socket.onerror = () => socket.close();
@@ -155,6 +188,8 @@
           state.fallbackTimer = null;
         }
         setStatus("Using polling fallback", "error");
+        replConnection.textContent = "WebREPL requires the live WebSocket";
+        replConnection.className = "repl-hint repl-error";
         // One failed WebSocket attempt falls back to polling for this page.
         // A reload can try WebSockets again without creating a reconnect storm.
         startPolling();
@@ -191,6 +226,32 @@
       exitCode.textContent = "Clear failed: " + error;
     }
   });
+  replForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const source = replInput.value;
+    if (!source.trim()) return;
+    if (!state.socketConnected || state.socket === null) {
+      replConnection.textContent = "WebSocket unavailable";
+      replConnection.className = "repl-hint repl-error";
+      return;
+    }
+    replTerminal.textContent += source + "\n";
+    replTerminal.scrollTop = replTerminal.scrollHeight;
+    state.socket.send(source);
+    replInput.value = "";
+    replInput.focus();
+  });
+  replInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+      event.preventDefault();
+      replForm.requestSubmit();
+    }
+  });
+  replClear.addEventListener("click", () => {
+    replTerminal.textContent = "CPython 3.14.7 WebREPL\n\n>>> ";
+  });
+  menuApps.addEventListener("click", () => showView("apps"));
+  menuRepl.addEventListener("click", () => showView("repl"));
   refreshApps();
   connectSocket();
 })();
