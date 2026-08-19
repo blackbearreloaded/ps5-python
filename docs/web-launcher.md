@@ -46,6 +46,11 @@ The launcher is uploaded to:
 /data/python/runtime/python-web.elf
 ```
 
+The build also emits `build/ps5/python-web-test.elf`, a separate test-only
+copy of the launcher. Use `tools/run_ps5_web_test.sh` to deploy that artifact;
+it defaults to port `9601`, leaving the production-named ELF and its port
+selection independent.
+
 The deployment command detaches the payload loader, so the web manager remains
 running after the build command exits. Launch it from Homebrew Launcher or a
 payload manager using the same ELF if desired.

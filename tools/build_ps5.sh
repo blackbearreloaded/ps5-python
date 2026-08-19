@@ -16,6 +16,7 @@ xz_dir="$root_dir/build/ps5/deps/xz"
 jobs="${PS5_JOBS:-$(nproc 2>/dev/null || echo 2)}"
 launcher="$build_dir/python.elf"
 web_launcher="$build_dir/python-web.elf"
+web_test_launcher="$build_dir/python-web-test.elf"
 runtime_dir="$build_dir/cpython-lib"
 
 if [ ! -f "$source_dir/Include/Python.h" ]; then
@@ -473,7 +474,9 @@ build_web_launcher() {
         "$build_dir/Modules/expat/libexpat.a" \
         "$build_dir/Modules/_decimal/libmpdec/libmpdec.a" \
         "$hb_dir/lib/libmicrohttpd.a"; then
+        cp "$web_launcher" "$web_test_launcher"
         echo "Web launcher unchanged: $web_launcher"
+        echo "Test launcher: $web_test_launcher"
         return
     fi
     "${compiler[@]}" \
@@ -502,6 +505,8 @@ build_web_launcher() {
         -L"$xz_dir/lib" -llzma \
         -L"$libffi_dir/lib" -lffi \
         -Wl,--wrap=clock_nanosleep -lmicrohttpd -ldl -lpthread
+    cp "$web_launcher" "$web_test_launcher"
+    echo "Test launcher: $web_test_launcher"
 }
 
 case "${1:-core}" in
