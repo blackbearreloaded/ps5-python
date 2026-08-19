@@ -217,9 +217,12 @@ build_runtime_bundle() {
     for module in "$source_dir"/Lib/html/*.py; do
         cp "$module" "$runtime_dir/html/$(basename "$module")"
     done
-    for module in ftplib.py poplib.py imaplib.py smtplib.py mailbox.py; do
+    for module in ftplib.py poplib.py imaplib.py smtplib.py; do
         cp "$source_dir/Lib/$module" "$runtime_dir/$module"
     done
+    "$build_python" "$root_dir/tools/patch_mailbox.py" \
+        "$source_dir/Lib/mailbox.py" \
+        "$runtime_dir/mailbox.py"
     cp "$source_dir/Lib/pprint.py" "$runtime_dir/pprint.py"
     cp "$source_dir/Lib/runpy.py" "$runtime_dir/runpy.py"
     cp "$source_dir/Lib/secrets.py" "$runtime_dir/secrets.py"
