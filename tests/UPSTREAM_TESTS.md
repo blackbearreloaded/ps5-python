@@ -54,6 +54,7 @@ adaptation policy, not a replacement for CPython's complete regression suite.
 | `stdlib/test_diagnostics.py` | `test_tracemalloc.py`, `test_multiprocessing.py` |
 | `stdlib/test_data_structures.py` | `test_collections.py`, `test_itertools.py`, `test_heapq.py`, `test_dataclasses.py` |
 | `stdlib/test_profiling.py` | `test_timeit.py`, `test_dis.py`, `test_tracemalloc.py`, `test_struct.py` |
+| `stdlib/test_tier5_inspection.py` | `test_ast.py`, `test_dis.py`, `test_inspect.py` |
 | `stdlib/test_posix_boundary.py` | `test_os.py`, `test_signal.py` |
 | `stdlib/test_process.py` | `test_os.py` (`fork`, `waitpid`) |
 | `stdlib/test_network.py` | `test_socket.py`, `test_select.py` (`poll`, non-blocking sockets) |
