@@ -131,6 +131,10 @@ mkdir_remote "$remote_runtime/importlib"
 for module in __init__.py _abc.py abc.py machinery.py util.py; do
     upload "$runtime_dir/importlib/$module" "$remote_runtime/importlib/$module"
 done
+mkdir_remote "$remote_runtime/importlib/resources"
+while IFS= read -r -d '' module_file; do
+    upload "$module_file" "$remote_runtime/importlib/resources/$(basename "$module_file")"
+done < <(find "$runtime_dir/importlib/resources" -type f -name '*.py' -print0 | sort -z)
 for package in concurrent multiprocessing; do
     mkdir_remote "$remote_runtime/$package"
     if [ "$package" = concurrent ]; then
