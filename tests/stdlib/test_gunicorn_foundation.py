@@ -29,10 +29,11 @@ def run_inherited_socket_worker(listener_fd, address, marker):
     pid = os.fork()
     if pid == 0:
         try:
-            # Gunicorn workers inherit the arbiter's listening fd.  fromfd()
-            # models the duplicate wrapper commonly used by worker setup.
-            worker_listener = socket.fromfd(
-                listener_fd, socket.AF_INET, socket.SOCK_STREAM
+            # Gunicorn workers inherit the arbiter's listening fd.  Reuse it
+            # directly: PS5 does not provide dup()/fromfd(), and no duplicate
+            # descriptor is needed for a forked worker.
+            worker_listener = socket.socket(
+                socket.AF_INET, socket.SOCK_STREAM, fileno=listener_fd
             )
             connection, _ = worker_listener.accept()
             try:
