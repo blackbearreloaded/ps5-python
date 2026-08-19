@@ -6,6 +6,7 @@ _sre _sre/sre.c
 _json _json.c
 _struct _struct.c
 math mathmodule.c
+cmath cmathmodule.c
 _codecs _codecsmodule.c
 unicodedata unicodedata.c
 binascii binascii.c
