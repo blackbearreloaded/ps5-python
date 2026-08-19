@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <microhttpd.h>
+#include <netinet/in.h>
 #include <pthread.h>
 #include <signal.h>
 #include <stdint.h>
@@ -22,6 +23,7 @@
 #define WS_MAX_CLIENTS 4
 #define WS_INITIAL_CAPACITY 2048
 #define WS_FRAME_CAPACITY 65536
+#define TCP_REPL_LINE_CAPACITY 65536
 
 static pthread_mutex_t log_mutex = PTHREAD_MUTEX_INITIALIZER;
 static char log_buffer[LOG_CAPACITY];
@@ -36,6 +38,10 @@ static int app_running;
 static int app_finished;
 static int app_exit_code;
 static volatile sig_atomic_t server_stop;
+static unsigned short tcp_repl_port;
+static int tcp_repl_fd = -1;
+static pthread_t tcp_repl_thread;
+static int tcp_repl_started;
 
 typedef struct ws_client {
     int initialized;
@@ -412,7 +418,7 @@ ws_broadcast_log(const char *data, size_t length)
 static void
 ws_broadcast_status(void)
 {
-    char message[192];
+    char message[224];
     int running;
     int finished;
     int exit_code;
@@ -426,9 +432,10 @@ ws_broadcast_status(void)
     process_id = (long)getpid();
     snprintf(message, sizeof message,
              "{\"type\":\"status\",\"pid\":%ld,\"running\":%s,"
-             "\"finished\":%s,\"exit_code\":%d}",
+             "\"finished\":%s,\"exit_code\":%d,\"repl_port\":%u}",
              process_id, running ? "true" : "false",
-             finished ? "true" : "false", exit_code);
+             finished ? "true" : "false", exit_code,
+             (unsigned)tcp_repl_port);
     ws_broadcast(message);
 }
 
@@ -572,7 +579,7 @@ ws_client_worker(void *data)
 {
     ws_client_t *client = data;
     int flags;
-    char message[192];
+    char message[224];
     char *snapshot = NULL;
     size_t snapshot_length;
     unsigned opcode;
@@ -587,9 +594,10 @@ ws_client_worker(void *data)
     process_id = (long)getpid();
     snprintf(message, sizeof message,
              "{\"type\":\"status\",\"pid\":%ld,\"running\":%s,"
-             "\"finished\":%s,\"exit_code\":%d}",
+             "\"finished\":%s,\"exit_code\":%d,\"repl_port\":%u}",
              process_id, app_running ? "true" : "false",
-             app_finished ? "true" : "false", app_exit_code);
+             app_finished ? "true" : "false", app_exit_code,
+             (unsigned)tcp_repl_port);
     pthread_mutex_unlock(&state_mutex);
     ws_send_text(client, message);
 
@@ -672,6 +680,144 @@ ws_upgrade_handler(void *cls, struct MHD_Connection *connection,
         return;
     }
     pthread_detach(thread);
+}
+
+static int
+tcp_repl_send(int fd, const char *text)
+{
+    return send_all(fd, text, strlen(text));
+}
+
+static void *
+tcp_repl_client_worker(void *data)
+{
+    int fd = *(int *)data;
+    char *line;
+    char *output;
+    unsigned char input[1024];
+    size_t line_length = 0;
+    size_t output_length;
+    ssize_t received;
+    size_t i;
+
+    free(data);
+    line = malloc(TCP_REPL_LINE_CAPACITY + 1);
+    output = malloc(8192);
+    if (line == NULL || output == NULL)
+        goto done;
+    if (tcp_repl_send(fd, "CPython 3.14.7 TCP REPL\r\n>>> ") != 0)
+        goto done;
+    for (;;) {
+        received = recv(fd, input, sizeof input, 0);
+        if (received <= 0 || server_stop)
+            break;
+        for (i = 0; i < (size_t)received; i++) {
+            if (input[i] == '\r')
+                continue;
+            if (input[i] != '\n') {
+                if (line_length + 1 >= TCP_REPL_LINE_CAPACITY) {
+                    if (tcp_repl_send(fd, "input line too long\r\n>>> ") != 0)
+                        goto done;
+                    line_length = 0;
+                } else {
+                    line[line_length++] = (char)input[i];
+                }
+                continue;
+            }
+            line[line_length] = '\0';
+            (void)cpython_ps5_runtime_eval(line, output, 8192);
+            output_length = strlen(output);
+            if (output_length > 0 && send_all(fd, output, output_length) != 0)
+                goto done;
+            if (output_length == 0 || output[output_length - 1] != '\n') {
+                if (tcp_repl_send(fd, "\r\n") != 0)
+                    goto done;
+            }
+            if (tcp_repl_send(fd, ">>> ") != 0)
+                goto done;
+            line_length = 0;
+        }
+    }
+done:
+    free(output);
+    free(line);
+    shutdown(fd, SHUT_RDWR);
+    close(fd);
+    return NULL;
+}
+
+static void *
+tcp_repl_server_worker(void *unused)
+{
+    struct sockaddr_in address;
+    socklen_t address_length;
+    int client_fd;
+    int *client_data;
+    pthread_t thread;
+
+    (void)unused;
+    while (!server_stop) {
+        address_length = sizeof address;
+        client_fd = accept(tcp_repl_fd, (struct sockaddr *)&address,
+                           &address_length);
+        if (client_fd < 0) {
+            if (server_stop)
+                break;
+            continue;
+        }
+        client_data = malloc(sizeof *client_data);
+        if (client_data == NULL) {
+            close(client_fd);
+            continue;
+        }
+        *client_data = client_fd;
+        if (pthread_create(&thread, NULL, tcp_repl_client_worker,
+                           client_data) != 0) {
+            close(client_fd);
+            free(client_data);
+            continue;
+        }
+        pthread_detach(thread);
+    }
+    return NULL;
+}
+
+static int
+tcp_repl_start(unsigned short port)
+{
+    struct sockaddr_in address;
+    int option = 1;
+
+    tcp_repl_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (tcp_repl_fd < 0)
+        return -1;
+    (void)setsockopt(tcp_repl_fd, SOL_SOCKET, SO_REUSEADDR,
+                     &option, sizeof option);
+    memset(&address, 0, sizeof address);
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = htonl(INADDR_ANY);
+    address.sin_port = htons(port);
+    if (bind(tcp_repl_fd, (struct sockaddr *)&address, sizeof address) != 0 ||
+        listen(tcp_repl_fd, 4) != 0 ||
+        pthread_create(&tcp_repl_thread, NULL, tcp_repl_server_worker, NULL) != 0) {
+        close(tcp_repl_fd);
+        tcp_repl_fd = -1;
+        return -1;
+    }
+    tcp_repl_started = 1;
+    return 0;
+}
+
+static void
+tcp_repl_stop(void)
+{
+    if (!tcp_repl_started)
+        return;
+    shutdown(tcp_repl_fd, SHUT_RDWR);
+    close(tcp_repl_fd);
+    tcp_repl_fd = -1;
+    pthread_join(tcp_repl_thread, NULL);
+    tcp_repl_started = 0;
 }
 
 static void
@@ -943,7 +1089,7 @@ apps_response(struct MHD_Connection *connection)
 static enum MHD_Result
 status_response(struct MHD_Connection *connection)
 {
-    char body[192];
+    char body[224];
     int started;
     int running;
     int finished;
@@ -959,10 +1105,10 @@ status_response(struct MHD_Connection *connection)
     process_id = (long)getpid();
     snprintf(body, sizeof body,
              "{\"pid\":%ld,\"started\":%s,\"running\":%s,"
-             "\"finished\":%s,\"exit_code\":%d}",
+             "\"finished\":%s,\"exit_code\":%d,\"repl_port\":%u}",
              process_id, started ? "true" : "false",
              running ? "true" : "false", finished ? "true" : "false",
-             exit_code);
+             exit_code, (unsigned)tcp_repl_port);
     return queue_response(connection, MHD_HTTP_OK, "application/json", NULL,
                           body, strlen(body), MHD_RESPMEM_MUST_COPY);
 }
@@ -1246,13 +1392,20 @@ int
 main(int argc, char **argv)
 {
     unsigned long port = DEFAULT_PORT;
+    unsigned long repl_port = 0;
     struct MHD_Daemon *daemon;
     cpython_run_options_t runtime_options;
 
     if (argc > 1)
         port = strtoul(argv[1], NULL, 10);
-    if (port == 0 || port > 65535)
+    if (argc > 2)
+        repl_port = strtoul(argv[2], NULL, 10);
+    else if (port < 65535)
+        repl_port = port + 1;
+    if (port == 0 || port > 65535 || repl_port == 0 || repl_port > 65535 ||
+        repl_port == port)
         return 2;
+    tcp_repl_port = (unsigned short)repl_port;
     runtime_options.runtime_path = "/data/python/runtime/cpython-lib";
     runtime_options.app_root_path = NULL;
     runtime_options.app_lib_path = NULL;
@@ -1263,18 +1416,24 @@ main(int argc, char **argv)
         cpython_ps5_runtime_stop();
         return 1;
     }
+    if (tcp_repl_start(tcp_repl_port) != 0) {
+        cpython_ps5_runtime_stop();
+        return 1;
+    }
     daemon = MHD_start_daemon(MHD_USE_INTERNAL_POLLING_THREAD |
                                   MHD_USE_THREAD_PER_CONNECTION | MHD_USE_ITC |
                                   MHD_ALLOW_UPGRADE,
                               (uint16_t)port, NULL, NULL, access_handler, NULL,
                               MHD_OPTION_END);
     if (daemon == NULL) {
+        tcp_repl_stop();
         cpython_ps5_runtime_stop();
         return 1;
     }
     while (!server_stop)
         sleep(1);
     MHD_stop_daemon(daemon);
+    tcp_repl_stop();
     cpython_ps5_runtime_stop();
     return 0;
 }

@@ -7,6 +7,7 @@ ps5_host="${PS5_HOST:-192.168.4.30}"
 ftp_port="${PS5_FTP_PORT:-2121}"
 loader_port="${PS5_LOADER_PORT:-9021}"
 web_port="${PS5_WEB_PORT:-8090}"
+repl_port="${PS5_REPL_PORT:-$((web_port + 1))}"
 ftp_url="ftp://$ps5_host:$ftp_port"
 
 bash "$root_dir/tools/build_ps5.sh" web
@@ -122,7 +123,7 @@ done < <(find "$apps_dir" -type f \
     -print0 | sort -z)
 
 source "$sdk_dir/toolchain/prospero.sh"
-launch_uri="file:/data/python/runtime/$web_remote_name?args=$web_port"
+launch_uri="file:/data/python/runtime/$web_remote_name?args=$web_port%20$repl_port"
 log_file="$root_dir/build/ps5/python-web-deploy.log"
 nohup "$sdk_dir/bin/prospero-deploy" -h "$ps5_host" -p "$loader_port" \
     "$launch_uri" >"$log_file" 2>&1 < /dev/null &
@@ -150,6 +151,8 @@ echo "Python web launcher: http://$ps5_host:$web_port/"
 if [ "${PS5_WEB_CHECK:-0}" = "1" ]; then
     python3 "$root_dir/tools/check_web_repl.py" \
         --host "$ps5_host" --port "$web_port"
+    python3 "$root_dir/tools/check_tcp_repl.py" \
+        --host "$ps5_host" --port "$repl_port"
     echo "Apps:"
     curl --connect-timeout 2 --max-time 5 --fail --silent --show-error "http://$ps5_host:$web_port/api/apps"
     echo
