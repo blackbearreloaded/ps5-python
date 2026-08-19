@@ -102,6 +102,11 @@ if hasattr(os, "fork") and hasattr(os, "waitpid"):
     pid = os.fork()
     if pid == 0:
         try:
+            # Keep the Gunicorn arbiter and its worker in one cleanup domain;
+            # PS5's loader otherwise waits for an orphaned worker after the
+            # arbiter has exited normally.
+            if hasattr(os, "setpgid"):
+                os.setpgid(0, 0)
             FlaskGunicornApplication(address).run()
         except SystemExit as exc:
             os._exit(exc.code if isinstance(exc.code, int) else 1)
@@ -109,6 +114,11 @@ if hasattr(os, "fork") and hasattr(os, "waitpid"):
             os._exit(70)
 
     try:
+        if hasattr(os, "setpgid"):
+            try:
+                os.setpgid(pid, pid)
+            except OSError:
+                pass
         request_bytes = (b"GET /health HTTP/1.1\r\nHost: localhost\r\n"
                          b"Connection: close\r\n\r\n")
         response = b""
@@ -134,6 +144,11 @@ if hasattr(os, "fork") and hasattr(os, "waitpid"):
         _, status = os.waitpid(pid, 0)
         assert os.WIFEXITED(status) and os.WEXITSTATUS(status) == 0
     finally:
+        if hasattr(os, "killpg"):
+            try:
+                os.killpg(pid, signal.SIGKILL)
+            except OSError:
+                pass
         try:
             os.kill(pid, signal.SIGKILL)
         except OSError:
