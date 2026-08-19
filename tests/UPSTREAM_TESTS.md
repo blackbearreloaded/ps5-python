@@ -68,8 +68,10 @@ adaptation policy, not a replacement for CPython's complete regression suite.
 | `stdlib/test_tier9_core.py` | `test_future_stmt.py`, `test_marshal.py`, `test_copyreg.py`, `test_thread.py` (portable core subset) |
 | `stdlib/test_wsgi.py` | `test_wsgiref.py` (loopback server, environment, validation, and HTTP response subset) |
 | `stdlib/test_wsgi_threaded.py` | `test_wsgiref.py`, `test_httpservers.py` (ThreadingMixIn concurrency and shutdown subset) |
+| `stdlib/test_gunicorn_foundation.py` | `test_os.py`, `test_signal.py`, `test_socket.py` (pre-fork listener inheritance, worker reaping, and SIGCHLD subset) |
 | `stdlib/test_posix_boundary.py` | `test_os.py`, `test_signal.py` |
 | `stdlib/test_process.py` | `test_os.py` (`fork`, `waitpid`) |
+| `stdlib/test_worker_lifecycle.py` | `test_os.py`, `test_signal.py`, `test_socket.py` (forked listener/control-channel handoff, wait/restart, SIGCHLD, and TERM subset) |
 | `stdlib/test_network.py` | `test_socket.py`, `test_select.py` (`poll`, non-blocking sockets) |
 | `stdlib/test_select.py` | `test_select.py`, `test_selectors.py` |
 
