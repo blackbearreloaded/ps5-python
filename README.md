@@ -203,6 +203,9 @@ See [docs/stdlib-status.md](docs/stdlib-status.md) for the exact standard-
 library coverage, omitted APIs, PS5 limitations, upstream sources, and tests.
 Update that document whenever a standard-library module changes.
 
+See [docs/ps5-limitations.md](docs/ps5-limitations.md) for the consolidated
+split between remaining implementation work and deep PS5 kernel/SDK limits.
+
 The PS5 build automatically downloads and builds the pinned OpenSSL 3.5.2
 static dependency under `build/ps5/deps/openssl`. To build it independently,
 run `bash tools/build_openssl_ps5.sh` from WSL. The resulting `_ssl` and
