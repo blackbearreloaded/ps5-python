@@ -72,19 +72,22 @@
             </div>
             <button id="repl-clear" class="secondary-button" type="button">Clear</button>
           </div>
-          <pre id="repl-terminal" class="terminal repl-terminal" role="log" aria-live="polite">CPython 3.14.7 WebREPL
+          <div class="repl-shell">
+            <pre id="repl-terminal" class="terminal repl-terminal" role="log" aria-live="polite">CPython 3.14.7 WebREPL
 Connected to the running python-web.elf.
-Use the input below to evaluate code in a persistent interpreter session.
+Use Enter to evaluate a line; Shift+Enter inserts a new line.
 
 >>> </pre>
-          <form id="repl-form" class="repl-form">
-            <textarea id="repl-input" rows="3" spellcheck="false"
-                      placeholder="print('hello from PS5')"></textarea>
-            <div class="repl-actions">
-              <span id="repl-connection" class="repl-hint">Waiting for WebSocket…</span>
-              <button class="primary-button" type="submit">Evaluate</button>
-            </div>
-          </form>
+            <form id="repl-form" class="repl-form" aria-label="Python interpreter input">
+              <span class="repl-prompt" aria-hidden="true">&gt;&gt;&gt;</span>
+              <textarea id="repl-input" rows="1" spellcheck="false"
+                        aria-label="Python command" placeholder="print('hello from PS5')"></textarea>
+            </form>
+          </div>
+          <div class="repl-actions">
+            <span id="repl-connection" class="repl-hint">Waiting for WebSocket…</span>
+            <span class="repl-hint">↑/↓ history · Shift+Enter newline</span>
+          </div>
         </section>
       </main>
     </section>

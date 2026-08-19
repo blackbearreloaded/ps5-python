@@ -1,7 +1,7 @@
 (() => {
   const state = { cursor: 0, launching: false, selectedId: null,
     socket: null, socketConnected: false, pollTimer: null, fallbackTimer: null,
-    view: "apps" };
+    view: "apps", replBusy: false, replHistory: [], replHistoryIndex: -1 };
   const appsElement = document.getElementById("apps");
   const statusElement = document.getElementById("status");
   const statusText = statusElement.querySelector(".status-text");
@@ -64,6 +64,16 @@
       setStatus(state.socketConnected ? "Live link" : "Ready", "ready");
       exitCode.textContent = "Waiting for a run";
     }
+  }
+  function appendRepl(text) {
+    replTerminal.textContent += text;
+    replTerminal.scrollTop = replTerminal.scrollHeight;
+  }
+  function resetReplPrompt() {
+    replTerminal.textContent = "CPython 3.14.7 WebREPL\n" +
+      "Connected to the running python-web.elf.\n" +
+      "Use Enter to evaluate a line; Shift+Enter inserts a new line.\n\n>>> ";
+    replTerminal.scrollTop = replTerminal.scrollHeight;
   }
   function renderApps(apps) {
     appsElement.textContent = "";
@@ -141,8 +151,12 @@
     if (event.type === "repl") {
       replConnection.textContent = event.ok ? "Evaluation complete" : "Evaluation failed";
       replConnection.className = event.ok ? "repl-hint" : "repl-hint repl-error";
-      replTerminal.textContent += (event.data || "") + (event.data ? "\n" : "");
-      replTerminal.scrollTop = replTerminal.scrollHeight;
+      const data = event.data || "";
+      if (data) appendRepl(data.endsWith("\n") ? data : data + "\n");
+      appendRepl(">>> ");
+      state.replBusy = false;
+      replInput.disabled = false;
+      replInput.focus();
     }
     if (event.type === "clear") {
       state.cursor = 0;
@@ -229,26 +243,47 @@
   replForm.addEventListener("submit", (event) => {
     event.preventDefault();
     const source = replInput.value;
-    if (!source.trim()) return;
+    if (!source.trim() || state.replBusy) return;
     if (!state.socketConnected || state.socket === null) {
       replConnection.textContent = "WebSocket unavailable";
       replConnection.className = "repl-hint repl-error";
       return;
     }
-    replTerminal.textContent += source + "\n";
-    replTerminal.scrollTop = replTerminal.scrollHeight;
+    state.replHistory = state.replHistory.filter((item) => item !== source);
+    state.replHistory.push(source);
+    state.replHistoryIndex = -1;
+    appendRepl(source + "\n");
     state.socket.send(source.endsWith("\n") ? source : source + "\n");
     replInput.value = "";
-    replInput.focus();
+    state.replBusy = true;
+    replInput.disabled = true;
+    replConnection.textContent = "Evaluating…";
+    replConnection.className = "repl-hint";
   });
   replInput.addEventListener("keydown", (event) => {
-    if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+    if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       replForm.requestSubmit();
+      return;
+    }
+    if (event.key === "ArrowUp" && !event.shiftKey && state.replHistory.length) {
+      event.preventDefault();
+      if (state.replHistoryIndex < state.replHistory.length - 1)
+        state.replHistoryIndex += 1;
+      replInput.value = state.replHistory[state.replHistory.length - 1 - state.replHistoryIndex];
+      replInput.setSelectionRange(replInput.value.length, replInput.value.length);
+    } else if (event.key === "ArrowDown" && !event.shiftKey && state.replHistoryIndex >= 0) {
+      event.preventDefault();
+      state.replHistoryIndex -= 1;
+      replInput.value = state.replHistoryIndex < 0 ? "" :
+        state.replHistory[state.replHistory.length - 1 - state.replHistoryIndex];
+      replInput.setSelectionRange(replInput.value.length, replInput.value.length);
     }
   });
   replClear.addEventListener("click", () => {
-    replTerminal.textContent = "CPython 3.14.7 WebREPL\n\n>>> ";
+    resetReplPrompt();
+    replInput.value = "";
+    state.replHistoryIndex = -1;
   });
   menuApps.addEventListener("click", () => showView("apps"));
   menuRepl.addEventListener("click", () => showView("repl"));

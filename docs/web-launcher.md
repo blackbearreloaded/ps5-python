@@ -89,12 +89,15 @@ interpreter and returns:
 {"type":"repl","ok":true,"data":"3\n"}
 ```
 
-Expressions use interactive-display behavior, while multi-line input is
-executed as a block. Variables and imports persist between evaluations. Output
-and tracebacks are captured per evaluation, so they do not corrupt the app log
-stream. The runtime serializes app execution and REPL evaluation through the
-interpreter lock; an app and a REPL command are never executing Python objects
-concurrently.
+The interpreter is presented as a CLI-style terminal: commands are entered at
+the prompt in the same pane where output appears. Enter evaluates the current
+line, Shift+Enter inserts a newline for a block, and the up/down arrows recall
+history. Expressions use interactive-display behavior, while multi-line input
+is executed as a block. Variables and imports persist between evaluations.
+Output and tracebacks are captured per evaluation, so they do not corrupt the
+app log stream. The runtime serializes app execution and REPL evaluation
+through the interpreter lock; an app and a REPL command are never executing
+Python objects concurrently.
 
 This follows the MicroPython WebREPL pattern: the network server remains in
 the ELF, the interpreter session remains local to that process, and the
