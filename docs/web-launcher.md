@@ -137,6 +137,12 @@ returns raw stdout/stderr or expression display text followed by the next
 `>>>` prompt. It is intended for trusted LAN use and does not provide
 authentication or encryption.
 
+`sys.exit()` is contained by the embedded runtime: the client receives
+`SystemExit` and a fresh prompt, while the launcher ELF and other sessions keep
+running. A bare `exit` is not automatically installed in this isolated build;
+it behaves like any other unresolved Python name unless the user imports or
+defines it.
+
 The protocol comparison and compatibility boundary for the reference
 implementations are recorded in
 [`docs/webrepl-reference.md`](webrepl-reference.md). That note distinguishes
