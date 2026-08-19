@@ -48,6 +48,7 @@ TEST_FILES = (
     "test_tier5_runtime.py",
     "test_tier6_security_i18n.py",
     "test_tier6_text_formats.py",
+    "test_tier6_posix.py",
     "test_posix_boundary.py",
     "test_process.py",
     "test_network.py",
