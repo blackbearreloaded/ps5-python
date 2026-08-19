@@ -239,6 +239,10 @@ build_runtime_bundle() {
     for module in __init__.py _abc.py abc.py machinery.py util.py; do
         cp "$source_dir/Lib/importlib/$module" "$runtime_dir/importlib/$module"
     done
+    mkdir -p "$runtime_dir/importlib/resources"
+    for module in "$source_dir"/Lib/importlib/resources/*.py; do
+        cp "$module" "$runtime_dir/importlib/resources/$(basename "$module")"
+    done
     mkdir -p "$runtime_dir/concurrent/futures"
     cp "$source_dir/Lib/concurrent/__init__.py" "$runtime_dir/concurrent/__init__.py"
     cp "$source_dir/Lib/concurrent/futures/__init__.py" "$runtime_dir/concurrent/futures/__init__.py"
