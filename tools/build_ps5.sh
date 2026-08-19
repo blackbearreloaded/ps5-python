@@ -132,6 +132,10 @@ configure_ps5() {
 
 build_runtime_bundle() {
     mkdir -p "$runtime_dir/encodings"
+    # Wheel metadata is retained in third_party for host inspection, but the
+    # PS5 FTP filesystem rejects dotted directory creation. Framework code
+    # carries pinned version fallbacks for the target bundle instead.
+    find "$runtime_dir" -mindepth 1 -maxdepth 1 -type d -name '*.dist-info' -exec rm -rf {} +
     cp "$root_dir/tools/minimal_encodings_init.py" \
         "$runtime_dir/encodings/__init__.py"
     cp "$source_dir/Lib/codecs.py" "$runtime_dir/codecs.py"
@@ -260,9 +264,25 @@ build_runtime_bundle() {
         mkdir -p "$(dirname "$target")"
         cp "$module" "$target"
     done < <(find "$root_dir/third_party/gunicorn" -type f -name '*.py' -print0 | sort -z)
+    # Flask's pure-Python WSGI framework closure. Optional native speedups,
+    # reloaders, debuggers, and async workers remain outside the PS5 target.
+    for package in flask werkzeug jinja2 markupsafe itsdangerous click blinker; do
+        rm -rf "$runtime_dir/$package"
+        mkdir -p "$runtime_dir/$package"
+        while IFS= read -r -d '' module; do
+            relative_file="${module#"$root_dir/third_party/$package/"}"
+            target="$runtime_dir/$package/$relative_file"
+            mkdir -p "$(dirname "$target")"
+            cp "$module" "$target"
+        done < <(find "$root_dir/third_party/$package" -type f \( -name '*.py' -o -name 'py.typed' \) -print0 | sort -z)
+    done
     mkdir -p "$runtime_dir/importlib"
     for module in __init__.py _abc.py abc.py machinery.py util.py; do
         cp "$source_dir/Lib/importlib/$module" "$runtime_dir/importlib/$module"
+    done
+    mkdir -p "$runtime_dir/importlib/metadata"
+    for module in "$source_dir"/Lib/importlib/metadata/*.py; do
+        cp "$module" "$runtime_dir/importlib/metadata/$(basename "$module")"
     done
     mkdir -p "$runtime_dir/importlib/resources"
     for module in "$source_dir"/Lib/importlib/resources/*.py; do

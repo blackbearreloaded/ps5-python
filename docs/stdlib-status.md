@@ -322,7 +322,25 @@ request, and controlled server shutdown using `ThreadingMixIn`.
 | Module | PS5 status | Included and tested | Missing or limited |
 | --- | --- | --- | --- |
 | `wsgiref` | Official package bundled | Single-process and threaded loopback request/response, concurrency, and shutdown | Full CGI, signal, malformed-request, keep-alive, and high-throughput coverage pending |
-| `gunicorn` 23.0.0 | Vendored pure-Python package bundled | Official sync worker and HTTP parser; pre-fork master/worker; normal TCP bind and inherited `fd://` listener; loopback WSGI request; SIGTERM/SIGCHLD shutdown and reaping | Daemon/re-exec, Unix sockets, `importlib.metadata` plugin entry points, and optional gevent/eventlet workers are outside the PS5 contract |
+| `gunicorn` 23.0.0 | Vendored pure-Python package bundled | Official sync worker and HTTP parser; pre-fork master/worker; normal TCP bind and inherited `fd://` listener; loopback WSGI request; SIGTERM/SIGCHLD shutdown and reaping | Daemon/re-exec, Unix sockets, distribution-metadata plugin entry points, and optional gevent/eventlet workers are outside the PS5 contract |
+
+### Flask/Werkzeug application boundary
+
+The pinned pure-Python framework closure is bundled for CPython **3.14.7**:
+
+| Package | Version | PS5 status |
+| --- | --- | --- |
+| Flask | 3.1.3 | Bundled; routing, JSON responses, Jinja rendering, signed sessions, and Gunicorn WSGI serving pass |
+| Werkzeug | 3.1.8 | Bundled; WSGI test client and Flask request/response boundary pass |
+| Jinja2 / MarkupSafe | 3.1.6 / 3.0.3 | Bundled; pure-Python template rendering and HTML escaping pass; native speedups omitted |
+| ItsDangerous / Click / Blinker | 2.2.0 / 8.2.1 / 1.9.0 | Bundled; session signing and Flask dependency imports pass |
+
+The focused `tests/stdlib/test_flask.py` check is adapted from CPython's
+WSGI, cookie, and cookie-jar tests. It exercises Flask's test client,
+Werkzeug's WSGI client, JSON request/response handling, Jinja escaping, a
+signed session cookie, and a real Flask app served by Gunicorn's sync worker.
+The Flask development reloader/debugger, dotenv discovery, multi-process
+serving, and optional async workers remain disabled on PS5.
 
 This establishes the application/server interface needed by Flask-style WSGI
 applications and validates both the reference threaded server and Gunicorn's

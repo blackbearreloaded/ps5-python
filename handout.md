@@ -175,7 +175,8 @@ and import-tested.
 4. Build a minimal HTTP server on the verified IPv4 selector layer.
 5. Validate ctypes against a safe PS5-native test library or broker API.
 6. Expand the official concurrency-derived tests as each PS5 primitive lands.
-7. Attempt a minimal Flask/Werkzeug/Jinja2/MarkupSafe application bundle.
+7. Expand the passing Flask/Werkzeug/Jinja2/MarkupSafe bundle beyond the
+   current route, template, session, and Gunicorn sync smoke coverage.
 
 ## Development rules
 

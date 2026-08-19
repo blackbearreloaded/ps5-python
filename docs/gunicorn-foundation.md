@@ -34,7 +34,9 @@ following upstream features remain intentionally outside the PS5 contract:
 - daemonization and USR2 re-exec, which require descriptor duplication and a
   second executable launch;
 - Unix-domain sockets, because the PS5 socket build has no `AF_UNIX`;
-- entry-point plugin discovery (`importlib.metadata` is not bundled);
+- distribution metadata and entry-point plugin discovery (the runtime carries
+  `importlib.metadata`, but the PS5 FTP filesystem does not deploy dotted
+  wheel metadata directories);
 - gevent, eventlet, and other optional asynchronous worker classes;
 - process-pool, spawn, and forkserver integrations, which are separate from
   Gunicorn's forked sync workers.

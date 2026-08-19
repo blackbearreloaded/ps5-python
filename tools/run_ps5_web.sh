@@ -56,7 +56,7 @@ for module in __init__.py module_docs.py topics.py; do
     upload "$runtime_dir/pydoc_data/$module" "/data/python/runtime/cpython-lib/pydoc_data/$module"
 done
 upload "$runtime_dir/_pyrepl/pager.py" /data/python/runtime/cpython-lib/_pyrepl/pager.py
-for package in logging string urllib http wsgiref email unittest asyncio html compression zipfile xml sqlite3 dbm sysconfig _pyrepl gunicorn; do
+for package in logging string urllib http wsgiref email unittest asyncio html compression zipfile xml sqlite3 dbm sysconfig _pyrepl gunicorn flask werkzeug jinja2 markupsafe itsdangerous click blinker; do
     mkdir_remote "/data/python/runtime/cpython-lib/$package"
     while IFS= read -r -d '' module_file; do
         relative_file="${module_file#"$runtime_dir/$package/"}"
@@ -69,6 +69,10 @@ mkdir_remote /data/python/runtime/cpython-lib/importlib
 for module in __init__.py _abc.py abc.py machinery.py util.py; do
     upload "$runtime_dir/importlib/$module" "/data/python/runtime/cpython-lib/importlib/$module"
 done
+mkdir_remote /data/python/runtime/cpython-lib/importlib/metadata
+while IFS= read -r -d '' module_file; do
+    upload "$module_file" "/data/python/runtime/cpython-lib/importlib/metadata/$(basename "$module_file")"
+done < <(find "$runtime_dir/importlib/metadata" -type f -name '*.py' -print0 | sort -z)
 mkdir_remote /data/python/runtime/cpython-lib/importlib/resources
 while IFS= read -r -d '' module_file; do
     upload "$module_file" "/data/python/runtime/cpython-lib/importlib/resources/$(basename "$module_file")"

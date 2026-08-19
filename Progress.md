@@ -9,7 +9,7 @@ upstream source commit `823f0323ee6ec1402088b73bce1a38473cac36dc`.
 
 ## Follow-up
 
-- Host validation now passes all 66 discovered scripts. Tests that require PS5
+- Host validation now passes all 67 discovered scripts. Tests that require PS5
   capabilities (fork, `select.poll`, external DNS, and live TLS) skip cleanly
   on desktop Python instead of making the host baseline nondeterministic.
 - Added `tests/stdlib/test_tls_handshake.py` as a separate live PS5 smoke test;
@@ -17,7 +17,7 @@ upstream source commit `823f0323ee6ec1402088b73bce1a38473cac36dc`.
   PS5 CA bundle is the next TLS increment.
 - PS5 aggregate suite passes with the profiling, concurrency, Tier 3, Tier 4,
   Tier 5, Tier 6, Tier 7, feasible Tier 8 wrappers, WSGI, and Gunicorn:
-  `CPYTHON_CORE_SUITE: PASS (65 scripts)`.
+  `CPYTHON_CORE_SUITE: PASS (66 scripts)`.
 
 ## Completed Today
 
@@ -108,8 +108,9 @@ Static or bundled support now includes:
   loopback requests, WSGI environment propagation, response handling, and
   controlled shutdown pass on PS5. Gunicorn 23.0.0's official sync worker and
   pre-fork master now serve a loopback request, accept an inherited `fd://`
-  listener, and shut down/reap workers on SIGTERM. Flask/Werkzeug remain
-  separate framework packaging.
+  listener, and shut down/reap workers on SIGTERM. Flask 3.1.3 and its pinned
+  pure-Python Werkzeug/Jinja2/MarkupSafe/ItsDangerous/Click/Blinker closure
+  now serve a Flask route through Gunicorn on PS5.
 
 ### Security and hashing
 
@@ -141,6 +142,12 @@ Static or bundled support now includes:
   reaping pass `tests/stdlib/test_gunicorn_server.py`. Daemon/re-exec,
   Unix-domain sockets, plugin entry points, and optional async workers remain
   explicitly unsupported.
+- Vendored Flask 3.1.3 with Werkzeug 3.1.8, Jinja2 3.1.6, MarkupSafe 3.0.3,
+  ItsDangerous 2.2.0, Click 8.2.1, and Blinker 1.9.0. The Flask test client,
+  Werkzeug WSGI client, JSON, Jinja escaping, signed sessions, and a real
+  Flask app served by Gunicorn pass `tests/stdlib/test_flask.py` on PS5.
+  Native MarkupSafe speedups and debugger/reloader subprocess paths remain
+  outside the target subset.
 - Statically linked native `array` for multiprocessing reduction support.
 - Verified concrete `pathlib.Path` operations and tempfile context cleanup;
   patched `shutil.rmtree` to use its PS5-compatible path-based fallback.
@@ -341,8 +348,8 @@ coverage remain incomplete.
   long-running profiling stress remains unverified.
 - Queue/semaphore support, POSIX shared memory, and process-pool launching once
   the PS5 payload gains named semaphores, file-backed `mmap`, and an ELF broker.
-- A complete HTTP server foundation suitable for Flask or Werkzeug.
-- Flask, Werkzeug, Jinja2, and MarkupSafe dependency validation.
+- Full HTTP-server stress, debugger, reloader, and HTTPS certificate-store
+  coverage remain outstanding for Flask/Werkzeug workloads.
 
 ## Next Steps
 
@@ -353,7 +360,8 @@ coverage remain incomplete.
 5. Investigate the kernel-assisted ELF broker for subprocess-compatible workers.
 6. Expand upstream-derived concurrency tests as each PS5 primitive becomes
    available, without weakening the documented PS5 subset.
-7. Attempt a minimal Flask/Werkzeug/Jinja2/MarkupSafe application bundle.
+7. Expand Flask/Werkzeug integration beyond the passing route, template,
+   session, and Gunicorn sync smoke test.
 
 ## Git Checkpoints
 
