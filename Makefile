@@ -51,34 +51,34 @@ ps5-check:
 	@test -f "$(CPYTHON_SRC)/Include/Python.h"
 	@echo "PS5 SDK and CPython source are present."
 
-ps5-configure: host-build
+ps5-configure: lint host-build
 	bash tools/build_ps5.sh configure
 
-ps5-core: host-build
+ps5-core: lint host-build
 	PS5_JOBS=$(PS5_JOBS) bash tools/build_ps5.sh core
 
-ps5-run: host-build
+ps5-run: lint host-build
 	PS5_JOBS=$(PS5_JOBS) bash tools/run_ps5.sh "$(SCRIPT)"
 
-ps5-test: host-build
+ps5-test: lint host-build
 	PS5_JOBS=$(PS5_JOBS) RUN_TIMEOUT=120 bash tools/run_ps5.sh tests/core_suite.py
 
 ps5-suite: ps5-test
 	PS5_JOBS=$(PS5_JOBS) bash tools/run_ps5_lifetime.sh
 
-ps5-lifetime: host-build
+ps5-lifetime: lint host-build
 	PS5_JOBS=$(PS5_JOBS) bash tools/run_ps5_lifetime.sh
 
-ps5-app: host-build
+ps5-app: lint host-build
 	PS5_JOBS=$(PS5_JOBS) bash tools/run_ps5_app.sh "$(APP)"
 
-ps5-web: host-build
+ps5-web: lint host-build
 	PS5_JOBS=$(PS5_JOBS) bash tools/run_ps5_web.sh
 
-ps5-web-test: host-build
+ps5-web-test: lint host-build
 	PS5_JOBS=$(PS5_JOBS) bash tools/run_ps5_web_test.sh
 
-ps5-kill:
+ps5-kill: lint
 	bash tools/run_ps5_kill.sh $(PID) $(SIGNAL)
 
 clean:

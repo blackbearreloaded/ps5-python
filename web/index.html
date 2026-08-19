@@ -10,11 +10,17 @@
   <div class="app-shell">
     <header class="topbar">
       <div class="brand">
-        <div class="brand-mark">Py</div>
+        <div class="brand-mark"><span>Py</span><i></i></div>
         <div>
-          <p class="eyebrow">PS5 runtime</p>
-          <h1>Python apps</h1>
+          <p class="eyebrow">Proposal 1 / PS5 runtime</p>
+          <h1>Python Studio</h1>
         </div>
+      </div>
+      <div class="topbar-meta">
+        <span class="topbar-chip"><b></b> LOCAL CONSOLE</span>
+        <span class="topbar-version">CPython 3.14.7</span>
+        <button id="theme-toggle" class="theme-button" type="button"
+                aria-label="Change color theme">Theme: Studio</button>
       </div>
       <div id="status" class="status-pill status-ready">
         <span class="status-dot"></span>
@@ -24,11 +30,14 @@
 
     <section class="workspace">
       <aside class="sidebar">
-        <div class="menu-tabs" role="tablist" aria-label="Launcher menus">
+          <div class="rail-label">Workspace</div>
+          <div class="menu-tabs" role="tablist" aria-label="Launcher menus">
           <button id="menu-repl" class="menu-tab active" type="button"
                   role="tab" aria-selected="true">Interpreter</button>
           <button id="menu-apps" class="menu-tab" type="button"
                   role="tab" aria-selected="false">Applications</button>
+          <button id="menu-script" class="menu-tab" type="button"
+                  role="tab" aria-selected="false">Run script</button>
         </div>
         <div id="apps-sidebar" class="hidden">
         <div class="panel-heading">
@@ -46,6 +55,10 @@
           <span class="note-icon">i</span>
           <span>Apps are loaded from <code>/data/python/apps</code>.</span>
         </div>
+        </div>
+        <div class="rail-footer">
+          <span class="rail-mark">01</span>
+          <span>Trusted LAN<br><b>PS5 payload</b></span>
         </div>
       </aside>
 
@@ -82,13 +95,53 @@ Use Enter to evaluate a line; Shift+Enter inserts a new line.
 </pre>
             <form id="repl-form" class="repl-form" aria-label="Python interpreter input">
               <span class="repl-prompt" aria-hidden="true">&gt;&gt;&gt;</span>
-              <textarea id="repl-input" rows="1" spellcheck="false"
-                        aria-label="Python command" placeholder="print('hello from PS5')"></textarea>
+              <div class="repl-input-shell">
+                <pre id="repl-highlight" class="code-highlight" aria-hidden="true"><code class="language-python"></code></pre>
+                <textarea id="repl-input" rows="1" spellcheck="false"
+                          aria-label="Python command" placeholder="print('hello from PS5')"></textarea>
+              </div>
             </form>
           </div>
           <div class="repl-actions">
             <span id="repl-connection" class="repl-hint">Waiting for WebSocket…</span>
             <span class="repl-hint">↑/↓ history · Shift+Enter newline · Ctrl+L clear screen</span>
+          </div>
+        </section>
+        <section id="script-console" class="menu-view hidden" aria-hidden="true">
+          <div class="console-heading">
+            <div>
+              <p class="eyebrow">Script workspace</p>
+              <h2>Run a complete Python script</h2>
+            </div>
+            <div class="script-heading-actions">
+              <button id="script-clear" class="secondary-button" type="button">Clear</button>
+              <button id="script-run" class="primary-button" type="button">Run script</button>
+            </div>
+          </div>
+          <div class="script-workspace">
+            <div class="script-editor-panel">
+              <div class="script-panel-label">
+                <span>main.py</span>
+                <span id="script-dirty" class="script-dirty">Saved</span>
+              </div>
+              <div class="code-editor script-code-editor">
+                <pre id="script-highlight" class="code-highlight" aria-hidden="true"><code class="language-python"></code></pre>
+                <textarea id="script-input" class="script-input" spellcheck="false"
+                          aria-label="Python script" autocapitalize="off">print("Hello from the script runner")
+</textarea>
+              </div>
+            </div>
+            <div class="script-output-panel">
+              <div class="script-panel-label">
+                <span>Output</span>
+                <span id="script-status" class="repl-hint">Ready</span>
+              </div>
+              <pre id="script-output" class="script-output" role="log" aria-live="polite">Paste a complete Python script above, then run it here.</pre>
+            </div>
+          </div>
+          <div class="script-footer">
+            <span class="repl-hint">Runs in the persistent interpreter · Ctrl+Enter to run</span>
+            <span id="script-runtime" class="repl-hint">Waiting for WebSocket…</span>
           </div>
         </section>
       </main>
@@ -100,6 +153,7 @@ Use Enter to evaluate a line; Shift+Enter inserts a new line.
       <span>Local launcher</span>
     </footer>
   </div>
+  <script src="/vendor/highlight.js/highlight.min.js"></script>
   <script src="/app.js"></script>
 </body>
 </html>

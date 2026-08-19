@@ -14,10 +14,21 @@ python-web.elf
 ```
 
 The browser UI is kept outside the ELF in the tracked web/ directory:
-web/index.html, web/app.css, and web/app.js.
+web/index.html, web/app.css, web/app.js, and the vendored Highlight.js asset
+under web/vendor/highlight.js/.
 Deployment uploads these files to /data/python/web/. The native server only
 serves the static files and owns the API/runtime boundary, so the UI can be
 restyled or extended without rebuilding the Python runtime.
+
+The script editor and active WebREPL input use the locally vendored
+Highlight.js Python grammar. Highlighting is rendered in a read-only layer over
+the native textareas, preserving paste, selection, keyboard shortcuts, and
+mobile editing without requiring a browser extension or internet access.
+
+The launcher supports three built-in visual themes: **Studio**, **Terminal**,
+and **Paper**. The theme control in the top bar cycles between them and stores
+the selection in browser-local storage. Themes are entirely frontend-owned, so
+they do not change the PS5 runtime or require a server setting.
 
 The default URL is:
 
@@ -26,7 +37,8 @@ http://<PS5-IP>:8090/
 ```
 
 The Interpreter menu is the first and default view. Its URL is
-`?view=interpreter`; the Applications menu uses `?view=applications`.
+`?view=interpreter`; the Applications menu uses `?view=applications`; the
+script workspace uses `?view=script`.
 
 Port 8080 is intentionally avoided because the existing PS5 `websrv` commonly
 uses it. Override the port with `PS5_WEB_PORT`.
@@ -89,10 +101,11 @@ application log and through `/api/logs`.
 | `/api/shutdown` | Stops the manager; useful for tests |
 | `/ws` | Streams JSON log/status events and accepts WebREPL source lines |
 
-The page makes one `/ws` attempt per page load and prefers it for live output.
-If the upgrade is interrupted, it falls back to the cursor API at one-second
-intervals without repeatedly reconnecting. Refreshing the page tries WebSocket
-again. The cursor API remains available for diagnostics and automation.
+The page makes one `/ws` attempt per page load and uses it as the live transport
+for output and status. It does not poll `/api/logs` or `/api/status`; if the
+upgrade fails, the UI reports that the live link is unavailable. Refreshing the
+page tries WebSocket again. The cursor API remains available for diagnostics and
+automation, but is not used as a browser refresh loop.
 
 WebSocket messages are JSON objects. Log events have the form
 `{"type":"log","data":"..."}`; status events contain `type`, `running`,
@@ -161,6 +174,20 @@ after the final exit message, so finished-app logs are not replayed to a new
 portal visit. The Clear button also clears the server buffer and all connected
 browser consoles. While an app is running, including a long-lived daemon, its
 live output remains available.
+
+## Script workspace
+
+The **Run script** menu provides a complete-script editor separate from the
+interactive REPL. Paste or write a Python program in the editor and select
+**Run script**, or press Ctrl+Enter. The result appears in the adjacent output
+pane, and unsaved edits are marked in the editor header.
+
+This first editor increment sends the source through the existing WebSocket
+REPL boundary and evaluates it in the persistent launcher interpreter. It does
+not yet save files, expose a workspace browser, create an isolated job, or
+provide a Stop action. Those controls remain part of the dedicated script
+runner roadmap; a script can be restarted or cleared from the editor without
+affecting the interactive REPL transcript.
 
 Long-lived apps are currently an experimental in-process mode: the entry point
 runs on a native worker thread in the same `python-web.elf` CPython runtime.

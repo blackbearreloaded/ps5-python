@@ -36,6 +36,9 @@ upload "$web_elf" "/data/python/runtime/$web_remote_name"
 upload "$web_dir/index.html" /data/python/web/index.html
 upload "$web_dir/app.css" /data/python/web/app.css
 upload "$web_dir/app.js" /data/python/web/app.js
+mkdir_remote /data/python/web/vendor
+mkdir_remote /data/python/web/vendor/highlight.js
+upload "$web_dir/vendor/highlight.js/highlight.min.js" /data/python/web/vendor/highlight.js/highlight.min.js
 upload "$runtime_dir/codecs.py" /data/python/runtime/cpython-lib/codecs.py
 upload "$runtime_dir/site.py" /data/python/runtime/cpython-lib/site.py
 upload "$runtime_dir/_sitebuiltins.py" /data/python/runtime/cpython-lib/_sitebuiltins.py

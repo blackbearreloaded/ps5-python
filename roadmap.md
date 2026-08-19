@@ -46,6 +46,12 @@ current seamless terminal experience while highlighting Python tokens. The
 editor must support the existing prompt flow rather than turning every command
 into a separate modal dialog.
 
+The first implementation is now available in the browser: a locally vendored
+Highlight.js Python grammar renders synchronized layers over both the complete
+script editor and the active WebREPL textarea. The native textarea remains the
+editable surface, with a plain-text fallback if the optional highlighter asset
+cannot load.
+
 Recommended approach:
 
 1. Vendor a small browser editor bundle at build/deploy time; nothing should
@@ -90,14 +96,22 @@ expensive.
 Add a third top-level menu: **Run script**. This is separate from both the
 Applications menu and the interactive Interpreter.
 
+The first browser-only slice is now available: a complete-script editor with a
+dirty indicator, Run/Clear controls, Ctrl+Enter, URL-persisted `?view=script`,
+and an adjacent output pane. It uses the existing WebSocket runtime boundary
+and persistent interpreter, so it is useful for local experiments without
+changing the PS5 native API yet.
+
 The script view should provide:
 
 - A full-height Python editor with syntax highlighting.
-- New, open, save, save-as, and run actions.
+- New, open, save, save-as, and run actions. The current slice provides the
+  editor and run/clear actions; file persistence remains outstanding.
 - A small file browser rooted at `/data/python/user` or another explicit user
   workspace, never an unrestricted filesystem browser.
 - Run output in the existing live console surface.
 - Run, stop, and rerun controls with the current exit code and elapsed time.
+  The current slice provides Run and rerun; job-level Stop remains outstanding.
 - A dirty-buffer indicator and confirmation before discarding unsaved edits.
 - Optional “run selection” for quick experiments.
 

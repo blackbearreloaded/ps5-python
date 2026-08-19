@@ -115,7 +115,8 @@ make host-build
 make ps5-core
 ```
 
-Run the source quality checks from WSL before building:
+The PS5 build and test targets invoke `lint` automatically. Run the source
+quality checks directly when iterating from WSL:
 
 ```sh
 make format       # apply the checked-in clang-format policy
