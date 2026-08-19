@@ -112,9 +112,14 @@ upload "$runtime_dir/selectors.py" "$remote_runtime/selectors.py"
 for module in os.py stat.py genericpath.py posixpath.py abc.py _collections_abc.py io.py socket.py enum.py types.py signal.py hashlib.py ssl.py base64.py warnings.py contextvars.py _py_warnings.py _weakrefset.py tracemalloc.py csv.py decimal.py fractions.py numbers.py contextlib.py weakref.py copy.py copyreg.py _compat_pickle.py hmac.py random.py bisect.py glob.py fnmatch.py functools.py operator.py reprlib.py linecache.py pickle.py struct.py timeit.py dis.py opcode.py _opcode_metadata.py gzip.py bz2.py lzma.py shelve.py tarfile.py uuid.py filecmp.py platform.py tty.py profile.py pstats.py cProfile.py; do
     upload "$runtime_dir/$module" "$remote_runtime/$module"
 done
-for module in threading.py queue.py runpy.py secrets.py getpass.py tempfile.py datetime.py typing.py annotationlib.py ast.py _ast_unparse.py keyword.py __future__.py argparse.py gettext.py locale.py traceback.py pprint.py textwrap.py codeop.py tokenize.py token.py _colorize.py difflib.py inspect.py calendar.py graphlib.py statistics.py colorsys.py ipaddress.py wave.py quopri.py socketserver.py mimetypes.py doctest.py py_compile.py compileall.py code.py cmd.py bdb.py pdb.py rlcompleter.py readline.py subprocess.py shutil.py ftplib.py poplib.py imaplib.py smtplib.py mailbox.py; do
+for module in threading.py queue.py runpy.py secrets.py getpass.py tempfile.py datetime.py typing.py annotationlib.py ast.py _ast_unparse.py keyword.py __future__.py argparse.py gettext.py locale.py traceback.py pprint.py textwrap.py codeop.py tokenize.py token.py _colorize.py difflib.py inspect.py calendar.py graphlib.py statistics.py colorsys.py ipaddress.py wave.py quopri.py socketserver.py mimetypes.py doctest.py py_compile.py compileall.py code.py cmd.py bdb.py pdb.py rlcompleter.py readline.py subprocess.py shutil.py ftplib.py poplib.py imaplib.py smtplib.py mailbox.py shlex.py getopt.py optparse.py pydoc.py webbrowser.py symtable.py pkgutil.py; do
     upload "$runtime_dir/$module" "$remote_runtime/$module"
 done
+mkdir_remote "$remote_runtime/pydoc_data"
+for module in __init__.py module_docs.py topics.py; do
+    upload "$runtime_dir/pydoc_data/$module" "$remote_runtime/pydoc_data/$module"
+done
+upload "$runtime_dir/_pyrepl/pager.py" "$remote_runtime/_pyrepl/pager.py"
 mkdir_remote "$remote_runtime/zoneinfo"
 for module in __init__.py _common.py _tzpath.py _zoneinfo.py; do
     upload "$runtime_dir/zoneinfo/$module" "$remote_runtime/zoneinfo/$module"

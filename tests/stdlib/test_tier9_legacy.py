@@ -1,75 +1,84 @@
-"""Portable Tier 9 legacy-helper checks adapted from CPython 3.14.7.
+"""Portable Tier 9 checks adapted from CPython 3.14.7 Lib/test.
 
-The source tests are ``test_cmd``, ``test_shlex``, ``test_optparse``,
-``test_getopt``, ``test_symtable``, and ``test_pydoc`` in CPython's
-``Lib/test``.  Browser, GUI, and terminal integrations are intentionally not
-started on the headless PS5 payload.
+The upstream command-line and documentation tests use unittest, subprocesses,
+and interactive terminals.  These checks retain their deterministic behavior
+without requiring those unavailable test harness services on the PS5.
 """
+
+import io
 
 import cmd
 import getopt
-import io
 import optparse
+import pydoc
 import shlex
+import symtable
+import webbrowser
 
 
-# CPython Lib/test/test_cmd.py: parsing and command dispatch without a TTY.
-class Echo(cmd.Cmd):
+assert shlex.split("alpha 'two words' \"three words\"") == [
+    "alpha", "two words", "three words"
+]
+assert shlex.join(["alpha", "two words", ""] ) == "alpha 'two words' ''"
+assert shlex.quote("a'b") == "'a'\"'\"'b'"
+
+options, args = getopt.getopt(
+    ["-q", "--output=result.txt", "input.py"], "q", ["output="]
+)
+assert options == [("-q", ""), ("--output", "result.txt")]
+assert args == ["input.py"]
+
+parser = optparse.OptionParser(add_help_option=False)
+parser.add_option("-q", "--quiet", action="store_true", dest="quiet")
+parser.add_option("-o", "--output", dest="output")
+parsed, remaining = parser.parse_args(["--quiet", "-o", "out.txt", "item"])
+assert parsed.quiet is True
+assert parsed.output == "out.txt"
+assert remaining == ["item"]
+
+
+class Shell(cmd.Cmd):
+    prompt = ""
+
     def __init__(self):
         super().__init__(stdin=io.StringIO(), stdout=io.StringIO())
-        self.seen = []
+        self.seen = None
 
-    def do_echo(self, argument):
-        self.seen.append(argument)
-        return False
-
-
-console = Echo()
-assert console.parseline("echo hello") == ("echo", "hello", "echo hello")
-assert console.onecmd("echo hello") is False
-assert console.seen == ["hello"]
+    def do_echo(self, arg):
+        self.seen = arg
+        return True
 
 
-# CPython Lib/test/test_shlex.py: POSIX tokenization and quoting helpers.
-assert shlex.split('alpha "two words"') == ["alpha", "two words"]
-assert shlex.join(["alpha", "two words"]) == "alpha 'two words'"
-assert shlex.quote("don't") == "'don'\"'\"'t'"
+shell = Shell()
+assert shell.parseline("echo hello") == ("echo", "hello", "echo hello")
+assert shell.onecmd("echo hello") is True
+assert shell.seen == "hello"
 
-
-# CPython Lib/test/test_optparse.py and test_getopt.py.
-parser = optparse.OptionParser()
-parser.add_option("-n", "--name", dest="name")
-options, args = parser.parse_args(["--name", "ps5", "payload"])
-assert options.name == "ps5"
-assert args == ["payload"]
-assert getopt.getopt(["-a", "-b", "value", "tail"], "ab:") == (
-    [("-a", ""), ("-b", "value")],
-    ["tail"],
+table = symtable.symtable(
+    "value = 1\ndef add(extra):\n    return value + extra\n",
+    "<tier9>",
+    "exec",
 )
+assert "value" in table.get_identifiers()
+function = [child for child in table.get_children() if child.get_name() == "add"][0]
+assert function.get_name() == "add"
+assert function.lookup("extra").is_parameter()
+
+assert pydoc.locate("builtins.str") is str
+rendered = pydoc.render_doc(str)
+assert "class str" in rendered
 
 
-# CPython Lib/test/test_symtable.py.  _symtable is optional in reduced builds.
-try:
-    import symtable
-except ImportError:
-    symtable = None
-if symtable is not None:
-    table = symtable.symtable(
-        "answer = 42\ndef f(): return answer", "<tier9>", "exec"
-    )
-    assert table.lookup("answer").is_global()
-    assert table.lookup("f").is_namespace()
+class DummyBrowser(webbrowser.BaseBrowser):
+    def open(self, url, new=0, autoraise=True):
+        self.request = (url, new, autoraise)
+        return True
 
 
-# CPython Lib/test/test_pydoc.py.  Rendering is pure text; server/browser
-# startup is excluded because the payload has no desktop.
-try:
-    import pydoc
-except ImportError:
-    pydoc = None
-if pydoc is not None:
-    documentation = pydoc.render_doc(str, renderer=pydoc.plaintext)
-    assert "class str" in documentation
-
+browser = DummyBrowser("dummy")
+webbrowser.register("tier9-dummy", None, instance=browser)
+assert webbrowser.get("tier9-dummy") is browser
+assert browser.open_new_tab("https://example.com") is True
+assert browser.request == ("https://example.com", 2, True)
 
 print("test_tier9_legacy: PASS")
