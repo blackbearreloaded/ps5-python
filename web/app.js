@@ -237,7 +237,7 @@
     }
     replTerminal.textContent += source + "\n";
     replTerminal.scrollTop = replTerminal.scrollHeight;
-    state.socket.send(source);
+    state.socket.send(source.endsWith("\n") ? source : source + "\n");
     replInput.value = "";
     replInput.focus();
   });
