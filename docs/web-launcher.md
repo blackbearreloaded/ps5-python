@@ -112,7 +112,8 @@ interpreter and returns:
 
 The interpreter is presented as a CLI-style terminal: commands are entered at
 the prompt in the same pane where output appears. Enter evaluates the current
-line, Shift+Enter inserts a newline for a block, and the up/down arrows recall
+line, including an empty line which simply advances to a fresh prompt.
+Shift+Enter inserts a newline for a block, and the up/down arrows recall
 history. Ctrl+L clears the visible terminal screen without restarting the
 interpreter. Expressions use interactive-display behavior, while multi-line
 input is executed as a block. Variables and imports persist between
@@ -132,10 +133,10 @@ the ELF, the interpreter session remains local to that process, and the
 browser is only a transport and terminal UI. The current implementation is
 intended for trusted LAN use; it has no authentication or encryption.
 
-The TCP REPL sends a CPython prompt, accepts one source line per newline, and
-returns raw stdout/stderr or expression display text followed by the next
-`>>>` prompt. It is intended for trusted LAN use and does not provide
-authentication or encryption.
+The TCP REPL sends a CPython prompt, accepts one source line per newline,
+including empty lines, and returns raw stdout/stderr or expression display text
+followed by the next `>>>` prompt. It is intended for trusted LAN use and does
+not provide authentication or encryption.
 
 `sys.exit()` is contained by the embedded runtime: the client receives
 `SystemExit` and a fresh prompt, while the launcher ELF and other sessions keep

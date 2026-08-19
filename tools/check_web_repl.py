@@ -46,7 +46,7 @@ def read_frame(connection, pending=b""):
     return first & 0x0F, payload, pending[length:]
 
 
-def evaluate(connection, pending, source, expected, ok=True):
+def evaluate(connection, pending, source, expected, ok=True, forbidden=()):
     connection.sendall(frame(source if source.endswith("\n") else source + "\n"))
     while True:
         opcode, payload, pending = read_frame(connection, pending)
@@ -57,6 +57,8 @@ def evaluate(connection, pending, source, expected, ok=True):
             continue
         if event.get("ok") is not ok:
             raise AssertionError(f"unexpected REPL status: {event!r}")
+        if any(marker in event.get("data", "") for marker in forbidden):
+            raise AssertionError(f"unexpected REPL data: {event!r}")
         if expected not in event.get("data", ""):
             raise AssertionError(f"unexpected REPL data: {event!r}")
         return pending
@@ -94,6 +96,7 @@ def main():
         _, _, pending = read_frame(connection, pending)
         pending = evaluate(connection, pending, "print(123)", "123")
         pending = evaluate(connection, pending, "1 + 1", "2")
+        pending = evaluate(connection, pending, "", "", forbidden=("SyntaxError",))
         pending = evaluate(connection, pending, "import sys; sys.exit()",
                            "SystemExit", ok=False)
         pending = evaluate(connection, pending, "webrepl_reset_marker = 42", "")

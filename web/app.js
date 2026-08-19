@@ -276,15 +276,17 @@
   replForm.addEventListener("submit", (event) => {
     event.preventDefault();
     const source = replInput.value;
-    if (!source.trim() || state.replBusy) return;
+    if (state.replBusy) return;
     if (!state.socketConnected || state.socket === null) {
       replConnection.textContent = "WebSocket unavailable";
       replConnection.className = "repl-hint repl-error";
       return;
     }
-    state.replHistory = state.replHistory.filter((item) => item !== source);
-    state.replHistory.push(source);
-    state.replHistoryIndex = -1;
+    if (source.trim()) {
+      state.replHistory = state.replHistory.filter((item) => item !== source);
+      state.replHistory.push(source);
+      state.replHistoryIndex = -1;
+    }
     appendRepl(">>> " + source);
     state.replCommandOpen = true;
     state.socket.send(source.endsWith("\n") ? source : source + "\n");
