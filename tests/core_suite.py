@@ -44,6 +44,7 @@ TEST_FILES = (
     "test_data_structures.py",
     "test_profiling.py",
     "test_tier5_inspection.py",
+    "test_tier5_runtime.py",
     "test_posix_boundary.py",
     "test_process.py",
     "test_network.py",

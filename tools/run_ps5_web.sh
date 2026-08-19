@@ -35,6 +35,8 @@ upload "$web_dir/index.html" /data/python/web/index.html
 upload "$web_dir/app.css" /data/python/web/app.css
 upload "$web_dir/app.js" /data/python/web/app.js
 upload "$runtime_dir/codecs.py" /data/python/runtime/cpython-lib/codecs.py
+upload "$runtime_dir/site.py" /data/python/runtime/cpython-lib/site.py
+upload "$runtime_dir/_sitebuiltins.py" /data/python/runtime/cpython-lib/_sitebuiltins.py
 upload "$runtime_dir/encodings/__init__.py" /data/python/runtime/cpython-lib/encodings/__init__.py
 upload "$runtime_dir/encodings/ascii.py" /data/python/runtime/cpython-lib/encodings/ascii.py
 upload "$runtime_dir/encodings/aliases.py" /data/python/runtime/cpython-lib/encodings/aliases.py
@@ -48,7 +50,7 @@ done
 for module in threading.py queue.py runpy.py secrets.py tempfile.py datetime.py typing.py annotationlib.py ast.py _ast_unparse.py keyword.py __future__.py argparse.py gettext.py locale.py traceback.py pprint.py textwrap.py codeop.py tokenize.py token.py _colorize.py difflib.py inspect.py calendar.py quopri.py ipaddress.py socketserver.py mimetypes.py subprocess.py shutil.py; do
     upload "$runtime_dir/$module" "/data/python/runtime/cpython-lib/$module"
 done
-for package in logging string urllib http email unittest asyncio html compression zipfile xml sqlite3; do
+for package in logging string urllib http email unittest asyncio html compression zipfile xml sqlite3 sysconfig; do
     mkdir_remote "/data/python/runtime/cpython-lib/$package"
     while IFS= read -r -d '' module_file; do
         relative_file="${module_file#"$runtime_dir/$package/"}"
@@ -86,7 +88,6 @@ mkdir_remote /data/python/runtime/cpython-lib/ctypes
 for module in __init__.py _endian.py _layout.py _aix.py util.py wintypes.py; do
     upload "$runtime_dir/ctypes/$module" "/data/python/runtime/cpython-lib/ctypes/$module"
 done
-upload "$runtime_dir/sysconfig.py" /data/python/runtime/cpython-lib/sysconfig.py
 for package in re json; do
     mkdir_remote "/data/python/runtime/cpython-lib/$package"
     while IFS= read -r -d '' module_file; do

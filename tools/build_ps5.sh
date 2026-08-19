@@ -126,6 +126,8 @@ build_runtime_bundle() {
     cp "$root_dir/tools/minimal_encodings_init.py" \
         "$runtime_dir/encodings/__init__.py"
     cp "$source_dir/Lib/codecs.py" "$runtime_dir/codecs.py"
+    cp "$source_dir/Lib/site.py" "$runtime_dir/site.py"
+    cp "$source_dir/Lib/_sitebuiltins.py" "$runtime_dir/_sitebuiltins.py"
     cp "$source_dir/Lib/encodings/ascii.py" \
         "$runtime_dir/encodings/ascii.py"
     cp "$source_dir/Lib/encodings/aliases.py" \
@@ -263,7 +265,11 @@ build_runtime_bundle() {
     cp "$source_dir/Lib/heapq.py" "$runtime_dir/heapq.py"
     cp "$root_dir/tools/minimal_dataclasses.py" "$runtime_dir/dataclasses.py"
     rm -rf "$runtime_dir/ctypes" "$runtime_dir/sysconfig"
-    cp "$root_dir/tools/minimal_sysconfig.py" "$runtime_dir/sysconfig.py"
+    mkdir -p "$runtime_dir/sysconfig"
+    cp "$source_dir/Lib/sysconfig/__init__.py" "$runtime_dir/sysconfig/__init__.py"
+    cp "$source_dir/Lib/sysconfig/__main__.py" "$runtime_dir/sysconfig/__main__.py"
+    "$build_python" "$root_dir/tools/patch_sysconfig_ps5.py" \
+        "$runtime_dir/sysconfig/__init__.py"
     mkdir -p "$runtime_dir/ctypes"
     for module in __init__.py _endian.py _layout.py _aix.py util.py wintypes.py; do
         if [ "$module" = __init__.py ]; then
