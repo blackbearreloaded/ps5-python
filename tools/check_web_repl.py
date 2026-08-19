@@ -96,7 +96,10 @@ def main():
         _, _, pending = read_frame(connection, pending)
         pending = evaluate(connection, pending, "print(123)", "123")
         pending = evaluate(connection, pending, "1 + 1", "2")
-        pending = evaluate(connection, pending, "", "", forbidden=("SyntaxError",))
+        for _ in range(3):
+            pending = evaluate(
+                connection, pending, "", "", forbidden=("SyntaxError",)
+            )
         pending = evaluate(connection, pending, "import sys; sys.exit()",
                            "SystemExit", ok=False)
         pending = evaluate(connection, pending, "webrepl_reset_marker = 42", "")
