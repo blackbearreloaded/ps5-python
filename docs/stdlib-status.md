@@ -124,6 +124,30 @@ and statically linked where the upstream module requires them.
 Static dependencies are reproducibly built by `tools/build_zlib_ps5.sh` and
 `tools/build_sqlite3_ps5.sh`. bzip2/lzma support is not yet linked.
 
+## Tier 5 metaprogramming, inspection, and execution status
+
+These modules use the pinned CPython 3.14.7 `Lib/` sources and focused Tier 5
+tests. PS5 startup and source-layout limitations are recorded explicitly.
+
+| Module | PS5 status | Included and tested | Missing or limited |
+| --- | --- | --- | --- |
+| `inspect` | Official wrapper | Predicates, signatures, argument binding, members, frames, and source lookup | Source recovery is unavailable for launcher-executed in-memory scripts; full upstream coverage pending |
+| `ast` | Official wrapper plus native `_ast` | Parsing, literal evaluation, tree walking, transformations, locations, dump, and unparse | Full compiler/error-location and regression coverage pending |
+| `dis` | Official wrapper plus native bytecode metadata | Instruction iteration, `Bytecode`, code info, and disassembly | Version-specific opcode and complete regression coverage pending |
+| `importlib` | Official package subset | `import_module`, `find_spec`, machinery finders/loaders, relative resolution, and ABCs | Full meta-path, zip/import hook, cache invalidation, and loader regression coverage pending |
+| `abc` | Official wrapper plus native `_abc` | Abstract methods, registration, virtual subclasses, and instance checks | Full cache-token and registry stress coverage pending |
+| `contextlib` | Official wrapper | `nullcontext`, `contextmanager`, `ExitStack`, and `suppress` | Async/context decorator edge cases and full coverage pending |
+| `gc` | Native built-in | Enable/disable state and explicit collection | PS5 allocator tuning and debug hooks remain unverified |
+| `site` | Official wrapper bundled | Prefix/user-site queries and startup-safe import | Automatic site customization is intentionally disabled by the PS5 launcher |
+| `sysconfig` | Official package with PS5 static-build fallback | Schemes, paths, platform, Python version, and config variables | Complete generated build-variable parity and installation-layout coverage pending |
+| `weakref` | Official wrapper plus native weakref support | Weak-reference lifecycle and collection | Proxy/finalizer stress and full regression coverage pending |
+| `codecs` | Official wrapper plus native `_codecs` | Registry lookup and UTF-8 transforms | Full codec alias/error-handler and incremental-stream coverage pending |
+| `types` | Official wrapper plus native built-in types | `SimpleNamespace`, mapping proxies, and dynamic function types | Full dynamic-class/descriptor coverage pending |
+
+The focused tests are `tests/stdlib/test_tier5_inspection.py`,
+`test_tier5_import.py`, and `test_tier5_runtime.py`; their upstream mapping is
+recorded in `tests/UPSTREAM_TESTS.md`.
+
 ## `os`
 
 Status: Python-level POSIX wrapper and core filesystem operations included.
