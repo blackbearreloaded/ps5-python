@@ -15,8 +15,8 @@ The existing PS5 runtime already provides its important lower-level pieces:
 - `urllib.parse`, `io`, `platform`, `os`, and `time` for the WSGI adapters;
 - `email`/HTTP header support and the standard typing/collections helpers.
 
-The initial target should be a single-process WSGI server, followed by an
-optional threaded variant. A threaded WSGI server can be expressed using the
+The initial target was a single-process WSGI server, followed by an optional
+threaded variant. Both are now validated. A threaded WSGI server can be expressed using the
 same standard-library mix-in used by `http.server`:
 
 ```python
@@ -46,9 +46,10 @@ that is the minimum evidence needed before trying a real framework.
 current PS5 runtime also has these known constraints:
 
 - IPv6 is disabled; bind and test with IPv4/loopback addresses.
-- `subprocess` child execution is unavailable, so Gunicorn's normal master and
-  worker lifecycle cannot run yet. `ProcessPoolExecutor` and pre-fork workers
-  are out of scope for this stage.
+- `subprocess` child execution is still unavailable for arbitrary external
+  commands, but Gunicorn's own in-process `fork()` master/worker lifecycle is
+  validated for the sync TCP worker. `ProcessPoolExecutor` and spawn-based
+  workers remain out of scope.
 - The socket and HTTP layers have import and smoke-test coverage, but not the
   complete upstream HTTP server, keep-alive, malformed-request, timeout, and
   load coverage.
@@ -58,11 +59,12 @@ current PS5 runtime also has these known constraints:
   complete package: `handlers.py`, `headers.py`, `simple_server.py`, `types.py`,
   `util.py`, and `validate.py`.
 
-Waitress is a reasonable later candidate for a more robust threaded server, but
-it is third-party code and is not present in this source tree. Flask's
-development server is also not an independent target: Flask brings Werkzeug,
-Jinja, Click, and additional packaging/runtime dependencies. Neither should
-be added until the standard-library WSGI smoke test passes on PS5.
+Gunicorn 23.0.0 is now vendored for the supported sync pre-fork path; see
+`docs/gunicorn-foundation.md` for its lifecycle contract and limitations.
+Waitress remains a reasonable later candidate for a more robust threaded
+server, but it is third-party code and is not present in this source tree.
+Flask's development server is also not an independent target: Flask brings
+Werkzeug, Jinja, Click, and additional packaging/runtime dependencies.
 
 ## Upstream test basis
 
