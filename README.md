@@ -93,6 +93,9 @@ Tier 9 core and legacy utilities are included where feasible: `__future__`,
 `getopt`, `pydoc`, `webbrowser`, and `symtable`. `turtle` remains omitted
 because it requires the unavailable Tcl/Tk GUI stack; browser and interactive
 terminal launch paths are documented as headless-PS5 limitations.
+The official `wsgiref` reference server is also bundled. Single-process and
+threaded loopback WSGI requests pass on PS5; Flask/Werkzeug and Gunicorn remain
+separate packaging and process-lifecycle work.
 
 ## Build the first PS5 ELF
 
