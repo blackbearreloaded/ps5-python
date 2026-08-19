@@ -56,7 +56,6 @@ TEST_FILES = (
     "test_tier8_protocols.py",
     "test_tier9_legacy.py",
     "test_tier9_core.py",
-    "test_tier9_legacy.py",
     "test_posix_boundary.py",
     "test_process.py",
     "test_network.py",
