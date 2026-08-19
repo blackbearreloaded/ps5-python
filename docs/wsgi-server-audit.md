@@ -34,11 +34,11 @@ httpd = make_server(
 httpd.serve_forever()
 ```
 
-The first PS5 smoke test should use loopback, a small WSGI application, and a
-second client request while the first handler is blocked. It should verify the
-status line, headers, body, WSGI environment, request shutdown, and
-`server.shutdown()`/`server_close()` from a controlling thread. This is the
-minimum evidence needed before trying a real framework.
+The current focused `tests/stdlib/test_wsgi.py` smoke test uses loopback, a
+small WSGI application, and a controlling thread to verify the status line,
+headers, body, WSGI environment, and request shutdown. A follow-up threaded
+case should add a second client request while the first handler is blocked;
+that is the minimum evidence needed before trying a real framework.
 
 ## Limits and sequencing
 
@@ -66,7 +66,7 @@ be added until the standard-library WSGI smoke test passes on PS5.
 
 ## Upstream test basis
 
-The focused test should be adapted from the pinned CPython tests
+The focused tests are adapted from the pinned CPython tests
 `Lib/test/test_wsgiref.py`, `Lib/test/test_httpservers.py`, and the WSGI server
 helpers used by `Lib/test/test_asyncio/utils.py`. Preserve the protocol and
 lifecycle assertions while omitting subprocess, IPv6, TLS-certificate-store,
