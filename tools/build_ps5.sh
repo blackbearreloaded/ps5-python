@@ -249,6 +249,17 @@ build_runtime_bundle() {
     for module in __init__.py _common.py _tzpath.py _zoneinfo.py; do
         cp "$source_dir/Lib/zoneinfo/$module" "$runtime_dir/zoneinfo/$module"
     done
+    # Vendored Gunicorn 23.0.0.  The package is pure Python; optional
+    # gevent/eventlet workers are retained for import completeness but the
+    # PS5-supported worker is the synchronous TCP worker.
+    rm -rf "$runtime_dir/gunicorn"
+    mkdir -p "$runtime_dir/gunicorn"
+    while IFS= read -r -d '' module; do
+        relative_file="${module#"$root_dir/third_party/gunicorn/"}"
+        target="$runtime_dir/gunicorn/$relative_file"
+        mkdir -p "$(dirname "$target")"
+        cp "$module" "$target"
+    done < <(find "$root_dir/third_party/gunicorn" -type f -name '*.py' -print0 | sort -z)
     mkdir -p "$runtime_dir/importlib"
     for module in __init__.py _abc.py abc.py machinery.py util.py; do
         cp "$source_dir/Lib/importlib/$module" "$runtime_dir/importlib/$module"

@@ -95,7 +95,10 @@ because it requires the unavailable Tcl/Tk GUI stack; browser and interactive
 terminal launch paths are documented as headless-PS5 limitations.
 The official `wsgiref` reference server is also bundled. Single-process and
 threaded loopback WSGI requests pass on PS5; Flask/Werkzeug and Gunicorn remain
-separate packaging and process-lifecycle work.
+separate framework packaging. Gunicorn 23.0.0's pure-Python package and sync
+HTTP worker are now vendored and import-tested; its pre-fork supervisor and
+signal/re-exec lifecycle are enabled only after the corresponding PS5 process
+foundation is validated.
 
 ## Build the first PS5 ELF
 

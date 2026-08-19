@@ -68,6 +68,7 @@ adaptation policy, not a replacement for CPython's complete regression suite.
 | `stdlib/test_tier9_core.py` | `test_future_stmt.py`, `test_marshal.py`, `test_copyreg.py`, `test_thread.py` (portable core subset) |
 | `stdlib/test_wsgi.py` | `test_wsgiref.py` (loopback server, environment, validation, and HTTP response subset) |
 | `stdlib/test_wsgi_threaded.py` | `test_wsgiref.py`, `test_httpservers.py` (ThreadingMixIn concurrency and shutdown subset) |
+| `stdlib/test_gunicorn.py` | Gunicorn 23.0.0 sync worker import and HTTP parser smoke checks, using the CPython WSGI/HTTP request boundary cases |
 | `stdlib/test_gunicorn_foundation.py` | `test_os.py`, `test_signal.py`, `test_socket.py` (pre-fork listener inheritance, worker reaping, and SIGCHLD subset) |
 | `stdlib/test_posix_boundary.py` | `test_os.py`, `test_signal.py` |
 | `stdlib/test_process.py` | `test_os.py` (`fork`, `waitpid`) |

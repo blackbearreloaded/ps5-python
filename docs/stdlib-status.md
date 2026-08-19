@@ -322,11 +322,14 @@ request, and controlled server shutdown using `ThreadingMixIn`.
 | Module | PS5 status | Included and tested | Missing or limited |
 | --- | --- | --- | --- |
 | `wsgiref` | Official package bundled | Single-process and threaded loopback request/response, concurrency, and shutdown | Full CGI, signal, malformed-request, keep-alive, and high-throughput coverage pending |
+| `gunicorn` 23.0.0 | Vendored pure-Python package bundled | Official sync worker, HTTP parser, TCP configuration imports, and worker-class resolution | Pre-fork master, signal supervision, daemon/re-exec, Unix sockets, `fcntl` hardening, and optional gevent/eventlet workers require additional PS5 foundations |
 
 This establishes the application/server interface needed by Flask-style WSGI
-applications and validates a basic threaded server path. It does not provide
-Flask, Werkzeug, Gunicorn, or a production worker supervisor. Those remain
-follow-up packaging and process-lifecycle work.
+applications and validates a basic threaded server path. Gunicorn's official
+23.0.0 package is now available for the sync-worker path; the parent process
+and worker lifecycle remain a separate PS5 foundation checkpoint. The package
+does not silently enable daemonization, re-exec, Unix-domain sockets, or
+third-party async workers on this target.
 
 ## `os`
 
