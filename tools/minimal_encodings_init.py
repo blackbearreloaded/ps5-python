@@ -16,6 +16,12 @@ def search_function(encoding):
         '646',
         'idna',
         'cp437',
+        'latin_1',
+        'iso8859_1',
+        'iso_8859_1',
+        'latin1',
+        'latin',
+        'l1',
     ):
         return None
     if normalized == 'utf_8':
@@ -27,6 +33,9 @@ def search_function(encoding):
     if normalized == 'cp437':
         from . import cp437
         return cp437.getregentry()
+    if normalized in ('latin_1', 'iso8859_1', 'iso_8859_1', 'latin1', 'latin', 'l1'):
+        from . import latin_1
+        return latin_1.getregentry()
     from . import ascii
     return ascii.getregentry()
 
