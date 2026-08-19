@@ -186,9 +186,15 @@ build_runtime_bundle() {
         cp "$source_dir/Lib/http/$module" "$runtime_dir/http/$module"
     done
     mkdir -p "$runtime_dir/email"
-    for module in "$source_dir"/Lib/email/*.py; do
-        cp "$module" "$runtime_dir/email/$(basename "$module")"
-    done
+    # email.mime and the other subpackages are required by smtplib/mailbox.
+    # Keep the complete official package tree so imports do not depend on the
+    # host Python installation.
+    while IFS= read -r -d '' module; do
+        relative_file="${module#"$source_dir/Lib/email/"}"
+        target="$runtime_dir/email/$relative_file"
+        mkdir -p "$(dirname "$target")"
+        cp "$module" "$target"
+    done < <(find "$source_dir/Lib/email" -type f -name '*.py' -print0 | sort -z)
     mkdir -p "$runtime_dir/unittest"
     for module in "$source_dir"/Lib/unittest/*.py; do
         cp "$module" "$runtime_dir/unittest/$(basename "$module")"
@@ -200,6 +206,9 @@ build_runtime_bundle() {
     mkdir -p "$runtime_dir/html"
     for module in "$source_dir"/Lib/html/*.py; do
         cp "$module" "$runtime_dir/html/$(basename "$module")"
+    done
+    for module in ftplib.py poplib.py imaplib.py smtplib.py mailbox.py; do
+        cp "$source_dir/Lib/$module" "$runtime_dir/$module"
     done
     cp "$source_dir/Lib/pprint.py" "$runtime_dir/pprint.py"
     cp "$source_dir/Lib/runpy.py" "$runtime_dir/runpy.py"
