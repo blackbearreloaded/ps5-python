@@ -99,9 +99,9 @@ assert binascii.unhexlify(b"505335") == b"PS5"
 assert binascii.crc32(b"123456789") == 0xCBF43926
 
 
-# CPython Lib/test/test_zoneinfo: the package and its explicit fixed-offset
-# constructor are always available.  Named zones depend on a PS5 tzdata
-# deployment, so that optional check is reported rather than failing startup.
+# CPython Lib/test/test_zoneinfo: the package is always importable. Named zones
+# depend on a PS5 tzdata deployment, so that optional check is reported rather
+# than failing startup.
 try:
     from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 except ImportError:
