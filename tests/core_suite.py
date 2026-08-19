@@ -31,6 +31,7 @@ TEST_FILES = (
     "test_dns.py",
     "test_core_modules.py",
     "test_ssl_hashlib.py",
+    "test_tls_handshake.py",
     "test_thread_context.py",
     "test_concurrency.py",
     "test_data_formats.py",
