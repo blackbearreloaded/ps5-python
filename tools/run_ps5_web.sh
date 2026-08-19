@@ -129,7 +129,7 @@ deploy_pid=$!
 
 ready=0
 for attempt in $(seq 1 20); do
-    if curl --fail --silent --show-error \
+    if curl --connect-timeout 2 --max-time 3 --fail --silent --show-error \
         "http://$ps5_host:$web_port/api/status" >/dev/null 2>&1; then
         ready=1
         break
@@ -150,13 +150,13 @@ if [ "${PS5_WEB_CHECK:-0}" = "1" ]; then
     python3 "$root_dir/tools/check_web_repl.py" \
         --host "$ps5_host" --port "$web_port"
     echo "Apps:"
-    curl --fail --silent --show-error "http://$ps5_host:$web_port/api/apps"
+    curl --connect-timeout 2 --max-time 5 --fail --silent --show-error "http://$ps5_host:$web_port/api/apps"
     echo
-    curl --fail --silent --show-error \
+    curl --connect-timeout 2 --max-time 5 --fail --silent --show-error \
         "http://$ps5_host:$web_port/api/launch?app=hello"
     echo
     for attempt in $(seq 1 20); do
-        logs=$(curl --fail --silent --show-error \
+        logs=$(curl --connect-timeout 2 --max-time 5 --fail --silent --show-error \
             "http://$ps5_host:$web_port/api/logs?since=0")
         if printf '%s' "$logs" | grep -q "Hello from a packaged Python app on PS5"; then
             echo "Live app output: PASS"
@@ -165,7 +165,7 @@ if [ "${PS5_WEB_CHECK:-0}" = "1" ]; then
         sleep 1
     done
     printf '%s\n' "$logs"
-    curl --fail --silent --show-error \
+    curl --connect-timeout 2 --max-time 5 --fail --silent --show-error \
         "http://$ps5_host:$web_port/api/shutdown" >/dev/null
     wait "$deploy_pid" || true
 fi
