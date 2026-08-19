@@ -96,6 +96,11 @@ Static or bundled support now includes:
   native `_bz2` and `_lzma`; round-trip tests pass on host and PS5.
 - Tier 8 omissions: `tkinter`, `curses`, native dbm backends, and `smtpd` are
   unavailable or infeasible on the PS5 target.
+- Tier 9 core modules: interpreter-provided `__main__`, `builtins`, and
+  `marshal`, native `_thread`, and official `__future__.py`/`copyreg.py`
+  wrappers are available. Future feature metadata, marshal round trips,
+  copyreg registration, and low-level thread locks/startup are tested from
+  CPython's official `Lib/test` sources.
 
 ### Security and hashing
 
@@ -413,3 +418,4 @@ coverage remain incomplete.
 - `9efedc4` Bundle latin-1 codec for dbm dumb
 - `aa6324d` Register Latin-1 in PS5 codec bootstrap
 - `dd8146d` Handle PS5 Maildir filesystems without hard links
+- Tier 9 core/internal coverage is tracked in the Tier 9 checkpoint below.
