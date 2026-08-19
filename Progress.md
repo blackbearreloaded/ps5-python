@@ -9,15 +9,15 @@ upstream source commit `823f0323ee6ec1402088b73bce1a38473cac36dc`.
 
 ## Follow-up
 
-- Host validation now passes all 63 discovered scripts. Tests that require PS5
+- Host validation now passes all 66 discovered scripts. Tests that require PS5
   capabilities (fork, `select.poll`, external DNS, and live TLS) skip cleanly
   on desktop Python instead of making the host baseline nondeterministic.
 - Added `tests/stdlib/test_tls_handshake.py` as a separate live PS5 smoke test;
   the PS5 handshake now passes with certificate checking disabled. A selected
   PS5 CA bundle is the next TLS increment.
 - PS5 aggregate suite passes with the profiling, concurrency, Tier 3, Tier 4,
-  Tier 5, Tier 6, Tier 7, and feasible Tier 8 wrappers:
-  `CPYTHON_CORE_SUITE: PASS (62 scripts)`.
+  Tier 5, Tier 6, Tier 7, feasible Tier 8 wrappers, WSGI, and Gunicorn:
+  `CPYTHON_CORE_SUITE: PASS (65 scripts)`.
 
 ## Completed Today
 
@@ -106,8 +106,10 @@ Static or bundled support now includes:
   `turtle` is omitted because PS5 has no Tcl/Tk GUI backend.
 - WSGI boundary: official `wsgiref` is bundled. Single-process and threaded
   loopback requests, WSGI environment propagation, response handling, and
-  controlled shutdown pass on PS5. Gunicorn's pre-fork worker supervisor and
-  Flask/Werkzeug dependency stack remain unvalidated.
+  controlled shutdown pass on PS5. Gunicorn 23.0.0's official sync worker and
+  pre-fork master now serve a loopback request, accept an inherited `fd://`
+  listener, and shut down/reap workers on SIGTERM. Flask/Werkzeug remain
+  separate framework packaging.
 
 ### Security and hashing
 
@@ -133,6 +135,12 @@ Static or bundled support now includes:
   pools, `multiprocessing.Pipe`, and `Process` with an explicit `fork`
   context; Queue/Semaphore/SharedMemory and ProcessPoolExecutor are recorded
   as platform limitations.
+- Vendored Gunicorn 23.0.0's pure-Python package and wired it into both PS5
+  runtime upload paths. The official sync worker, arbiter pre-fork lifecycle,
+  inherited TCP listeners, SIGTERM/SIGCHLD handling, and clean `waitpid()`
+  reaping pass `tests/stdlib/test_gunicorn_server.py`. Daemon/re-exec,
+  Unix-domain sockets, plugin entry points, and optional async workers remain
+  explicitly unsupported.
 - Statically linked native `array` for multiprocessing reduction support.
 - Verified concrete `pathlib.Path` operations and tempfile context cleanup;
   patched `shutil.rmtree` to use its PS5-compatible path-based fallback.

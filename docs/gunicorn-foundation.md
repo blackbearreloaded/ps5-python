@@ -6,46 +6,42 @@ Gunicorn.
 
 ## What is now validated
 
-`tests/stdlib/test_gunicorn_foundation.py` is a bounded, import-light smoke
-test based on the pinned CPython `Lib/test/test_os.py`, `test_signal.py`, and
-`test_socket.py` behavior checks. On PS5 it verifies:
+Gunicorn 23.0.0 is vendored under `third_party/gunicorn` and copied into the
+CPython **3.14.7** PS5 runtime bundle. The supported path is the official
+sync worker with an IPv4 TCP listener. `tests/stdlib/test_gunicorn_server.py`
+is adapted from the pinned CPython `Lib/test/test_wsgiref.py`,
+`test_httpservers.py`, `test_os.py`, and `test_signal.py` behavior checks. On
+PS5 it verifies:
 
-- an arbiter-created IPv4 listening socket can be inherited by forked workers;
-- a worker can wrap and own its inherited descriptor with
-  `socket.socket(fileno=...)` and serve a request. PS5 currently has no
-  working `dup()`/`dup2()`, so the child must close its inherited copy only
-  after the worker wrapper is done;
-- two pre-fork workers can independently accept and complete requests;
-- the arbiter can send `SIGTERM` and reap a blocked worker with `waitpid()`;
-- `SIGCHLD` handlers can be installed and restored around worker reaping.
+- the Gunicorn arbiter creates a TCP listener and forks a sync worker;
+- the worker parses and serves a real loopback WSGI request;
+- the master receives `SIGTERM`, shuts down the worker, and exits cleanly;
+- an already-open `fd://` listener is handed to the arbiter without
+  `socket.fromfd()`; PS5 workers wrap inherited descriptors directly;
+- the lower-level listener test also covers two independent pre-fork workers,
+  `waitpid()` reaping, and `SIGCHLD` installation/restoration.
 
 The test uses only loopback IPv4, one request per worker, and bounded blocking
 operations. It is skipped by the desktop host suite because Windows does not
 provide the POSIX `fork()` boundary being measured.
 
-## Remaining Gunicorn foundation
+## Deliberate PS5 limits
 
-The standard-library boundary is sufficient for a small synchronous
-pre-fork prototype, but it is not yet a claim that the third-party Gunicorn
-package is bundled. The remaining work is:
+The ordinary bind/listen, pre-fork, sync request, and TERM/CHLD supervision
+path is now usable for an embedded or CLI-loaded WSGI application. The
+following upstream features remain intentionally outside the PS5 contract:
 
-- bundle and audit Gunicorn's official release dependencies (`gunicorn` itself
-  is not part of CPython);
-- implement an arbiter loop with worker-count, restart, and graceful-shutdown
-  policy;
-- validate inherited listener behavior across repeated worker generations;
-- add timeout, abnormal-exit, and signal-escalation handling;
-- complete descriptor lifecycle checks for worker stdout/stderr and access
-  logging;
-- keep `spawn`, `forkserver`, `ProcessPoolExecutor`, queues, and shared-memory
-  paths out of scope until their missing process-launch primitives are ready.
+- daemonization and USR2 re-exec, which require descriptor duplication and a
+  second executable launch;
+- Unix-domain sockets, because the PS5 socket build has no `AF_UNIX`;
+- entry-point plugin discovery (`importlib.metadata` is not bundled);
+- gevent, eventlet, and other optional asynchronous worker classes;
+- process-pool, spawn, and forkserver integrations, which are separate from
+  Gunicorn's forked sync workers.
 
-The current PS5 `subprocess` limitation remains important: Gunicorn's normal
-CLI entry point and configuration discovery may invoke external processes or
-shell helpers. The first useful target is therefore an embedded, synchronous
-WSGI launcher that receives an application callable and an already-created
-listener, followed by the package's ordinary arbiter once its imports and
-worker lifecycle are validated.
+Gunicorn's timeout, worker replacement, HUP reload, and signal escalation code
+is retained from the official release; expand the bounded PS5 tests before
+advertising those less common control paths for production workloads.
 
 ## Reference basis
 

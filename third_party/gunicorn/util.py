@@ -34,7 +34,10 @@ except ImportError:
 try:
     import importlib.metadata as importlib_metadata
 except (ModuleNotFoundError, ImportError):
-    import importlib_metadata
+    # The PS5 runtime intentionally omits the package-metadata stack.  The
+    # supported sync worker is resolved from Gunicorn's built-in table, so
+    # entry-point discovery is unavailable rather than blocking imports.
+    importlib_metadata = None
 
 from gunicorn.errors import AppImportError
 from gunicorn.workers import SUPPORTED_WORKERS
@@ -67,6 +70,8 @@ except ImportError:
 
 
 def load_entry_point(distribution, group, name):
+    if importlib_metadata is None:
+        raise ImportError("importlib.metadata is unavailable on PS5")
     dist_obj = importlib_metadata.distribution(distribution)
     eps = [ep for ep in dist_obj.entry_points
            if ep.group == group and ep.name == name]

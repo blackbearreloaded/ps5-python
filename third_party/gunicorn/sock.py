@@ -15,14 +15,23 @@ from gunicorn import util
 
 class BaseSocket:
 
-    def __init__(self, address, conf, log, fd=None):
+    def __init__(self, address, conf, log, fd=None, sock=None):
         self.log = log
         self.conf = conf
 
         self.cfg_addr = address
-        if fd is None:
+        if sock is not None:
+            bound = True
+        elif fd is None:
             sock = socket.socket(self.FAMILY, socket.SOCK_STREAM)
             bound = False
+        elif sys.platform.startswith("freebsd"):
+            # The PS5 socket build does not implement socket.fromfd(), which
+            # duplicates a descriptor.  A forked Gunicorn worker owns the
+            # inherited descriptor directly, so keep that same ownership
+            # model for fd:// and systemd-style listener handoff.
+            sock = socket.socket(self.FAMILY, socket.SOCK_STREAM, fileno=fd)
+            bound = True
         else:
             sock = socket.fromfd(fd, self.FAMILY, socket.SOCK_STREAM)
             os.close(fd)
@@ -171,6 +180,15 @@ def create_sockets(conf, log, fds=None):
         raise ValueError('keyfile "%s" does not exist' % conf.keyfile)
 
     # sockets are already bound
+    if fdaddr and sys.platform.startswith("freebsd"):
+        for fd in fdaddr:
+            sock = socket.socket(fileno=fd)
+            sock_name = sock.getsockname()
+            sock_type = _sock_type(sock_name)
+            listener = sock_type(sock_name, conf, log, sock=sock)
+            listeners.append(listener)
+        return listeners
+
     if fdaddr:
         for fd in fdaddr:
             sock = socket.fromfd(fd, socket.AF_UNIX, socket.SOCK_STREAM)
