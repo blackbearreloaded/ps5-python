@@ -23,16 +23,6 @@ def frame(payload, opcode=1):
     return header + mask + masked
 
 
-def read_exact(connection, size):
-    data = b""
-    while len(data) < size:
-        chunk = connection.recv(size - len(data))
-        if not chunk:
-            raise RuntimeError("WebSocket closed before a complete frame")
-        data += chunk
-    return data
-
-
 def read_frame(connection, pending=b""):
     while len(pending) < 2:
         pending += connection.recv(1024)
@@ -53,6 +43,20 @@ def read_frame(connection, pending=b""):
         pending += connection.recv(1024)
     payload = pending[:length]
     return first & 0x0F, payload, pending[length:]
+
+
+def evaluate(connection, pending, source, expected):
+    connection.sendall(frame(source if source.endswith("\n") else source + "\n"))
+    while True:
+        opcode, payload, pending = read_frame(connection, pending)
+        if opcode != 1:
+            continue
+        event = json.loads(payload.decode())
+        if event.get("type") != "repl":
+            continue
+        assert event.get("ok") is True
+        assert expected in event.get("data", "")
+        return pending
 
 
 def main():
@@ -85,15 +89,8 @@ def main():
             raise RuntimeError("WebSocket upgrade failed")
         # The server sends status first, followed by the current log buffer.
         _, _, pending = read_frame(connection, pending)
-        connection.sendall(frame("1 + 2"))
-        while True:
-            opcode, payload, pending = read_frame(connection, pending)
-            if opcode == 1:
-                event = json.loads(payload.decode())
-                if event.get("type") == "repl":
-                    assert event.get("ok") is True
-                    assert "3" in event.get("data", "")
-                    break
+        pending = evaluate(connection, pending, "print(123)", "123")
+        pending = evaluate(connection, pending, "1 + 1", "2")
         connection.sendall(frame(b"", opcode=8))
     print("WEBREPL_CHECK: PASS")
 
