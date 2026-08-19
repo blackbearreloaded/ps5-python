@@ -115,6 +115,21 @@ make host-build
 make ps5-core
 ```
 
+Run the source quality checks from WSL before building:
+
+```sh
+make format       # apply the checked-in clang-format policy
+make format-check # verify formatting without modifying files
+make tidy         # run clang-tidy with the PS5 compile definitions
+make lint         # run format-check and tidy
+```
+
+The project-owned C and header files under `src/` are formatted using the
+checked-in [`.clang-format`](.clang-format) policy. Clang-Tidy uses
+[`.clang-tidy`](.clang-tidy) and analyzes those files with C11 and the same
+PS5-facing include paths used by the launcher build. Vendored CPython sources
+are intentionally excluded.
+
 PS5 builds use all WSL CPU threads by default and automatically use `ccache`
 when available. Select the compiler cache explicitly with `PS5_CACHE=ccache`
 or `PS5_CACHE=sccache`; disable caching with `PS5_CACHE=none` (or the legacy

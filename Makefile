@@ -6,7 +6,18 @@ PS5_JOBS ?= $(shell nproc 2>/dev/null || echo 2)
 SCRIPT ?= examples/main.py
 APP ?= apps/hello
 
-.PHONY: host-test host-suite host-lifetime host-app package-app host-build source-fetch source-check ps5-check ps5-configure ps5-core ps5-run ps5-test ps5-suite ps5-lifetime ps5-app ps5-web ps5-web-test ps5-kill clean
+.PHONY: format format-check tidy lint host-test host-suite host-lifetime host-app package-app host-build source-fetch source-check ps5-check ps5-configure ps5-core ps5-run ps5-test ps5-suite ps5-lifetime ps5-app ps5-web ps5-web-test ps5-kill clean
+
+format:
+	bash tools/run_clang_format.sh
+
+format-check:
+	bash tools/run_clang_format.sh --check
+
+tidy:
+	bash tools/run_clang_tidy.sh
+
+lint: format-check tidy
 
 host-test:
 	$(POWERSHELL) -NoProfile -ExecutionPolicy Bypass -File host/run_core_tests.ps1

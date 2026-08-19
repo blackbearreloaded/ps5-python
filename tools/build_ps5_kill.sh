@@ -13,5 +13,5 @@ fi
 source "$sdk_dir/toolchain/prospero.sh"
 mkdir -p "$(dirname "$output")"
 "$sdk_dir/bin/prospero-clang" -DCPYTHON_PS5 \
-    -o "$output" "$root_dir/src/ps5_kill.c"
+    -o "$output" "$root_dir/src/tools/ps5_kill.c"
 echo "Built $output"

@@ -425,9 +425,9 @@ ensure_tier6_posix_native_modules() {
 
 build_launcher() {
     if ! needs_rebuild "$launcher" \
-        "$root_dir/src/cpython_runner.c" \
-        "$root_dir/src/cpython_runtime.c" \
-        "$root_dir/src/ps5_time.c" \
+        "$root_dir/src/runtime/cpython_runner.c" \
+        "$root_dir/src/runtime/cpython_runtime.c" \
+        "$root_dir/src/platform/ps5_time.c" \
         "$root_dir/platform/cpython_ps5_host.c" \
         "$build_dir/Modules/config.o" \
         "$build_dir/libpython3.14.a" \
@@ -445,9 +445,9 @@ build_launcher() {
         -I"$source_dir" \
         -I"$source_dir/Include/internal" \
         -o "$launcher" \
-        "$root_dir/src/cpython_runner.c" \
-        "$root_dir/src/cpython_runtime.c" \
-        "$root_dir/src/ps5_time.c" \
+        "$root_dir/src/runtime/cpython_runner.c" \
+        "$root_dir/src/runtime/cpython_runtime.c" \
+        "$root_dir/src/platform/ps5_time.c" \
         "$root_dir/platform/cpython_ps5_host.c" \
         "$build_dir/Modules/config.o" \
         "$build_dir/libpython3.14.a" \
@@ -465,9 +465,17 @@ build_launcher() {
 build_web_launcher() {
     bash "$root_dir/tools/build_libmicrohttpd.sh"
     if ! needs_rebuild "$web_launcher" \
-        "$root_dir/src/cpython_web_launcher.c" \
-        "$root_dir/src/cpython_runtime.c" \
-        "$root_dir/src/ps5_time.c" \
+        "$root_dir/src/web/http_server.c" \
+        "$root_dir/src/web/app_manager.c" \
+        "$root_dir/src/web/http_response.c" \
+        "$root_dir/src/web/main.c" \
+        "$root_dir/src/web/tcp_repl.c" \
+        "$root_dir/src/web/web_utils.c" \
+        "$root_dir/src/web/web_state.c" \
+        "$root_dir/src/web/log_capture.c" \
+        "$root_dir/src/web/websocket.c" \
+        "$root_dir/src/runtime/cpython_runtime.c" \
+        "$root_dir/src/platform/ps5_time.c" \
         "$root_dir/platform/cpython_ps5_host.c" \
         "$build_dir/Modules/config.o" \
         "$build_dir/libpython3.14.a" \
@@ -489,9 +497,17 @@ build_web_launcher() {
         -I"$source_dir" \
         -I"$source_dir/Include/internal" \
         -o "$web_launcher" \
-        "$root_dir/src/cpython_web_launcher.c" \
-        "$root_dir/src/cpython_runtime.c" \
-        "$root_dir/src/ps5_time.c" \
+        "$root_dir/src/web/http_server.c" \
+        "$root_dir/src/web/app_manager.c" \
+        "$root_dir/src/web/http_response.c" \
+        "$root_dir/src/web/main.c" \
+        "$root_dir/src/web/tcp_repl.c" \
+        "$root_dir/src/web/web_utils.c" \
+        "$root_dir/src/web/web_state.c" \
+        "$root_dir/src/web/log_capture.c" \
+        "$root_dir/src/web/websocket.c" \
+        "$root_dir/src/runtime/cpython_runtime.c" \
+        "$root_dir/src/platform/ps5_time.c" \
         "$root_dir/platform/cpython_ps5_host.c" \
         "$build_dir/Modules/config.o" \
         "$build_dir/libpython3.14.a" \

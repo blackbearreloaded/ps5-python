@@ -3,14 +3,13 @@
 #include "cpython_ps5_host.h"
 #include "cpython_runtime.h"
 
-int
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
     char script_path[256];
     cpython_run_options_t options;
 
-    if (cpython_ps5_select_script(argc, argv, script_path,
-                                  sizeof script_path) != 0) {
+    if (cpython_ps5_select_script(argc, argv, script_path, sizeof script_path) != 0)
+    {
         cpython_ps5_notify("CPYTHON PATH FAIL");
         return 2;
     }

@@ -299,23 +299,34 @@ may remain SDK- or kernel-dependent.
 
 ### Native launcher split
 
-Refactor the current large `src/cpython_web_launcher.c` into focused modules:
+The native launcher has been reorganized into purpose-based source modules:
 
 ```text
-src/web/
-  launcher_main.c       argument parsing, lifecycle, shutdown
-  http_server.c/.h      libmicrohttpd routes and static files
-  websocket.c/.h        RFC 6455 framing and live event fan-out
-  tcp_repl.c/.h         raw line-oriented REPL listener
-  runtime_bridge.c/.h   CPython evaluation/reset and stream capture
-  job_manager.c/.h      app/script lifecycle and stop policy
-  system_info.c/.h      PS5 capability adapters and telemetry
-  web_state.c/.h        shared status, logs, and synchronization
+src/
+  runtime/
+    cpython_runner.c       standalone interpreter entry point
+    cpython_runtime.c      CPython initialization and evaluation
+    cpython_core_smoke.c   core runtime smoke entry point
+  platform/
+    ps5_time.c              PS5 clock compatibility wrapper
+  tools/
+    ps5_kill.c              PS5 process utility entry point
+  web/
+    main.c                  web launcher entry point and lifecycle
+    http_server.c/.h        libmicrohttpd routes and dispatch
+    http_response.c/.h      HTTP response and static-file helpers
+    websocket.c/.h          WebSocket broadcast and client transport
+    tcp_repl.c/.h           raw line-oriented REPL listener
+    app_manager.c/.h        application discovery and lifecycle
+    log_capture.c/.h        stdout/stderr capture and log ring buffer
+    web_state.c/.h          shared status and synchronization state
+    web_utils.c/.h          socket and JSON helpers
 ```
 
-The split should preserve behavior first. Each module gets a narrow header and
-unit-testable host fallback where possible. The final ELF must keep the same
-static-linking model and must not introduce a dynamic runtime dependency.
+The split preserves the existing static-linking model. Headers under `src/`
+are private module interfaces; public runtime/platform headers remain under
+`include/`. New launcher modules should continue to use narrow headers and
+avoid reintroducing shared implementation state into route handlers.
 
 ### Frontend split
 
