@@ -85,7 +85,7 @@
   function resetReplPrompt() {
     replTerminal.textContent = "CPython 3.14.7 WebREPL\n" +
       "Connected to the running python-web.elf.\n" +
-      "Use Enter to evaluate a line; Shift+Enter inserts a new line.\n\n";
+      "Use Enter to evaluate a line; Shift+Enter inserts a new line.\n";
     replShell.scrollTop = replShell.scrollHeight;
     state.replCommandOpen = false;
   }
