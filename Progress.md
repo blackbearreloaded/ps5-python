@@ -9,14 +9,15 @@ upstream source commit `823f0323ee6ec1402088b73bce1a38473cac36dc`.
 
 ## Follow-up
 
-- Host validation now passes all 56 discovered scripts. Tests that require PS5
+- Host validation now passes all 59 discovered scripts. Tests that require PS5
   capabilities (fork, `select.poll`, external DNS, and live TLS) skip cleanly
   on desktop Python instead of making the host baseline nondeterministic.
 - Added `tests/stdlib/test_tls_handshake.py` as a separate live PS5 smoke test;
   the PS5 handshake now passes with certificate checking disabled. A selected
   PS5 CA bundle is the next TLS increment.
 - PS5 aggregate suite passes with the profiling, concurrency, Tier 3, Tier 4,
-  Tier 5, Tier 6, and Tier 7 wrappers: `CPYTHON_CORE_SUITE: PASS (55 scripts)`.
+  Tier 5, Tier 6, Tier 7, and feasible Tier 8 wrappers:
+  `CPYTHON_CORE_SUITE: PASS (58 scripts)`.
 
 ## Completed Today
 
@@ -88,8 +89,13 @@ Static or bundled support now includes:
   `pstats`, `tracemalloc`, `doctest`, `py_compile`, `compileall`, `code`,
   `codeop`, `readline`, and `rlcompleter`
 - Tier 8 feasible utility wrappers: `graphlib`, `statistics`, `cmath`,
-  `ipaddress`, `colorsys`, `calendar`, `zoneinfo`, `wave`, and `binascii`;
-  named timezone data remains a deployment responsibility.
+  `ipaddress`, `colorsys`, `calendar`, `zoneinfo`, `wave`, `binascii`,
+  `ftplib`, `poplib`, `imaplib`, `smtplib`, `mailbox`, `email`, `shelve`, and
+  pure `dbm.dumb`; named timezone data remains a deployment responsibility.
+- Tier 8 compression support: static bzip2 1.0.8 and xz/liblzma 5.6.3 with
+  native `_bz2` and `_lzma`; round-trip tests pass on host and PS5.
+- Tier 8 omissions: `tkinter`, `curses`, native dbm backends, and `smtpd` are
+  unavailable or infeasible on the PS5 target.
 
 ### Security and hashing
 
@@ -206,7 +212,7 @@ Static or bundled support now includes:
 The final PS5 aggregate run completed with:
 
 ```text
-CPYTHON_CORE_SUITE: PASS (55 scripts)
+CPYTHON_CORE_SUITE: PASS (58 scripts)
 ```
 
 The suite includes adapted tests based on the pinned CPython `Lib/test` tree.
@@ -222,9 +228,9 @@ CPYTHON_PS5_LIFETIME: PASS (3 process runs)
 
 ### Compression
 
-zlib 1.3.1 is statically linked and tested through the native `zlib` module,
-gzip, ZIP, and TAR wrappers. `_bz2` and `_lzma` remain unimplemented until
-their external PS5 dependencies are built.
+zlib 1.3.1, bzip2 1.0.8, and xz/liblzma 5.6.3 are statically linked and
+tested through the native `zlib`, `_bz2`, and `_lzma` modules plus gzip, ZIP,
+and TAR wrappers. Full upstream compression stress coverage remains pending.
 
 ### IPv6
 
@@ -306,7 +312,6 @@ coverage remain incomplete.
 ## What Is Missing
 
 - Certificate-verified HTTPS with an explicit PS5 CA-store strategy.
-- Static bzip2 and xz dependencies.
 - Full `multiprocessing` and subprocess integration.
 - Full upstream regression coverage for the Tier 2 utility modules; the
   supported subset and each known gap are listed in `docs/stdlib-status.md`.
@@ -321,7 +326,7 @@ coverage remain incomplete.
 
 ## Next Steps
 
-1. Build and integrate static bzip2/xz, then expand compression coverage.
+1. Expand bzip2/xz streaming and corruption coverage from the upstream tests.
 2. Complete HTTPS handshake and certificate-store strategy using OpenSSL.
 3. Add a minimal HTTP server using the verified IPv4 poll/event-loop layer.
 4. Validate `ctypes` against a safe PS5-native test library or broker API.
@@ -397,3 +402,14 @@ coverage remain incomplete.
 - `e4623cf` Use portable tracemalloc filter pattern
 - `529df8e` Document Tier 7 developer tools
 - `7c9b690` Add feasible Tier 8 utility modules
+- `e7efc20` Record Tier 8 utility checkpoint
+- `8339b88` Clarify zoneinfo test limitation
+- `0aed2fe` Add Tier 8 protocol and mailbox smoke tests
+- `9696ab3` Bundle Tier 8 protocol and mail dependencies
+- `450f7c2` Document Tier 8 protocol and mail support
+- `8b6e4fd` Add Tier 8 compression and persistence support
+- `911de47` Skip Tier 8 persistence filesystem check on host
+- `1253240` Bundle importlib resources for zoneinfo
+- `9efedc4` Bundle latin-1 codec for dbm dumb
+- `aa6324d` Register Latin-1 in PS5 codec bootstrap
+- `dd8146d` Handle PS5 Maildir filesystems without hard links

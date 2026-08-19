@@ -121,8 +121,9 @@ and statically linked where the upstream module requires them.
 | `glob` | Official wrapper | Wildcard expansion in the PS5 temporary directory | Recursive hidden-file and dirfd behavior pending |
 | `fnmatch` | Official wrapper | Shell-style filename matching | Case-normalization and full regression coverage pending |
 
-Static dependencies are reproducibly built by `tools/build_zlib_ps5.sh` and
-`tools/build_sqlite3_ps5.sh`. bzip2/lzma support is not yet linked.
+Static dependencies are reproducibly built by `tools/build_zlib_ps5.sh`,
+`tools/build_sqlite3_ps5.sh`, `tools/build_bzip2_ps5.sh`, and
+`tools/build_xz_ps5.sh`.
 
 ## Tier 5 metaprogramming, inspection, and execution status
 
@@ -134,7 +135,7 @@ tests. PS5 startup and source-layout limitations are recorded explicitly.
 | `inspect` | Official wrapper | Predicates, signatures, argument binding, members, frames, and source lookup | Source recovery is unavailable for launcher-executed in-memory scripts; full upstream coverage pending |
 | `ast` | Official wrapper plus native `_ast` | Parsing, literal evaluation, tree walking, transformations, locations, dump, and unparse | Full compiler/error-location and regression coverage pending |
 | `dis` | Official wrapper plus native bytecode metadata | Instruction iteration, `Bytecode`, code info, and disassembly | Version-specific opcode and complete regression coverage pending |
-| `importlib` | Official package subset | `import_module`, `find_spec`, machinery finders/loaders, relative resolution, and ABCs | Full meta-path, zip/import hook, cache invalidation, and loader regression coverage pending |
+| `importlib` | Official package subset, including `importlib.resources` | `import_module`, `find_spec`, machinery finders/loaders, relative resolution, ABCs, and resource traversal used by `zoneinfo` | Full meta-path, zip/import hook, cache invalidation, and loader regression coverage pending |
 | `abc` | Official wrapper plus native `_abc` | Abstract methods, registration, virtual subclasses, and instance checks | Full cache-token and registry stress coverage pending |
 | `contextlib` | Official wrapper | `nullcontext`, `contextmanager`, `ExitStack`, and `suppress` | Async/context decorator edge cases and full coverage pending |
 | `gc` | Native built-in | Enable/disable state and explicit collection | PS5 allocator tuning and debug hooks remain unverified |
@@ -225,10 +226,20 @@ database stacks are tracked as intentionally omitted.
 | `binascii` | Native static module | Hex conversion and CRC32 | Full ASCII/base64/quoted-printable error coverage pending |
 
 `test_tier8_pure.py` is adapted from the corresponding CPython tests listed in
-`tests/UPSTREAM_TESTS.md`. `tkinter`, `curses`, `dbm`, `shelve`, and desktop or
-interactive terminal integrations remain omitted until PS5 provides the
-required GUI, database, or terminal backends. bzip2/xz compression remains
-tracked separately.
+`tests/UPSTREAM_TESTS.md`.
+
+## Tier 8 compression and persistence status
+
+| Module | PS5 status | Included and tested | Missing or limited |
+| --- | --- | --- | --- |
+| `bz2` | Static bzip2 1.0.8 plus native `_bz2` | Bytes round trip | Full streaming, corruption, and upstream regression coverage pending |
+| `lzma` | Static xz/liblzma 5.6.3 plus native `_lzma` | Bytes round trip | Full filters, containers, and upstream regression coverage pending |
+| `shelve` | Official wrapper bundled | Shelf round trip over `dbm.dumb` | Native dbm-backed locking and full regression coverage pending |
+| `dbm` | Pure package with `dbm.dumb` | Key/value round trip | GDBM/NDBM and other native database backends are unavailable |
+
+`tkinter` and `curses` remain omitted because no Tcl/Tk or curses backend is
+shipped. `smtpd` is absent from CPython 3.14.7 itself. Desktop UI and native
+database backends remain outside the feasible PS5 subset.
 
 ## Tier 8 protocol and mail status
 
@@ -617,9 +628,9 @@ Source and tests:
 - `tests/stdlib/test_data_formats.py`, adapted from `test_csv.py`,
   `test_decimal.py`, and `test_xml_etree.py`
 
-The static zlib 1.3.1 dependency and native `zlib` module are now bundled and
-tested. `_bz2` and `_lzma` remain disabled because their external PS5
-dependencies are not yet built into this workspace.
+The static zlib 1.3.1, bzip2 1.0.8, and xz/liblzma 5.6.3 dependencies and
+their native modules are bundled and round-trip tested. Full upstream
+compression coverage remains pending.
 
 ## Import runtime, filesystem paths, and temporary files
 
