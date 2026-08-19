@@ -9,14 +9,14 @@ upstream source commit `823f0323ee6ec1402088b73bce1a38473cac36dc`.
 
 ## Follow-up
 
-- Host validation now passes all 48 discovered scripts. Tests that require PS5
+- Host validation now passes all 51 discovered scripts. Tests that require PS5
   capabilities (fork, `select.poll`, external DNS, and live TLS) skip cleanly
   on desktop Python instead of making the host baseline nondeterministic.
 - Added `tests/stdlib/test_tls_handshake.py` as a separate live PS5 smoke test;
   the PS5 handshake now passes with certificate checking disabled. A selected
   PS5 CA bundle is the next TLS increment.
-- PS5 aggregate suite passes with the profiling, concurrency, Tier 3, and Tier
-  4 wrappers: `CPYTHON_CORE_SUITE: PASS (47 scripts)`.
+- PS5 aggregate suite passes with the profiling, concurrency, Tier 3, Tier 4,
+  and Tier 5 wrappers: `CPYTHON_CORE_SUITE: PASS (50 scripts)`.
 
 ## Completed Today
 
@@ -77,6 +77,9 @@ Static or bundled support now includes:
 - Tier 4 data/format wrappers: `sqlite3`, `pickle`, `struct`, `bisect`,
   `heapq`, `array`, `operator`, `decimal`, `fractions`, `zlib`, `gzip`,
   `zipfile`, `tarfile`, `base64`, `xml`, `tempfile`, `glob`, and `fnmatch`
+- Tier 5 metaprogramming/inspection wrappers: `inspect`, `ast`, `dis`,
+  `importlib`, `abc`, `contextlib`, `gc`, `site`, `sysconfig`, `weakref`,
+  `codecs`, and `types`
 
 ### Security and hashing
 
@@ -152,12 +155,24 @@ Static or bundled support now includes:
 - Added `tests/stdlib/test_tier4_formats.py`, adapted from the pinned CPython
   pickle, struct, zlib, gzip, ZIP, TAR, SQLite, XML, glob, and fnmatch tests.
 
+### Tier 5 metaprogramming and inspection
+
+- Bundled the official `inspect`, `ast`, and `dis` implementations, including
+  AST unparse support and bytecode metadata.
+- Completed the importlib/ABC package closure and verified finder, loader,
+  relative-import, abstract-method, and virtual-subclass behavior.
+- Bundled `contextlib`, `site`, and `_sitebuiltins`; added the official
+  `sysconfig` package with a static-build fallback for missing generated data.
+- Added focused tests derived from the pinned CPython AST, disassembly,
+  inspection, importlib, ABC, contextlib, GC, site, sysconfig, weakref, codecs,
+  and types tests.
+
 ## Verification
 
 The final PS5 aggregate run completed with:
 
 ```text
-CPYTHON_CORE_SUITE: PASS (47 scripts)
+CPYTHON_CORE_SUITE: PASS (50 scripts)
 ```
 
 The suite includes adapted tests based on the pinned CPython `Lib/test` tree.
@@ -324,3 +339,8 @@ coverage remain incomplete.
 - `3cca2c1` Upload sqlite3 runtime package to PS5
 - `891ce0f` Bundle cp437 codec for ZIP archives
 - `403cc00` Enable cp437 in PS5 codec registry
+- `00ae5aa` Bundle ast unparse dependency and add Tier 5 inspection tests
+- `2fc8b31` Document PS5 inspect source recovery limitation
+- `739b451` Adapt frame source test for PS5 launcher
+- `b6e35d9` Add Tier 5 importlib and abc smoke test
+- `d29ec2e` Bundle Tier 5 runtime utility modules
