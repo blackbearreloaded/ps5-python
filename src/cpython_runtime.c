@@ -18,6 +18,7 @@ static pthread_mutex_t runtime_mutex = PTHREAD_MUTEX_INITIALIZER;
 static int runtime_active;
 static PyInterpreterState *runtime_interpreter;
 static PyThreadState *runtime_main_state;
+static int codecs_registered;
 
 static long
 cpython_ps5_peak_rss(void)
@@ -102,7 +103,11 @@ runtime_initialize(const cpython_run_options_t *options)
 #ifdef CPYTHON_PS5
     cpython_ps5_configure_tempdir();
 #endif
-    PyImport_AppendInittab("_codecs", PyInit__codecs);
+    if (!codecs_registered) {
+        if (PyImport_AppendInittab("_codecs", PyInit__codecs) != 0)
+            return -1;
+        codecs_registered = 1;
+    }
     if (append_module_path(&config, runtime_path) != 0) {
         PyConfig_Clear(&config);
         return -1;
@@ -130,6 +135,24 @@ cpython_ps5_runtime_start(const cpython_run_options_t *options)
     pthread_mutex_lock(&runtime_mutex);
     if (!runtime_active && runtime_initialize(options) != 0)
         result = -1;
+    pthread_mutex_unlock(&runtime_mutex);
+    return result;
+}
+
+int
+cpython_ps5_runtime_reset(const cpython_run_options_t *options)
+{
+    int result;
+
+    pthread_mutex_lock(&runtime_mutex);
+    if (runtime_active) {
+        PyEval_RestoreThread(runtime_main_state);
+        runtime_main_state = NULL;
+        runtime_interpreter = NULL;
+        runtime_active = 0;
+        Py_Finalize();
+    }
+    result = runtime_initialize(options);
     pthread_mutex_unlock(&runtime_mutex);
     return result;
 }

@@ -13,6 +13,7 @@ int cpython_ps5_run_file(const char *script_path,
 
 /* Persistent interpreter services used by the web launcher. */
 int cpython_ps5_runtime_start(const cpython_run_options_t *options);
+int cpython_ps5_runtime_reset(const cpython_run_options_t *options);
 int cpython_ps5_runtime_eval(const char *source, char *output,
                              size_t output_size);
 void cpython_ps5_runtime_stop(void);
