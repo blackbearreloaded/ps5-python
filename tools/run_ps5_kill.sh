@@ -18,7 +18,7 @@ curl --fail --silent --show-error --upload-file \
     "$root_dir/build/ps5/ps5-kill.elf" "$ftp_url$remote_path"
 source "$sdk_dir/toolchain/prospero.sh"
 
-encoded_args="%2F${1}"
+encoded_args="${1}"
 if [ "$#" -eq 2 ]; then
     encoded_args="${encoded_args}%20${2}"
 fi
