@@ -25,12 +25,12 @@
     <section class="workspace">
       <aside class="sidebar">
         <div class="menu-tabs" role="tablist" aria-label="Launcher menus">
-          <button id="menu-apps" class="menu-tab active" type="button"
-                  role="tab" aria-selected="true">Applications</button>
-          <button id="menu-repl" class="menu-tab" type="button"
-                  role="tab" aria-selected="false">Interpreter</button>
+          <button id="menu-repl" class="menu-tab active" type="button"
+                  role="tab" aria-selected="true">Interpreter</button>
+          <button id="menu-apps" class="menu-tab" type="button"
+                  role="tab" aria-selected="false">Applications</button>
         </div>
-        <div id="apps-sidebar">
+        <div id="apps-sidebar" class="hidden">
         <div class="panel-heading">
           <div>
             <p class="eyebrow">Library</p>
@@ -50,7 +50,7 @@
       </aside>
 
       <main class="console-panel">
-        <section id="app-console" class="menu-view">
+        <section id="app-console" class="menu-view hidden">
         <div class="console-heading">
           <div>
             <p class="eyebrow">Execution console</p>
@@ -64,7 +64,7 @@
           <span id="exit-code">Waiting for a run</span>
         </div>
         </section>
-        <section id="repl-console" class="menu-view hidden" aria-hidden="true">
+        <section id="repl-console" class="menu-view" aria-hidden="false">
           <div class="console-heading">
             <div>
               <p class="eyebrow">Embedded WebREPL</p>

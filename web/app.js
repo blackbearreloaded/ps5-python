@@ -27,7 +27,7 @@
   function updateViewUrl(view) {
     const url = new URL(window.location.href);
     if (view === "repl") url.searchParams.set("view", "interpreter");
-    else url.searchParams.delete("view");
+    else url.searchParams.set("view", "applications");
     window.history.replaceState(null, "", url.pathname +
       (url.searchParams.toString() ? "?" + url.searchParams.toString() : "") +
       url.hash);
@@ -354,7 +354,8 @@
   });
   menuApps.addEventListener("click", () => showView("apps"));
   menuRepl.addEventListener("click", () => showView("repl"));
-  showView(new URLSearchParams(window.location.search).get("view") === "interpreter" ? "repl" : "apps", false);
+  const requestedView = new URLSearchParams(window.location.search).get("view");
+  showView(requestedView === "applications" ? "apps" : "repl", false);
   refreshApps();
   connectSocket();
 })();
