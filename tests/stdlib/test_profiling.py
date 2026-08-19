@@ -2,11 +2,46 @@
 
 import dis
 import gc
+import cProfile
+import io
 import os
+import profile
+import pstats
 import struct
 import sys
 import timeit
 import tracemalloc
+
+
+# CPython Lib/test/test_profile.py and test_cprofile.py: both profiler
+# implementations collect Python call statistics and expose the same
+# pstats-compatible interface.
+def profiled_work(value):
+    return sum(range(value))
+
+
+for profiler_class in (cProfile.Profile, profile.Profile):
+    profiler = profiler_class()
+    assert profiler.runcall(profiled_work, 8) == 28
+    profiler.create_stats()
+    if profiler_class is cProfile.Profile:
+        assert any(entry.code is profiled_work.__code__
+                   for entry in profiler.getstats())
+    else:
+        assert any(key[2] == "profiled_work" for key in profiler.stats)
+
+    output = io.StringIO()
+    stats = pstats.Stats(profiler, stream=output)
+    stats.strip_dirs().sort_stats("cumulative").print_stats()
+    assert "profiled_work" in output.getvalue()
+    profile_summary = stats.get_stats_profile()
+    assert any("profiled_work" in key
+               for key in profile_summary.func_profiles)
+
+with cProfile.Profile() as context_profiler:
+    profiled_work(4)
+context_profiler.create_stats()
+assert context_profiler.getstats()
 
 
 # CPython Lib/test/test_timeit.py: reindent, callable timing, repeat, and
