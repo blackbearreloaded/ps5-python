@@ -109,7 +109,7 @@ upload "$runtime_dir/selectors.py" "$remote_runtime/selectors.py"
 for module in os.py stat.py genericpath.py posixpath.py abc.py _collections_abc.py io.py socket.py enum.py types.py signal.py hashlib.py ssl.py base64.py warnings.py contextvars.py _py_warnings.py _weakrefset.py tracemalloc.py csv.py decimal.py fractions.py numbers.py contextlib.py weakref.py copy.py copyreg.py _compat_pickle.py hmac.py random.py bisect.py glob.py fnmatch.py functools.py operator.py reprlib.py linecache.py pickle.py struct.py timeit.py dis.py opcode.py _opcode_metadata.py gzip.py tarfile.py; do
     upload "$runtime_dir/$module" "$remote_runtime/$module"
 done
-for module in threading.py queue.py runpy.py secrets.py tempfile.py datetime.py typing.py annotationlib.py ast.py keyword.py __future__.py argparse.py gettext.py locale.py traceback.py pprint.py textwrap.py codeop.py tokenize.py token.py _colorize.py difflib.py inspect.py calendar.py quopri.py ipaddress.py socketserver.py mimetypes.py subprocess.py shutil.py; do
+for module in threading.py queue.py runpy.py secrets.py tempfile.py datetime.py typing.py annotationlib.py ast.py _ast_unparse.py keyword.py __future__.py argparse.py gettext.py locale.py traceback.py pprint.py textwrap.py codeop.py tokenize.py token.py _colorize.py difflib.py inspect.py calendar.py quopri.py ipaddress.py socketserver.py mimetypes.py subprocess.py shutil.py; do
     upload "$runtime_dir/$module" "$remote_runtime/$module"
 done
 for package in logging string urllib http email unittest asyncio html compression zipfile xml sqlite3; do
@@ -122,7 +122,7 @@ for package in logging string urllib http email unittest asyncio html compressio
     done < <(find "$runtime_dir/$package" -type f -name '*.py' -print0 | sort -z)
 done
 mkdir_remote "$remote_runtime/importlib"
-for module in __init__.py _abc.py machinery.py util.py; do
+for module in __init__.py _abc.py abc.py machinery.py util.py; do
     upload "$runtime_dir/importlib/$module" "$remote_runtime/importlib/$module"
 done
 for package in concurrent multiprocessing; do

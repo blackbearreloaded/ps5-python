@@ -201,12 +201,13 @@ build_runtime_bundle() {
     cp "$source_dir/Lib/typing.py" "$runtime_dir/typing.py"
     cp "$source_dir/Lib/annotationlib.py" "$runtime_dir/annotationlib.py"
     cp "$source_dir/Lib/ast.py" "$runtime_dir/ast.py"
+    cp "$source_dir/Lib/_ast_unparse.py" "$runtime_dir/_ast_unparse.py"
     cp "$source_dir/Lib/keyword.py" "$runtime_dir/keyword.py"
     "$build_python" "$root_dir/tools/patch_shutil_rmtree.py" \
         "$source_dir/Lib/shutil.py" \
         "$runtime_dir/shutil.py"
     mkdir -p "$runtime_dir/importlib"
-    for module in __init__.py _abc.py machinery.py util.py; do
+    for module in __init__.py _abc.py abc.py machinery.py util.py; do
         cp "$source_dir/Lib/importlib/$module" "$runtime_dir/importlib/$module"
     done
     mkdir -p "$runtime_dir/concurrent/futures"
