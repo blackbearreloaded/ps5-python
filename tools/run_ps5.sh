@@ -99,6 +99,8 @@ fi
 upload "$elf" "$remote_elf"
 upload "$script_path" "$remote_script"
 upload "$runtime_dir/codecs.py" "$remote_runtime/codecs.py"
+upload "$runtime_dir/site.py" "$remote_runtime/site.py"
+upload "$runtime_dir/_sitebuiltins.py" "$remote_runtime/_sitebuiltins.py"
 upload "$runtime_dir/encodings/__init__.py" "$remote_runtime/encodings/__init__.py"
 upload "$runtime_dir/encodings/ascii.py" "$remote_runtime/encodings/ascii.py"
 upload "$runtime_dir/encodings/aliases.py" "$remote_runtime/encodings/aliases.py"
@@ -112,7 +114,7 @@ done
 for module in threading.py queue.py runpy.py secrets.py tempfile.py datetime.py typing.py annotationlib.py ast.py _ast_unparse.py keyword.py __future__.py argparse.py gettext.py locale.py traceback.py pprint.py textwrap.py codeop.py tokenize.py token.py _colorize.py difflib.py inspect.py calendar.py quopri.py ipaddress.py socketserver.py mimetypes.py subprocess.py shutil.py; do
     upload "$runtime_dir/$module" "$remote_runtime/$module"
 done
-for package in logging string urllib http email unittest asyncio html compression zipfile xml sqlite3; do
+for package in logging string urllib http email unittest asyncio html compression zipfile xml sqlite3 sysconfig; do
     mkdir_remote "$remote_runtime/$package"
     while IFS= read -r -d '' module_file; do
         relative_file="${module_file#"$runtime_dir/$package/"}"
@@ -150,7 +152,6 @@ mkdir_remote "$remote_runtime/ctypes"
 for module in __init__.py _endian.py _layout.py _aix.py util.py wintypes.py; do
     upload "$runtime_dir/ctypes/$module" "$remote_runtime/ctypes/$module"
 done
-upload "$runtime_dir/sysconfig.py" "$remote_runtime/sysconfig.py"
 for package in re json; do
     mkdir_remote "$remote_runtime/$package"
     while IFS= read -r -d '' module_file; do
