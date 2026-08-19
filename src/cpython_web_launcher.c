@@ -416,17 +416,19 @@ ws_broadcast_status(void)
     int running;
     int finished;
     int exit_code;
+    long process_id;
 
     pthread_mutex_lock(&state_mutex);
     running = app_running;
     finished = app_finished;
     exit_code = app_exit_code;
     pthread_mutex_unlock(&state_mutex);
+    process_id = (long)getpid();
     snprintf(message, sizeof message,
-             "{\"type\":\"status\",\"running\":%s,"
+             "{\"type\":\"status\",\"pid\":%ld,\"running\":%s,"
              "\"finished\":%s,\"exit_code\":%d}",
-             running ? "true" : "false", finished ? "true" : "false",
-             exit_code);
+             process_id, running ? "true" : "false",
+             finished ? "true" : "false", exit_code);
     ws_broadcast(message);
 }
 
@@ -561,16 +563,18 @@ ws_client_worker(void *data)
     unsigned opcode;
     unsigned char *payload;
     size_t payload_length;
+    long process_id;
 
     flags = fcntl(client->fd, F_GETFL, 0);
     if (flags >= 0)
         fcntl(client->fd, F_SETFL, flags & ~O_NONBLOCK);
     pthread_mutex_lock(&state_mutex);
+    process_id = (long)getpid();
     snprintf(message, sizeof message,
-             "{\"type\":\"status\",\"running\":%s,"
+             "{\"type\":\"status\",\"pid\":%ld,\"running\":%s,"
              "\"finished\":%s,\"exit_code\":%d}",
-             app_running ? "true" : "false", app_finished ? "true" : "false",
-             app_exit_code);
+             process_id, app_running ? "true" : "false",
+             app_finished ? "true" : "false", app_exit_code);
     pthread_mutex_unlock(&state_mutex);
     ws_send_text(client, message);
 
@@ -923,11 +927,12 @@ apps_response(struct MHD_Connection *connection)
 static enum MHD_Result
 status_response(struct MHD_Connection *connection)
 {
-    char body[160];
+    char body[192];
     int started;
     int running;
     int finished;
     int exit_code;
+    long process_id;
 
     pthread_mutex_lock(&state_mutex);
     started = launch_started;
@@ -935,11 +940,13 @@ status_response(struct MHD_Connection *connection)
     finished = app_finished;
     exit_code = app_exit_code;
     pthread_mutex_unlock(&state_mutex);
+    process_id = (long)getpid();
     snprintf(body, sizeof body,
-             "{\"started\":%s,\"running\":%s,\"finished\":%s,"
-             "\"exit_code\":%d}",
-             started ? "true" : "false", running ? "true" : "false",
-             finished ? "true" : "false", exit_code);
+             "{\"pid\":%ld,\"started\":%s,\"running\":%s,"
+             "\"finished\":%s,\"exit_code\":%d}",
+             process_id, started ? "true" : "false",
+             running ? "true" : "false", finished ? "true" : "false",
+             exit_code);
     return queue_response(connection, MHD_HTTP_OK, "application/json", NULL,
                           body, strlen(body), MHD_RESPMEM_MUST_COPY);
 }
