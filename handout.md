@@ -206,7 +206,11 @@ tools/run_ps5.sh
 tools/run_ps5_web.sh
 tools/ps5-setup.local
 tools/minimal_idna.py
-src/cpython_web_launcher.c
+src/web/main.c
+src/web/http_server.c
+src/web/app_manager.c
+src/web/websocket.c
+src/runtime/cpython_runtime.c
 tests/core_suite.py
 tests/UPSTREAM_TESTS.md
 apps/socket_server/main.py

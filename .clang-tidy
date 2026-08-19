@@ -1,0 +1,9 @@
+Checks: >-
+  -*,
+  clang-analyzer-core.*,
+  clang-analyzer-security.*,
+  -clang-analyzer-security.ArrayBound,
+  -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling
+WarningsAsErrors: '*'
+HeaderFilterRegex: '(^|/)include/|(^|/)platform/|(^|/)src/'
+FormatStyle: file
