@@ -217,6 +217,10 @@ make host-app APP=apps/hello
 PS5_HOST=192.168.4.30 make ps5-app APP=apps/hello
 ```
 
+Prepare an app's pure-Python dependencies on the host with
+`make package-app APP=apps/myapp`; the PS5 receives the completed bundle and
+does not run pip or download packages.
+
 The browser-based manager is documented in
 [docs/web-launcher.md](docs/web-launcher.md). Start it with:
 

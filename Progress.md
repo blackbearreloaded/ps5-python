@@ -31,6 +31,13 @@ upstream source commit `823f0323ee6ec1402088b73bce1a38473cac36dc`.
 - Launcher linking is skipped when none of its inputs changed.
 - README documents the build acceleration options.
 
+### Application packaging
+
+- Documented the self-contained app deployment model and added
+  `tools/package_app.py` plus `make package-app` for host-side pip collection
+  of universal pure-Python wheels into an app's `lib/` directory. Native
+  extensions are rejected because they require PS5-specific static integration.
+
 ### Networking and DNS
 
 - Added the packaged `apps/dns_demo` application.

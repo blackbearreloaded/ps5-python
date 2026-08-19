@@ -6,7 +6,7 @@ PS5_JOBS ?= $(shell nproc 2>/dev/null || echo 2)
 SCRIPT ?= examples/main.py
 APP ?= apps/hello
 
-.PHONY: host-test host-suite host-lifetime host-app host-build source-fetch source-check ps5-check ps5-configure ps5-core ps5-run ps5-test ps5-suite ps5-lifetime ps5-app ps5-web clean
+.PHONY: host-test host-suite host-lifetime host-app package-app host-build source-fetch source-check ps5-check ps5-configure ps5-core ps5-run ps5-test ps5-suite ps5-lifetime ps5-app ps5-web clean
 
 host-test:
 	$(POWERSHELL) -NoProfile -ExecutionPolicy Bypass -File host/run_core_tests.ps1
@@ -19,6 +19,9 @@ host-lifetime:
 
 host-app:
 	$(POWERSHELL) -NoProfile -ExecutionPolicy Bypass -File host/run_app.ps1 -AppPath "$(APP)"
+
+package-app:
+	$(PYTHON) tools/package_app.py "$(APP)"
 
 host-build:
 	bash tools/build_host.sh
