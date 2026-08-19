@@ -309,6 +309,23 @@ covered by the Tier 9 core section above. The complete `pydoc_data` package and
 files. `webbrowser` remains useful for controller registration and URL
 construction, but its OS browser backends cannot launch on the headless PS5.
 
+## WSGI application boundary
+
+The official `wsgiref` package is the first supported WSGI server target. The
+focused `tests/stdlib/test_wsgi.py` check is adapted from CPython 3.14.7's
+`test_wsgiref.py`: it runs a real `wsgiref.simple_server` on loopback, sends
+an HTTP request through `http.client`, and verifies the WSGI environment,
+response headers, body, and validation middleware.
+
+| Module | PS5 status | Included and tested | Missing or limited |
+| --- | --- | --- | --- |
+| `wsgiref` | Official package bundled | Single-process loopback WSGI request/response | Full CGI, signal, malformed-request, and high-throughput coverage pending |
+
+This establishes the application/server interface needed by Flask-style WSGI
+applications. It does not provide Flask, Werkzeug, Gunicorn, or a production
+worker supervisor. Those remain follow-up packaging and process-lifecycle
+work; the PS5 target currently validates a single-process WSGI server.
+
 ## `os`
 
 Status: Python-level POSIX wrapper and core filesystem operations included.
