@@ -1,7 +1,8 @@
 (() => {
-  const state = { cursor: 0, launching: false, selectedId: null,
-    socket: null, socketConnected: false, pollTimer: null, fallbackTimer: null,
-    view: "apps", replBusy: false, replCommandOpen: false,
+  const state = { launching: false, selectedId: null,
+    socket: null, socketConnected: false, fallbackTimer: null,
+    view: "apps", replBusy: false, scriptBusy: false, scriptDirty: false,
+    replCommandOpen: false,
     replHistory: [], replHistoryIndex: -1 };
   const appsElement = document.getElementById("apps");
   const statusElement = document.getElementById("status");
@@ -16,6 +17,7 @@
   const replConsole = document.getElementById("repl-console");
   const menuApps = document.getElementById("menu-apps");
   const menuRepl = document.getElementById("menu-repl");
+  const menuScript = document.getElementById("menu-script");
   const replShell = document.querySelector(".repl-shell");
   const replTerminal = document.getElementById("repl-terminal");
   const replForm = document.getElementById("repl-form");
@@ -23,11 +25,49 @@
   const replClear = document.getElementById("repl-clear");
   const replReset = document.getElementById("repl-reset");
   const replConnection = document.getElementById("repl-connection");
+  const scriptConsole = document.getElementById("script-console");
+  const scriptInput = document.getElementById("script-input");
+  const scriptOutput = document.getElementById("script-output");
+  const scriptRun = document.getElementById("script-run");
+  const scriptClear = document.getElementById("script-clear");
+  const scriptDirty = document.getElementById("script-dirty");
+  const scriptStatus = document.getElementById("script-status");
+  const scriptRuntime = document.getElementById("script-runtime");
+  const scriptHighlight = document.querySelector("#script-highlight code");
+  const replHighlight = document.querySelector("#repl-highlight code");
+  const themeToggle = document.getElementById("theme-toggle");
+  const themes = [
+    { id: "studio", label: "Studio" },
+    { id: "terminal", label: "Terminal" },
+    { id: "paper", label: "Paper" }
+  ];
+
+  function applyTheme(themeId) {
+    const theme = themes.find((item) => item.id === themeId) || themes[0];
+    document.documentElement.dataset.theme = theme.id;
+    themeToggle.textContent = "Theme: " + theme.label;
+    themeToggle.dataset.theme = theme.id;
+    window.localStorage.setItem("python-ps5-theme", theme.id);
+  }
+
+  function renderHighlight(source, target) {
+    if (window.hljs) {
+      target.innerHTML = window.hljs.highlight(source, { language: "python" }).value;
+    } else {
+      target.textContent = source;
+    }
+  }
+
+  function syncHighlightScroll(input, target) {
+    const layer = target.parentElement;
+    layer.scrollTop = input.scrollTop;
+    layer.scrollLeft = input.scrollLeft;
+  }
 
   function updateViewUrl(view) {
     const url = new URL(window.location.href);
-    if (view === "repl") url.searchParams.set("view", "interpreter");
-    else url.searchParams.set("view", "applications");
+    const viewName = view === "repl" ? "interpreter" : view === "script" ? "script" : "applications";
+    url.searchParams.set("view", viewName);
     window.history.replaceState(null, "", url.pathname +
       (url.searchParams.toString() ? "?" + url.searchParams.toString() : "") +
       url.hash);
@@ -36,16 +76,23 @@
   function showView(view, updateUrl = true) {
     state.view = view;
     const repl = view === "repl";
-    appsSidebar.classList.toggle("hidden", repl);
-    appConsole.classList.toggle("hidden", repl);
+    const script = view === "script";
+    appsSidebar.classList.toggle("hidden", repl || script);
+    appConsole.classList.toggle("hidden", repl || script);
     replConsole.classList.toggle("hidden", !repl);
+    scriptConsole.classList.toggle("hidden", !script);
     replConsole.setAttribute("aria-hidden", repl ? "false" : "true");
+    scriptConsole.setAttribute("aria-hidden", script ? "false" : "true");
     menuApps.classList.toggle("active", !repl);
+    menuApps.classList.toggle("active", view === "apps");
     menuRepl.classList.toggle("active", repl);
-    menuApps.setAttribute("aria-selected", repl ? "false" : "true");
+    menuScript.classList.toggle("active", script);
+    menuApps.setAttribute("aria-selected", view === "apps" ? "true" : "false");
     menuRepl.setAttribute("aria-selected", repl ? "true" : "false");
+    menuScript.setAttribute("aria-selected", script ? "true" : "false");
     if (updateUrl) updateViewUrl(view);
     if (repl) replInput.focus();
+    if (script) scriptInput.focus();
   }
 
   function setStatus(label, kind) {
@@ -91,7 +138,11 @@
   }
   function resizeReplInput() {
     replInput.style.height = "auto";
-    replInput.style.height = Math.min(replInput.scrollHeight, 150) + "px";
+    const height = Math.min(replInput.scrollHeight, 150) + "px";
+    replInput.parentElement.style.height = height;
+    replInput.style.height = height;
+    renderHighlight(replInput.value, replHighlight);
+    syncHighlightScroll(replInput, replHighlight);
   }
   function renderApps(apps) {
     appsElement.textContent = "";
@@ -137,7 +188,6 @@
     if (state.launching) return;
     state.launching = true;
     state.selectedId = app.id;
-    state.cursor = 0;
     titleElement.textContent = app.name;
     exitCode.textContent = "Running";
     setOutput("[launcher] starting " + app.id + "\n");
@@ -167,6 +217,16 @@
     }
     if (event.type === "log") appendOutput(event.data || "");
     if (event.type === "repl") {
+      if (state.scriptBusy) {
+        const scriptData = event.data || "";
+        scriptOutput.textContent = scriptData || "(script completed without output)";
+        scriptStatus.textContent = event.ok ? "Completed" : "Failed";
+        scriptStatus.className = event.ok ? "repl-hint repl-connected" : "repl-hint repl-error";
+        scriptRuntime.textContent = event.ok ? "Script finished" : "Script raised an exception";
+        state.scriptBusy = false;
+        scriptRun.disabled = false;
+        return;
+      }
       replConnection.textContent = event.ok ? "Evaluation complete" : "Evaluation failed";
       replConnection.className = event.ok ? "repl-hint" : "repl-hint repl-error";
       const data = event.data || "";
@@ -192,14 +252,10 @@
       replInput.focus();
     }
     if (event.type === "clear") {
-      state.cursor = 0;
       setOutput("");
       exitCode.textContent = "Output cleared";
     }
     if (event.type === "status") applyStatus(event);
-  }
-  function startPolling() {
-    if (state.pollTimer === null) poll();
   }
   function connectSocket() {
     const protocol = location.protocol === "https:" ? "wss:" : "ws:";
@@ -217,13 +273,10 @@
           window.clearTimeout(state.fallbackTimer);
           state.fallbackTimer = null;
         }
-        if (state.pollTimer !== null) {
-          window.clearTimeout(state.pollTimer);
-          state.pollTimer = null;
-        }
         setStatus("Live link", "ready");
         replConnection.textContent = "WebREPL connected";
         replConnection.className = "repl-hint repl-connected";
+        scriptRuntime.textContent = "WebREPL connected";
       };
       socket.onmessage = (event) => handleSocketMessage(event.data);
       socket.onerror = () => socket.close();
@@ -234,36 +287,20 @@
           window.clearTimeout(state.fallbackTimer);
           state.fallbackTimer = null;
         }
-        setStatus("Using polling fallback", "error");
+        setStatus("Live link unavailable", "error");
         replConnection.textContent = "WebREPL requires the live WebSocket";
         replConnection.className = "repl-hint repl-error";
-        // One failed WebSocket attempt falls back to polling for this page.
-        // A reload can try WebSockets again without creating a reconnect storm.
-        startPolling();
+        scriptRuntime.textContent = "WebSocket unavailable";
       };
     } catch (error) {
-      startPolling();
+      setStatus("Live link unavailable", "error");
+      replConnection.textContent = "WebREPL requires the live WebSocket";
+      replConnection.className = "repl-hint repl-error";
+      scriptRuntime.textContent = "WebSocket unavailable";
     }
-  }
-  async function poll() {
-    state.pollTimer = null;
-    if (state.socketConnected) return;
-    try {
-      const logsResponse = await fetch("/api/logs?since=" + state.cursor);
-      const next = logsResponse.headers.get("X-Log-Next");
-      if (next) state.cursor = Number(next);
-      const logs = await logsResponse.text();
-      if (logs) appendOutput(logs);
-      applyStatus(await (await fetch("/api/status")).json());
-    } catch (error) {
-      setStatus("Connection lost", "error");
-      exitCode.textContent = "Retrying…";
-    }
-    if (!state.socketConnected) state.pollTimer = window.setTimeout(poll, 1000);
   }
   refreshButton.addEventListener("click", refreshApps);
   clearButton.addEventListener("click", async () => {
-    state.cursor = 0;
     setOutput("");
     exitCode.textContent = "Output cleared";
     try {
@@ -328,6 +365,57 @@
     }
   });
   replInput.addEventListener("input", resizeReplInput);
+  function runScript() {
+    if (state.scriptBusy) return;
+    if (!state.socketConnected || state.socket === null) {
+      scriptStatus.textContent = "WebSocket unavailable";
+      scriptStatus.className = "repl-hint repl-error";
+      return;
+    }
+    const source = scriptInput.value;
+    if (!source.trim()) {
+      scriptStatus.textContent = "Nothing to run";
+      scriptStatus.className = "repl-hint repl-error";
+      return;
+    }
+    state.scriptBusy = true;
+    scriptRun.disabled = true;
+    scriptStatus.textContent = "Running…";
+    scriptStatus.className = "repl-hint";
+    scriptRuntime.textContent = "Evaluating complete script…";
+    scriptOutput.textContent = "";
+    state.scriptDirty = false;
+    scriptDirty.textContent = "Saved";
+    state.socket.send(source.endsWith("\n") ? source : source + "\n");
+  }
+  scriptRun.addEventListener("click", runScript);
+  scriptInput.addEventListener("input", () => {
+    state.scriptDirty = true;
+    scriptDirty.textContent = "Unsaved edits";
+    renderHighlight(scriptInput.value, scriptHighlight);
+    syncHighlightScroll(scriptInput, scriptHighlight);
+  });
+  scriptInput.addEventListener("scroll", () => syncHighlightScroll(scriptInput, scriptHighlight));
+  replInput.addEventListener("scroll", () => syncHighlightScroll(replInput, replHighlight));
+  scriptInput.addEventListener("keydown", (event) => {
+    if (event.ctrlKey && event.key === "Enter") {
+      event.preventDefault();
+      runScript();
+    }
+  });
+  scriptClear.addEventListener("click", () => {
+    scriptInput.value = "";
+    renderHighlight("", scriptHighlight);
+    scriptOutput.textContent = "Paste a complete Python script above, then run it here.";
+    state.scriptDirty = false;
+    scriptDirty.textContent = "Saved";
+    scriptStatus.textContent = "Ready";
+    scriptStatus.className = "repl-hint";
+  });
+  themeToggle.addEventListener("click", () => {
+    const current = themes.findIndex((theme) => theme.id === document.documentElement.dataset.theme);
+    applyTheme(themes[(current + 1) % themes.length].id);
+  });
   replClear.addEventListener("click", () => {
     resetReplPrompt();
     replInput.value = "";
@@ -356,8 +444,12 @@
   });
   menuApps.addEventListener("click", () => showView("apps"));
   menuRepl.addEventListener("click", () => showView("repl"));
+  menuScript.addEventListener("click", () => showView("script"));
   const requestedView = new URLSearchParams(window.location.search).get("view");
-  showView(requestedView === "applications" ? "apps" : "repl", false);
+  showView(requestedView === "applications" ? "apps" : requestedView === "script" ? "script" : "repl", false);
+  applyTheme(window.localStorage.getItem("python-ps5-theme") || "studio");
+  renderHighlight(scriptInput.value, scriptHighlight);
+  resizeReplInput();
   refreshApps();
   connectSocket();
 })();
