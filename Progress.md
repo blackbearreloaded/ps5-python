@@ -9,14 +9,14 @@ upstream source commit `823f0323ee6ec1402088b73bce1a38473cac36dc`.
 
 ## Follow-up
 
-- Host validation now passes all 47 discovered scripts. Tests that require PS5
+- Host validation now passes all 48 discovered scripts. Tests that require PS5
   capabilities (fork, `select.poll`, external DNS, and live TLS) skip cleanly
   on desktop Python instead of making the host baseline nondeterministic.
 - Added `tests/stdlib/test_tls_handshake.py` as a separate live PS5 smoke test;
   the PS5 handshake now passes with certificate checking disabled. A selected
   PS5 CA bundle is the next TLS increment.
-- PS5 aggregate suite passes with the profiling, concurrency, and Tier 3
-  utility wrappers: `CPYTHON_CORE_SUITE: PASS (46 scripts)`.
+- PS5 aggregate suite passes with the profiling, concurrency, Tier 3, and Tier
+  4 wrappers: `CPYTHON_CORE_SUITE: PASS (47 scripts)`.
 
 ## Completed Today
 
@@ -74,6 +74,9 @@ Static or bundled support now includes:
 - Tier 3 concurrency/networking wrappers: official `asyncio`, `threading`,
   `multiprocessing`, `concurrent.futures`, `socket`, `ssl`, `http`, `queue`,
   `select`, and `signal`
+- Tier 4 data/format wrappers: `sqlite3`, `pickle`, `struct`, `bisect`,
+  `heapq`, `array`, `operator`, `decimal`, `fractions`, `zlib`, `gzip`,
+  `zipfile`, `tarfile`, `base64`, `xml`, `tempfile`, `glob`, and `fnmatch`
 
 ### Security and hashing
 
@@ -141,12 +144,20 @@ Static or bundled support now includes:
   threading, multiprocessing, futures, socket, SSL, HTTP, queue, select, and
   signal tests; documented all platform ceilings in `docs/stdlib-status.md`.
 
+### Tier 4 data structures and formats
+
+- Built and linked static zlib 1.3.1 and SQLite 3.46.1 dependencies for PS5.
+- Linked native `zlib` and `_sqlite3`, bundled official SQLite/archive/XML
+  wrappers, and closed the cp437 codec dependency required by ZIP metadata.
+- Added `tests/stdlib/test_tier4_formats.py`, adapted from the pinned CPython
+  pickle, struct, zlib, gzip, ZIP, TAR, SQLite, XML, glob, and fnmatch tests.
+
 ## Verification
 
 The final PS5 aggregate run completed with:
 
 ```text
-CPYTHON_CORE_SUITE: PASS (46 scripts)
+CPYTHON_CORE_SUITE: PASS (47 scripts)
 ```
 
 The suite includes adapted tests based on the pinned CPython `Lib/test` tree.
@@ -162,8 +173,9 @@ CPYTHON_PS5_LIFETIME: PASS (3 process runs)
 
 ### Compression
 
-`zlib`, `_bz2`, and `_lzma` are not implemented. Their external PS5
-dependencies still need static builds and integration.
+zlib 1.3.1 is statically linked and tested through the native `zlib` module,
+gzip, ZIP, and TAR wrappers. `_bz2` and `_lzma` remain unimplemented until
+their external PS5 dependencies are built.
 
 ### IPv6
 
@@ -245,7 +257,7 @@ coverage remain incomplete.
 ## What Is Missing
 
 - Certificate-verified HTTPS with an explicit PS5 CA-store strategy.
-- Static zlib, bzip2, and xz dependencies.
+- Static bzip2 and xz dependencies.
 - Full `multiprocessing` and subprocess integration.
 - Full upstream regression coverage for the Tier 2 utility modules; the
   supported subset and each known gap are listed in `docs/stdlib-status.md`.
@@ -260,7 +272,7 @@ coverage remain incomplete.
 
 ## Next Steps
 
-1. Build and integrate static zlib, then add gzip/content-encoding tests.
+1. Build and integrate static bzip2/xz, then expand compression coverage.
 2. Complete HTTPS handshake and certificate-store strategy using OpenSSL.
 3. Add a minimal HTTP server using the verified IPv4 poll/event-loop layer.
 4. Validate `ctypes` against a safe PS5-native test library or broker API.
@@ -299,3 +311,16 @@ coverage remain incomplete.
 - `1067017` Bundle html dependency for http server
 - `57378dc` Bundle mimetypes dependency for http server
 - `6fab23f` Document Tier 3 concurrency and networking
+- `5d13249` Build SQLite statically for PS5
+- `00b8687` Bundle Tier 4 format and archive modules
+- `1696173` Build static zlib for PS5 compression
+- `e350b39` Pin zlib source checksum
+- `96b5c92` Add Tier 4 format test to aggregate suite
+- `c4d94e5` Exercise SQLite DB-API in Tier 4 test
+- `6e31f92` Avoid fragile configure for Tier 4 native modules
+- `6f1928e` Disable unavailable curses probes in PS5 configure
+- `5386717` Disable unavailable intl configure probe
+- `348be38` Use PS5 cross preprocessor during configure
+- `3cca2c1` Upload sqlite3 runtime package to PS5
+- `891ce0f` Bundle cp437 codec for ZIP archives
+- `403cc00` Enable cp437 in PS5 codec registry
