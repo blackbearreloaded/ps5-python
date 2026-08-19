@@ -19,6 +19,25 @@ static int runtime_active;
 static PyInterpreterState *runtime_interpreter;
 static PyThreadState *runtime_main_state;
 
+#ifdef CPYTHON_PS5
+static void
+runtime_debug(const char *stage)
+{
+    FILE *file = fopen("/data/python/runtime/repl-debug.log", "ab");
+
+    if (file != NULL) {
+        fprintf(file, "%s\n", stage);
+        fclose(file);
+    }
+}
+#else
+static void
+runtime_debug(const char *stage)
+{
+    (void)stage;
+}
+#endif
+
 static long
 cpython_ps5_peak_rss(void)
 {
@@ -215,9 +234,11 @@ evaluate_source_locked(const char *source, char *output, size_t output_size)
 
     if (!runtime_active || source == NULL || output == NULL || output_size == 0)
         return -1;
+    runtime_debug("eval-enter");
     thread_state = runtime_attach_thread();
     if (thread_state == NULL)
         return -1;
+    runtime_debug("thread-attached");
     output[0] = '\0';
     source_length = strlen(source);
     source_text = malloc(source_length + 2);
@@ -230,9 +251,12 @@ evaluate_source_locked(const char *source, char *output, size_t output_size)
         source_text[source_length++] = '\n';
     source_text[source_length] = '\0';
     main_module = PyImport_AddModule("__main__");
+    runtime_debug("main-module");
     globals = main_module ? PyModule_GetDict(main_module) : NULL;
     io = PyImport_ImportModule("io");
+    runtime_debug("io-imported");
     capture = io ? PyObject_CallMethod(io, "StringIO", NULL) : NULL;
+    runtime_debug("capture-created");
     previous_stdout = PySys_GetObject("stdout");
     previous_stderr = PySys_GetObject("stderr");
     Py_XINCREF(previous_stdout);
@@ -246,7 +270,9 @@ evaluate_source_locked(const char *source, char *output, size_t output_size)
     PySys_SetObject("stdout", capture);
     PySys_SetObject("stderr", capture);
     mode = strchr(source, '\n') != NULL ? Py_file_input : Py_single_input;
+    runtime_debug("before-run");
     result = PyRun_StringFlags(source_text, mode, globals, globals, NULL);
+    runtime_debug("after-run");
     if (result == NULL) {
         PyErr_PrintEx(0);
         failed = 1;
@@ -269,8 +295,10 @@ restore:
     Py_XDECREF(previous_stderr);
     Py_XDECREF(capture);
     Py_XDECREF(io);
+    runtime_debug("before-detach");
     free(source_text);
     runtime_detach_thread(thread_state);
+    runtime_debug("after-detach");
     return failed;
 }
 
