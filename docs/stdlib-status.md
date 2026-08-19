@@ -285,6 +285,30 @@ provided by the statically linked interpreter. `_thread` is likewise compiled
 into the executable. `__future__.py` and `copyreg.py` are copied from the
 pinned upstream `Lib/` tree into the runtime bundle; no host modules are used.
 
+## Tier 9 legacy and low-level utility status
+
+The feasible Tier 9 wrappers use the pinned CPython 3.14.7 `Lib/` sources and
+the focused `tests/stdlib/test_tier9_legacy.py` checks. Terminal, browser, and
+GUI actions are represented only up to the point supported by the PS5
+payload; the implementation does not claim a desktop environment exists.
+
+| Module | PS5 status | Included and tested | Missing or limited |
+| --- | --- | --- | --- |
+| `cmd` | Official wrapper bundled | Command parsing, dispatch, and command result handling | Interactive terminal loop and completion integration pending |
+| `shlex` | Official wrapper bundled | POSIX splitting, quoting, and joining | Full shell grammar/error regression coverage pending |
+| `optparse` | Official wrapper bundled | Option registration, boolean/value parsing, and positional arguments | Complete deprecated API and formatter coverage pending |
+| `getopt` | Official wrapper bundled | Short/long option parsing and option errors | Complete GNU permutation and CLI coverage pending |
+| `pydoc` | Official wrapper plus `pydoc_data`/pager dependencies | Object lookup and plain-text rendering | Interactive pager, HTTP documentation server, and full module discovery coverage pending |
+| `webbrowser` | Official wrapper bundled | Browser registration and controller selection | No PS5 desktop browser process; launching a browser is unavailable |
+| `symtable` | Official wrapper over native `_symtable` | Module/function symbol table creation and parameter lookup | Complete compiler-scope and type-parameter regression coverage pending |
+| `turtle` | Omitted | Not shipped | Requires `tkinter`/Tcl/Tk, which are unavailable on PS5 |
+
+`__main__`, `__future__`, `builtins`, `_thread`, `marshal`, and `copyreg` are
+covered by the Tier 9 core section above. The complete `pydoc_data` package and
+`_pyrepl.pager` are bundled so `pydoc` does not fall back to host-installed
+files. `webbrowser` remains useful for controller registration and URL
+construction, but its OS browser backends cannot launch on the headless PS5.
+
 ## `os`
 
 Status: Python-level POSIX wrapper and core filesystem operations included.

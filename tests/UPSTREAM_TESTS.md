@@ -64,6 +64,7 @@ adaptation policy, not a replacement for CPython's complete regression suite.
 | `stdlib/test_tier8_pure.py` | `test_graphlib.py`, `test_statistics.py`, `test_cmath.py`, `test_ipaddress.py`, `test_colorsys.py`, `test_calendar.py`, `test_wave.py`, `test_binascii.py`, `test_zoneinfo` (portable API subset) |
 | `stdlib/test_tier8_compression.py` | `test_bz2.py`, `test_lzma.py`, `test_dbm_dumb.py`, `test_shelve.py` (portable backend subset) |
 | `stdlib/test_tier8_protocols.py` | `test_ftplib.py`, `test_poplib.py`, `test_imaplib.py`, `test_smtplib.py`, `test_mailbox.py` (local protocol/mail subset) |
+| `stdlib/test_tier9_legacy.py` | `test_shlex.py`, `test_getopt.py`, `test_optparse.py`, `test_cmd.py`, `test_symtable.py`, `test_pydoc.py`, `test_webbrowser.py` (portable API subset) |
 | `stdlib/test_tier9_legacy.py` | `test_cmd.py`, `test_shlex.py`, `test_optparse.py`, `test_getopt.py`, `test_symtable.py`, `test_pydoc.py` (portable API subset) |
 | `stdlib/test_posix_boundary.py` | `test_os.py`, `test_signal.py` |
 | `stdlib/test_process.py` | `test_os.py` (`fork`, `waitpid`) |
