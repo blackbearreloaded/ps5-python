@@ -94,11 +94,12 @@ Tier 9 core and legacy utilities are included where feasible: `__future__`,
 because it requires the unavailable Tcl/Tk GUI stack; browser and interactive
 terminal launch paths are documented as headless-PS5 limitations.
 The official `wsgiref` reference server is also bundled. Single-process and
-threaded loopback WSGI requests pass on PS5; Flask/Werkzeug and Gunicorn remain
-separate framework packaging. Gunicorn 23.0.0's pure-Python package and sync
-HTTP worker are now vendored and import-tested; its pre-fork supervisor and
-signal/re-exec lifecycle are enabled only after the corresponding PS5 process
-foundation is validated.
+threaded loopback WSGI requests pass on PS5. Gunicorn 23.0.0 is vendored as a
+pure-Python package: its sync TCP worker, pre-fork master, inherited listener,
+SIGTERM shutdown, and worker reaping pass the PS5 loopback test. Daemon/re-exec,
+Unix-domain sockets, plugin entry points, and optional gevent/eventlet workers
+remain outside the PS5 contract. Flask/Werkzeug still require separate
+framework packaging.
 
 ## Build the first PS5 ELF
 
