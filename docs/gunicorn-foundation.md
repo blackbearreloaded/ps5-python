@@ -11,8 +11,10 @@ test based on the pinned CPython `Lib/test/test_os.py`, `test_signal.py`, and
 `test_socket.py` behavior checks. On PS5 it verifies:
 
 - an arbiter-created IPv4 listening socket can be inherited by forked workers;
-- a worker can duplicate the inherited descriptor with `socket.fromfd()` and
-  serve a request;
+- a worker can wrap and own its inherited descriptor with
+  `socket.socket(fileno=...)` and serve a request. PS5 currently has no
+  working `dup()`/`dup2()`, so the child must close its inherited copy only
+  after the worker wrapper is done;
 - two pre-fork workers can independently accept and complete requests;
 - the arbiter can send `SIGTERM` and reap a blocked worker with `waitpid()`;
 - `SIGCHLD` handlers can be installed and restored around worker reaping.
