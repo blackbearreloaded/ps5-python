@@ -16,6 +16,7 @@ PyMODINIT_FUNC PyInit__codecs(void);
 
 static pthread_mutex_t runtime_mutex = PTHREAD_MUTEX_INITIALIZER;
 static int runtime_active;
+static PyInterpreterState *runtime_interpreter;
 static PyThreadState *runtime_main_state;
 
 static long
@@ -111,6 +112,11 @@ runtime_initialize(const cpython_run_options_t *options)
     PyConfig_Clear(&config);
     if (PyStatus_Exception(status))
         return -1;
+    runtime_interpreter = PyInterpreterState_Get();
+    if (runtime_interpreter == NULL) {
+        Py_Finalize();
+        return -1;
+    }
     runtime_main_state = PyEval_SaveThread();
     runtime_active = 1;
     return 0;
@@ -135,10 +141,30 @@ cpython_ps5_runtime_stop(void)
     if (runtime_active) {
         PyEval_RestoreThread(runtime_main_state);
         runtime_main_state = NULL;
+        runtime_interpreter = NULL;
         runtime_active = 0;
         Py_Finalize();
     }
     pthread_mutex_unlock(&runtime_mutex);
+}
+
+static PyThreadState *
+runtime_attach_thread(void)
+{
+    PyThreadState *thread_state;
+
+    thread_state = PyThreadState_New(runtime_interpreter);
+    if (thread_state == NULL)
+        return NULL;
+    PyThreadState_Swap(thread_state);
+    return thread_state;
+}
+
+static void
+runtime_detach_thread(PyThreadState *thread_state)
+{
+    PyThreadState_Clear(thread_state);
+    PyThreadState_DeleteCurrent();
 }
 
 static int
@@ -173,7 +199,7 @@ copy_unicode_output(PyObject *value, char *output, size_t output_size)
 static int
 evaluate_source_locked(const char *source, char *output, size_t output_size)
 {
-    PyGILState_STATE gil;
+    PyThreadState *thread_state;
     PyObject *io = NULL;
     PyObject *capture = NULL;
     PyObject *previous_stdout = NULL;
@@ -187,7 +213,9 @@ evaluate_source_locked(const char *source, char *output, size_t output_size)
 
     if (!runtime_active || source == NULL || output == NULL || output_size == 0)
         return -1;
-    gil = PyGILState_Ensure();
+    thread_state = runtime_attach_thread();
+    if (thread_state == NULL)
+        return -1;
     output[0] = '\0';
     main_module = PyImport_AddModule("__main__");
     globals = main_module ? PyModule_GetDict(main_module) : NULL;
@@ -229,7 +257,7 @@ restore:
     Py_XDECREF(previous_stderr);
     Py_XDECREF(capture);
     Py_XDECREF(io);
-    PyGILState_Release(gil);
+    runtime_detach_thread(thread_state);
     return failed;
 }
 
@@ -252,7 +280,7 @@ cpython_ps5_run_file(const char *script_path,
     long script_size;
     char *script_source;
     char message[320];
-    PyGILState_STATE gil;
+    PyThreadState *thread_state;
     PyObject *main_module;
     PyObject *main_globals;
     PyObject *file_name;
@@ -297,7 +325,15 @@ cpython_ps5_run_file(const char *script_path,
         return 1;
     }
     pthread_mutex_lock(&runtime_mutex);
-    gil = PyGILState_Ensure();
+    thread_state = runtime_attach_thread();
+    if (thread_state == NULL) {
+        pthread_mutex_unlock(&runtime_mutex);
+        free(script_source);
+        if (!persistent)
+            cpython_ps5_runtime_stop();
+        cpython_ps5_notify("CPYTHON THREAD STATE FAIL");
+        return 1;
+    }
     if (options != NULL &&
         (append_runtime_path(options->app_root_path) != 0 ||
          append_runtime_path(options->app_lib_path) != 0)) {
@@ -327,7 +363,7 @@ cpython_ps5_run_file(const char *script_path,
     Py_DECREF(run_result);
 
 done:
-    PyGILState_Release(gil);
+    runtime_detach_thread(thread_state);
     pthread_mutex_unlock(&runtime_mutex);
     free(script_source);
     if (!persistent)
