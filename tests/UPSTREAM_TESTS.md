@@ -56,6 +56,8 @@ adaptation policy, not a replacement for CPython's complete regression suite.
 | `stdlib/test_profiling.py` | `test_timeit.py`, `test_dis.py`, `test_tracemalloc.py`, `test_struct.py` |
 | `stdlib/test_tier5_inspection.py` | `test_ast.py`, `test_dis.py`, `test_inspect.py` |
 | `stdlib/test_tier5_runtime.py` | `test_contextlib.py`, `test_gc.py`, `test_site.py`, `test_sysconfig.py`, `test_weakref.py`, `test_codecs.py`, `test_types.py` |
+| `stdlib/test_tier6_security_i18n.py` | `test_secrets.py`, `test_hmac.py`, `test_getpass.py`, `test_gettext.py`, `test_locale.py`, `test_unicodedata.py` |
+| `stdlib/test_tier6_text_formats.py` | `test_string/`, `test_textwrap.py`, `test_difflib.py`, `test_mimetypes.py`, `test_uuid.py`, `test_stat.py`, `test_filecmp.py` |
 | `stdlib/test_posix_boundary.py` | `test_os.py`, `test_signal.py` |
 | `stdlib/test_process.py` | `test_os.py` (`fork`, `waitpid`) |
 | `stdlib/test_network.py` | `test_socket.py`, `test_select.py` (`poll`, non-blocking sockets) |
