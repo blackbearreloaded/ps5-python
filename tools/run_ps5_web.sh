@@ -11,7 +11,8 @@ ftp_url="ftp://$ps5_host:$ftp_port"
 
 bash "$root_dir/tools/build_ps5.sh" web
 
-web_elf="$root_dir/build/ps5/python-web.elf"
+web_elf="${PS5_WEB_ELF:-$root_dir/build/ps5/python-web.elf}"
+web_remote_name="${PS5_WEB_REMOTE_NAME:-$(basename "$web_elf")}"
 runtime_dir="$root_dir/build/ps5/cpython-lib"
 web_dir="$root_dir/web"
 apps_dir="$root_dir/apps"
@@ -30,7 +31,7 @@ mkdir_remote /data/python/runtime
 mkdir_remote /data/python/runtime/cpython-lib
 mkdir_remote /data/python/runtime/cpython-lib/encodings
 mkdir_remote /data/python/apps
-upload "$web_elf" /data/python/runtime/python-web.elf
+upload "$web_elf" "/data/python/runtime/$web_remote_name"
 upload "$web_dir/index.html" /data/python/web/index.html
 upload "$web_dir/app.css" /data/python/web/app.css
 upload "$web_dir/app.js" /data/python/web/app.js
@@ -121,7 +122,7 @@ done < <(find "$apps_dir" -type f \
     -print0 | sort -z)
 
 source "$sdk_dir/toolchain/prospero.sh"
-launch_uri="file:/data/python/runtime/python-web.elf?args=$web_port"
+launch_uri="file:/data/python/runtime/$web_remote_name?args=$web_port"
 log_file="$root_dir/build/ps5/python-web-deploy.log"
 nohup "$sdk_dir/bin/prospero-deploy" -h "$ps5_host" -p "$loader_port" \
     "$launch_uri" >"$log_file" 2>&1 < /dev/null &

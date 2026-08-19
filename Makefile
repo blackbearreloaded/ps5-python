@@ -6,7 +6,7 @@ PS5_JOBS ?= $(shell nproc 2>/dev/null || echo 2)
 SCRIPT ?= examples/main.py
 APP ?= apps/hello
 
-.PHONY: host-test host-suite host-lifetime host-app package-app host-build source-fetch source-check ps5-check ps5-configure ps5-core ps5-run ps5-test ps5-suite ps5-lifetime ps5-app ps5-web ps5-kill clean
+.PHONY: host-test host-suite host-lifetime host-app package-app host-build source-fetch source-check ps5-check ps5-configure ps5-core ps5-run ps5-test ps5-suite ps5-lifetime ps5-app ps5-web ps5-web-test ps5-kill clean
 
 host-test:
 	$(POWERSHELL) -NoProfile -ExecutionPolicy Bypass -File host/run_core_tests.ps1
@@ -63,6 +63,9 @@ ps5-app: host-build
 
 ps5-web: host-build
 	PS5_JOBS=$(PS5_JOBS) bash tools/run_ps5_web.sh
+
+ps5-web-test: host-build
+	PS5_JOBS=$(PS5_JOBS) bash tools/run_ps5_web_test.sh
 
 ps5-kill:
 	bash tools/run_ps5_kill.sh $(PID) $(SIGNAL)
