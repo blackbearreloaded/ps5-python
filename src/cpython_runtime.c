@@ -286,7 +286,15 @@ evaluate_source_locked(const char *source, char *output, size_t output_size)
                                    globals, globals, NULL);
     }
     if (result == NULL) {
-        PyErr_PrintEx(0);
+        if (PyErr_ExceptionMatches(PyExc_SystemExit)) {
+            PyErr_Clear();
+            write_result = PyObject_CallMethod(capture, "write", "s",
+                                               "SystemExit\n");
+            if (write_result == NULL)
+                PyErr_Clear();
+        } else {
+            PyErr_PrintEx(0);
+        }
         failed = 1;
     } else if (single_line && result != Py_None) {
         repr = PyObject_Repr(result);
