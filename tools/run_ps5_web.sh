@@ -55,6 +55,7 @@ mkdir_remote /data/python/runtime/cpython-lib/pydoc_data
 for module in __init__.py module_docs.py topics.py; do
     upload "$runtime_dir/pydoc_data/$module" "/data/python/runtime/cpython-lib/pydoc_data/$module"
 done
+mkdir_remote /data/python/runtime/cpython-lib/_pyrepl
 upload "$runtime_dir/_pyrepl/pager.py" /data/python/runtime/cpython-lib/_pyrepl/pager.py
 for package in logging string urllib http wsgiref email unittest asyncio html compression zipfile xml sqlite3 dbm sysconfig _pyrepl gunicorn flask werkzeug jinja2 markupsafe itsdangerous click blinker; do
     mkdir_remote "/data/python/runtime/cpython-lib/$package"

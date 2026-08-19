@@ -33,15 +33,26 @@ def read_exact(connection, size):
     return data
 
 
-def read_frame(connection):
-    first, second = read_exact(connection, 2)
+def read_frame(connection, pending=b""):
+    while len(pending) < 2:
+        pending += connection.recv(1024)
+    first, second = pending[:2]
+    pending = pending[2:]
     length = second & 0x7F
     if length == 126:
-        length = struct.unpack(">H", read_exact(connection, 2))[0]
+        while len(pending) < 2:
+            pending += connection.recv(1024)
+        length = struct.unpack(">H", pending[:2])[0]
+        pending = pending[2:]
     elif length == 127:
-        length = struct.unpack(">Q", read_exact(connection, 8))[0]
-    payload = read_exact(connection, length)
-    return first & 0x0F, payload
+        while len(pending) < 8:
+            pending += connection.recv(1024)
+        length = struct.unpack(">Q", pending[:8])[0]
+        pending = pending[8:]
+    while len(pending) < length:
+        pending += connection.recv(1024)
+    payload = pending[:length]
+    return first & 0x0F, payload, pending[length:]
 
 
 def main():
@@ -67,13 +78,16 @@ def main():
         headers = b""
         while b"\r\n\r\n" not in headers:
             headers += connection.recv(1024)
-        if b"101 Switching Protocols" not in headers or expected.encode() not in headers:
+        header_end = headers.index(b"\r\n\r\n") + 4
+        response_headers = headers[:header_end]
+        pending = headers[header_end:]
+        if b"101 Switching Protocols" not in response_headers or expected.encode() not in response_headers:
             raise RuntimeError("WebSocket upgrade failed")
         # The server sends status first, followed by the current log buffer.
-        read_frame(connection)
+        _, _, pending = read_frame(connection, pending)
         connection.sendall(frame("1 + 2"))
         while True:
-            opcode, payload = read_frame(connection)
+            opcode, payload, pending = read_frame(connection, pending)
             if opcode == 1:
                 event = json.loads(payload.decode())
                 if event.get("type") == "repl":
