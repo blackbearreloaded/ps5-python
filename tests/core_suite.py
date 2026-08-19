@@ -52,6 +52,7 @@ TEST_FILES = (
     "test_tier7_compile.py",
     "test_tier7_interactive.py",
     "test_tier8_pure.py",
+    "test_tier8_protocols.py",
     "test_posix_boundary.py",
     "test_process.py",
     "test_network.py",

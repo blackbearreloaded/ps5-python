@@ -62,6 +62,7 @@ adaptation policy, not a replacement for CPython's complete regression suite.
 | `stdlib/test_tier7_compile.py` | `test_doctest.py`, `test_py_compile.py`, `test_compileall.py`, `test_codeop.py`, `test_code.py` |
 | `stdlib/test_tier7_interactive.py` | `test_code_module.py`, `test_pdb.py`, `test_readline.py`, `test_rlcompleter.py` (portable API subset) |
 | `stdlib/test_tier8_pure.py` | `test_graphlib.py`, `test_statistics.py`, `test_cmath.py`, `test_ipaddress.py`, `test_colorsys.py`, `test_calendar.py`, `test_wave.py`, `test_binascii.py`, `test_zoneinfo` (portable API subset) |
+| `stdlib/test_tier8_protocols.py` | `test_ftplib.py`, `test_poplib.py`, `test_imaplib.py`, `test_smtplib.py`, `test_mailbox.py` (local protocol/mail subset) |
 | `stdlib/test_posix_boundary.py` | `test_os.py`, `test_signal.py` |
 | `stdlib/test_process.py` | `test_os.py` (`fork`, `waitpid`) |
 | `stdlib/test_network.py` | `test_socket.py`, `test_select.py` (`poll`, non-blocking sockets) |
