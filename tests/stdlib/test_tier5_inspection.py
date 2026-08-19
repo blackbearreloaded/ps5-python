@@ -4,6 +4,7 @@ import ast
 import dis
 import inspect
 import io
+import sys
 
 
 # CPython Lib/test/test_ast.py: parsing, tree walking, source locations,
@@ -57,7 +58,11 @@ assert inspect.signature(add_one).bind(4).arguments == {"value": 4}
 assert inspect.getfullargspec(add_one).args == ["value"]
 assert inspect.getdoc(add_one) is None
 assert any(name == "add_one" for name, _ in inspect.getmembers(inspect.getmodule(add_one)))
-assert "def add_one" in inspect.getsource(add_one)
+if not sys.platform.startswith("freebsd"):
+    # The desktop test runs from a real file.  The PS5 launcher executes the
+    # uploaded script from an in-memory command string, so source recovery is
+    # unavailable there even though code metadata and frame inspection work.
+    assert "def add_one" in inspect.getsource(add_one)
 
 frame = inspect.currentframe()
 assert frame is not None
