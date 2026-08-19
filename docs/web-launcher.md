@@ -122,6 +122,8 @@ PS5_HOST=192.168.4.30 PS5_WEB_CHECK=1 make ps5-web
 ```
 
 This lists the apps, starts `hello`, fetches its live output, and shuts down
-the manager. It also evaluates `1 + 2` through the embedded WebREPL. A direct
+the manager. It also evaluates `print(123)` and `1 + 1` through the embedded
+WebREPL. Input is line-terminated before evaluation, and expression results are
+captured explicitly so browser commands behave like an interactive prompt. A direct
 WebSocket handshake can be verified separately against
 `ws://<PS5-IP>:8090/ws` with `tools/check_web_repl.py`.
