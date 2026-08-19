@@ -208,6 +208,8 @@ evaluate_source_locked(const char *source, char *output, size_t output_size)
     PyObject *globals;
     PyObject *result = NULL;
     PyObject *text = NULL;
+    char *source_text = NULL;
+    size_t source_length;
     int mode;
     int failed = 0;
 
@@ -217,6 +219,16 @@ evaluate_source_locked(const char *source, char *output, size_t output_size)
     if (thread_state == NULL)
         return -1;
     output[0] = '\0';
+    source_length = strlen(source);
+    source_text = malloc(source_length + 2);
+    if (source_text == NULL) {
+        runtime_detach_thread(thread_state);
+        return -1;
+    }
+    memcpy(source_text, source, source_length);
+    if (source_length == 0 || source_text[source_length - 1] != '\n')
+        source_text[source_length++] = '\n';
+    source_text[source_length] = '\0';
     main_module = PyImport_AddModule("__main__");
     globals = main_module ? PyModule_GetDict(main_module) : NULL;
     io = PyImport_ImportModule("io");
@@ -234,7 +246,7 @@ evaluate_source_locked(const char *source, char *output, size_t output_size)
     PySys_SetObject("stdout", capture);
     PySys_SetObject("stderr", capture);
     mode = strchr(source, '\n') != NULL ? Py_file_input : Py_single_input;
-    result = PyRun_StringFlags(source, mode, globals, globals, NULL);
+    result = PyRun_StringFlags(source_text, mode, globals, globals, NULL);
     if (result == NULL) {
         PyErr_PrintEx(0);
         failed = 1;
@@ -257,6 +269,7 @@ restore:
     Py_XDECREF(previous_stderr);
     Py_XDECREF(capture);
     Py_XDECREF(io);
+    free(source_text);
     runtime_detach_thread(thread_state);
     return failed;
 }
