@@ -268,7 +268,7 @@ target.
 
 These modules are either provided by the CPython interpreter itself or are
 small official Python wrappers. The focused
-`tests/stdlib/test_tier9.py` test is adapted from CPython 3.14.7's
+`tests/stdlib/test_tier9_core.py` test is adapted from CPython 3.14.7's
 `test_future_stmt`, `test_marshal`, `test_copyreg`, and `test_thread` tests.
 
 | Module | PS5 status | Included and tested | Missing or limited |

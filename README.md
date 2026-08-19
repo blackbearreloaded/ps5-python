@@ -88,6 +88,11 @@ Tier 8's feasible utility subset is included too: `graphlib`, `statistics`,
 pure `dbm.dumb`. Named timezone data is not bundled; `tkinter`, `curses`,
 native dbm backends, `smtpd`, Windows-only modules, and desktop terminal
 integrations remain outside the PS5 target.
+Tier 9 core and legacy utilities are included where feasible: `__future__`,
+`builtins`, `_thread`, `marshal`, `copyreg`, `cmd`, `shlex`, `optparse`,
+`getopt`, `pydoc`, `webbrowser`, and `symtable`. `turtle` remains omitted
+because it requires the unavailable Tcl/Tk GUI stack; browser and interactive
+terminal launch paths are documented as headless-PS5 limitations.
 
 ## Build the first PS5 ELF
 

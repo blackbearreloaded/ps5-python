@@ -66,6 +66,7 @@ adaptation policy, not a replacement for CPython's complete regression suite.
 | `stdlib/test_tier8_protocols.py` | `test_ftplib.py`, `test_poplib.py`, `test_imaplib.py`, `test_smtplib.py`, `test_mailbox.py` (local protocol/mail subset) |
 | `stdlib/test_tier9_legacy.py` | `test_shlex.py`, `test_getopt.py`, `test_optparse.py`, `test_cmd.py`, `test_symtable.py`, `test_pydoc.py`, `test_webbrowser.py` (portable API subset) |
 | `stdlib/test_tier9_legacy.py` | `test_cmd.py`, `test_shlex.py`, `test_optparse.py`, `test_getopt.py`, `test_symtable.py`, `test_pydoc.py` (portable API subset) |
+| `stdlib/test_tier9_core.py` | `test_future_stmt.py`, `test_marshal.py`, `test_copyreg.py`, `test_thread.py` (portable core subset) |
 | `stdlib/test_posix_boundary.py` | `test_os.py`, `test_signal.py` |
 | `stdlib/test_process.py` | `test_os.py` (`fork`, `waitpid`) |
 | `stdlib/test_network.py` | `test_socket.py`, `test_select.py` (`poll`, non-blocking sockets) |

@@ -101,6 +101,9 @@ Static or bundled support now includes:
   wrappers are available. Future feature metadata, marshal round trips,
   copyreg registration, and low-level thread locks/startup are tested from
   CPython's official `Lib/test` sources.
+- Tier 9 legacy utilities: official `cmd`, `shlex`, `optparse`, `getopt`,
+  `pydoc`, `webbrowser`, and `symtable` wrappers are bundled and tested.
+  `turtle` is omitted because PS5 has no Tcl/Tk GUI backend.
 
 ### Security and hashing
 
@@ -419,3 +422,5 @@ coverage remain incomplete.
 - `aa6324d` Register Latin-1 in PS5 codec bootstrap
 - `dd8146d` Handle PS5 Maildir filesystems without hard links
 - Tier 9 core/internal coverage is tracked in the Tier 9 checkpoint below.
+- `3efe506` Add Tier 9 legacy helper coverage
+- `8fd8dc5` Document Tier 9 core interpreter modules
