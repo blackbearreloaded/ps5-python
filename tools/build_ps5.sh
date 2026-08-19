@@ -164,8 +164,13 @@ build_runtime_bundle() {
     for module in "$source_dir"/Lib/logging/*.py; do
         cp "$module" "$runtime_dir/logging/$(basename "$module")"
     done
-    for module in __future__.py argparse.py getpass.py gettext.py locale.py traceback.py pprint.py textwrap.py codeop.py tokenize.py token.py _colorize.py difflib.py inspect.py calendar.py quopri.py ipaddress.py socketserver.py mimetypes.py doctest.py py_compile.py compileall.py code.py rlcompleter.py; do
+    for module in __future__.py argparse.py getpass.py gettext.py locale.py traceback.py pprint.py textwrap.py codeop.py tokenize.py token.py _colorize.py difflib.py inspect.py calendar.py quopri.py ipaddress.py socketserver.py mimetypes.py doctest.py py_compile.py compileall.py code.py cmd.py bdb.py pdb.py rlcompleter.py; do
         cp "$source_dir/Lib/$module" "$runtime_dir/$module"
+    done
+    cp "$root_dir/tools/minimal_readline.py" "$runtime_dir/readline.py"
+    mkdir -p "$runtime_dir/_pyrepl"
+    for module in __init__.py utils.py types.py trace.py; do
+        cp "$source_dir/Lib/_pyrepl/$module" "$runtime_dir/_pyrepl/$module"
     done
     mkdir -p "$runtime_dir/string"
     cp "$source_dir/Lib/string/__init__.py" "$runtime_dir/string/__init__.py"
