@@ -67,6 +67,7 @@ adaptation policy, not a replacement for CPython's complete regression suite.
 | `stdlib/test_tier9_legacy.py` | `test_shlex.py`, `test_getopt.py`, `test_optparse.py`, `test_cmd.py`, `test_symtable.py`, `test_pydoc.py`, `test_webbrowser.py` (portable API subset) |
 | `stdlib/test_tier9_core.py` | `test_future_stmt.py`, `test_marshal.py`, `test_copyreg.py`, `test_thread.py` (portable core subset) |
 | `stdlib/test_wsgi.py` | `test_wsgiref.py` (loopback server, environment, validation, and HTTP response subset) |
+| `stdlib/test_wsgi_threaded.py` | `test_wsgiref.py`, `test_httpservers.py` (ThreadingMixIn concurrency and shutdown subset) |
 | `stdlib/test_posix_boundary.py` | `test_os.py`, `test_signal.py` |
 | `stdlib/test_process.py` | `test_os.py` (`fork`, `waitpid`) |
 | `stdlib/test_network.py` | `test_socket.py`, `test_select.py` (`poll`, non-blocking sockets) |

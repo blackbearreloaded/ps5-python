@@ -315,16 +315,18 @@ The official `wsgiref` package is the first supported WSGI server target. The
 focused `tests/stdlib/test_wsgi.py` check is adapted from CPython 3.14.7's
 `test_wsgiref.py`: it runs a real `wsgiref.simple_server` on loopback, sends
 an HTTP request through `http.client`, and verifies the WSGI environment,
-response headers, body, and validation middleware.
+response headers, body, and validation middleware. The companion
+`test_wsgi_threaded.py` check exercises a blocked request, a concurrent
+request, and controlled server shutdown using `ThreadingMixIn`.
 
 | Module | PS5 status | Included and tested | Missing or limited |
 | --- | --- | --- | --- |
-| `wsgiref` | Official package bundled | Single-process loopback WSGI request/response | Full CGI, signal, malformed-request, and high-throughput coverage pending |
+| `wsgiref` | Official package bundled | Single-process and threaded loopback request/response, concurrency, and shutdown | Full CGI, signal, malformed-request, keep-alive, and high-throughput coverage pending |
 
 This establishes the application/server interface needed by Flask-style WSGI
-applications. It does not provide Flask, Werkzeug, Gunicorn, or a production
-worker supervisor. Those remain follow-up packaging and process-lifecycle
-work; the PS5 target currently validates a single-process WSGI server.
+applications and validates a basic threaded server path. It does not provide
+Flask, Werkzeug, Gunicorn, or a production worker supervisor. Those remain
+follow-up packaging and process-lifecycle work.
 
 ## `os`
 

@@ -57,6 +57,7 @@ TEST_FILES = (
     "test_tier9_legacy.py",
     "test_tier9_core.py",
     "test_wsgi.py",
+    "test_wsgi_threaded.py",
     "test_posix_boundary.py",
     "test_process.py",
     "test_network.py",
