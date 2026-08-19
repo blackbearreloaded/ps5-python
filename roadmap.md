@@ -152,6 +152,118 @@ Acceptance criteria:
 - The final state and exit reason are visible without refreshing the page.
 - A stopped job cannot leave the launcher in a permanently “running” state.
 
+## P0/P1 — Long-running daemons and web services
+
+### What works today
+
+An application launched from the Applications view can already be a
+long-running Python program. The launcher runs the selected entry point on a
+detached native worker thread, so a Flask app, Werkzeug server, or the
+supported synchronous Gunicorn path can keep serving while the launcher HTTP
+server, browser REPL, and raw TCP REPL remain available. The app must be
+packaged with its dependencies, listen on an application port different from
+the launcher ports, and currently there can be only one active app.
+
+This is an experimental in-process service mode, not a production supervisor.
+The app shares the CPython runtime with the launcher and REPL. A crash, fatal
+extension, unbounded memory use, or a non-cooperative native call can therefore
+affect the interpreter and the control plane. There is no browser Stop or
+Restart action yet, and “process is alive” is not the same as “HTTP service is
+ready”.
+
+### Recommended service model
+
+Do not create a new OS process for every short-lived application. Keep ordinary
+one-shot apps on the lightweight job path. Add an explicit **Run as service**
+mode for programs that are expected to stay alive, and give that mode a
+dedicated worker process boundary once PS5 process creation and wait/signal
+behavior are validated end to end:
+
+1. `python-web.elf` remains the trusted-LAN supervisor and control plane.
+2. A separate `python-app.elf` (or a supervisor-created per-app worker ELF)
+   owns the daemon's CPython interpreter, sockets, and application state.
+3. The supervisor starts the worker from a bounded manifest or config file in
+   `/user/temp`, rather than constructing an unbounded command line. The
+   manifest identifies the package root, entry point, working directory,
+   environment allowlist, advertised ports, and shutdown policy.
+4. The supervisor records a stable job/service ID, native PID, process group
+   where supported, stdout/stderr cursors, start/ready/exit times, exit code,
+   and restart count. Only PIDs issued by this supervisor may be stopped; it
+   must never enumerate or broadcast signals.
+5. Stop is graceful first, waits for a bounded timeout, and escalates only
+   through the validated PS5 process API. A worker crash or failed health
+   check can be restarted with bounded exponential backoff and a visible retry
+   limit.
+
+An interim in-process daemon mode may be useful while the worker ELF is being
+validated, but it must be visibly marked experimental, share the existing
+runtime lock, disable interpreter reset while active, and never promise crash
+isolation.
+
+### Manifest and readiness contract
+
+The service manifest should be deliberately small and explicit. A future
+version can support fields such as:
+
+```json
+{
+  "kind": "daemon",
+  "entry": "app:create_app",
+  "working_dir": "/data/python/apps/example",
+  "listen": [{"host": "0.0.0.0", "port": 5000}],
+  "healthcheck": {"url": "/health", "timeout_ms": 1500},
+  "restart": "on-failure",
+  "stop_timeout_ms": 3000,
+  "auto_start": false
+}
+```
+
+“Starting” must not be reported as “Ready”. The worker first reports that it
+has initialized, then the supervisor verifies the declared TCP or HTTP health
+check with a timeout. The UI should distinguish `Starting`, `Ready`,
+`Running`, `Degraded`, `Stopping`, `Exited`, and `Failed`, show the endpoint
+as a copyable link, and surface port conflicts before launch when possible.
+
+### User experience
+
+Add a service card alongside one-shot applications with:
+
+- Run as application / Run as service choice, with a clear explanation of the
+  lifecycle difference;
+- endpoint links, readiness badge, PID/job ID, uptime, restart count, and
+  last exit reason;
+- Stop, Restart, and (later) Disable auto-start actions;
+- live stdout/stderr with filters and bounded scrollback;
+- confirmation for Stop/Restart, plus a warning when a service is still
+  starting or has failed its health check;
+- recovery state after a browser refresh or launcher reconnect.
+
+The first version should link directly to the service's declared port rather
+than proxying application traffic through the admin server. This keeps the
+launcher small and makes port ownership obvious. A proxy/reverse-proxy view
+can be considered later for a unified origin and access control.
+
+### Dependencies and acceptance tests
+
+Implement this in stages:
+
+1. Extend the existing job model with `kind=oneshot|daemon`, stable IDs,
+   lifecycle states, output cursors, and a browser Stop action.
+2. Validate the PS5 worker-process boundary (`fork`/`exec` or the supported
+   equivalent), `waitpid`, descriptor inheritance, and targeted TERM/kill
+   behavior with a small native test worker.
+3. Add the manifest, readiness probe, port-conflict checks, bounded restart
+   policy, and service cards.
+4. Move daemon execution to the dedicated worker ELF and keep the in-process
+   mode as an explicitly labeled fallback only if needed.
+5. Add a packaged Flask/Werkzeug and supported Gunicorn smoke service on a
+   non-admin port. Start it, wait for readiness, make an HTTP request, stream
+   logs, stop it, restart it after a controlled failure, and verify that the
+   REPL and launcher remain usable throughout.
+
+Short-lived applications must keep their current behavior and must not pay the
+extra process cost unless the user selects service mode.
+
 ## P1 — PS5 system dashboard
 
 Add a compact top-bar/system drawer with capability-aware telemetry:
@@ -283,4 +395,3 @@ The milestone for calling this a usable “Python Studio on PS5” is not visual
 polish alone: a user must be able to discover the interpreter, write or run a
 script, see exactly what is running, stop it safely, and understand the
 console’s hardware/runtime limits from one page.
-

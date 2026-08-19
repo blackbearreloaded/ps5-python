@@ -161,6 +161,14 @@ portal visit. The Clear button also clears the server buffer and all connected
 browser consoles. While an app is running, including a long-lived daemon, its
 live output remains available.
 
+Long-lived apps are currently an experimental in-process mode: the entry point
+runs on a native worker thread in the same `python-web.elf` CPython runtime.
+This is sufficient for a packaged Flask/Werkzeug app or the supported
+synchronous Gunicorn path to serve requests, but there is no UI stop/restart
+control, readiness health check, or crash isolation yet. The planned daemon
+supervisor, manifest, and dedicated worker process are described in
+[`roadmap.md`](../roadmap.md#p0p1--long-running-daemons-and-web-services).
+
 ## Automated validation
 
 The deployment script can run an end-to-end HTTP check:
