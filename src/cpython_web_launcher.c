@@ -968,6 +968,25 @@ status_response(struct MHD_Connection *connection)
 }
 
 static enum MHD_Result
+repl_reset_response(struct MHD_Connection *connection)
+{
+    int running;
+
+    pthread_mutex_lock(&state_mutex);
+    running = app_running;
+    pthread_mutex_unlock(&state_mutex);
+    if (running)
+        return queue_text(connection, MHD_HTTP_CONFLICT, "text/plain",
+                          "stop the running app before resetting the interpreter");
+    if (cpython_ps5_runtime_reset(NULL) != 0)
+        return queue_text(connection, MHD_HTTP_INTERNAL_SERVER_ERROR,
+                          "text/plain", "interpreter reset failed");
+    ws_broadcast("{\"type\":\"repl_reset\"}");
+    return queue_text(connection, MHD_HTTP_OK, "application/json",
+                      "{\"reset\":true}");
+}
+
+static enum MHD_Result
 logs_response(struct MHD_Connection *connection, const char *query)
 {
     char since_text[32];
@@ -1190,6 +1209,8 @@ access_handler(void *cls, struct MHD_Connection *connection,
         return apps_response(connection);
     if (!strcmp(target, "/api/status"))
         return status_response(connection);
+    if (!strcmp(target, "/api/repl/reset"))
+        return repl_reset_response(connection);
     if (!strcmp(target, "/api/logs/clear")) {
         log_clear_broadcast();
         return queue_text(connection, MHD_HTTP_OK, "application/json",

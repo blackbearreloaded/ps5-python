@@ -82,6 +82,7 @@ code { color: #b8cced; font: 11px ui-monospace, SFMono-Regular, Consolas, monosp
 .menu-view { display: flex; min-height: 0; flex: 1; flex-direction: column; }
 .hidden { display: none !important; }
 .console-heading { margin-bottom: 18px; }
+.repl-heading-actions { display: flex; align-items: center; gap: 8px; }
 .terminal {
   flex: 1; min-height: 480px; margin: 0; padding: 22px; overflow: auto; border: 1px solid rgba(149, 172, 211, 0.18);
   border-radius: 15px; color: #d9e5f7; background: #070b12; box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.28);

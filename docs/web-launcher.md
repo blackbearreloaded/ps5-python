@@ -65,6 +65,7 @@ payload manager using the same ELF if desired.
 | `/api/launch?app=hello` | Starts one app bundle |
 | `/api/logs?since=0` | Returns new stdout/stderr bytes and `X-Log-Next` |
 | `/api/logs/clear` | Clears the server-side log buffer and connected consoles |
+| `/api/repl/reset` | Restarts the embedded interpreter and clears its globals |
 | `/api/shutdown` | Stops the manager; useful for tests |
 | `/ws` | Streams JSON log/status events and accepts WebREPL source lines |
 
@@ -92,8 +93,12 @@ interpreter and returns:
 The interpreter is presented as a CLI-style terminal: commands are entered at
 the prompt in the same pane where output appears. Enter evaluates the current
 line, Shift+Enter inserts a newline for a block, and the up/down arrows recall
-history. Expressions use interactive-display behavior, while multi-line input
-is executed as a block. Variables and imports persist between evaluations.
+history. Ctrl+L clears the visible terminal screen without restarting the
+interpreter. Expressions use interactive-display behavior, while multi-line
+input is executed as a block. Variables and imports persist between
+evaluations until **Restart interpreter** is selected. Opening the Interpreter
+menu adds `?view=interpreter` to the URL so a browser refresh returns to that
+view.
 Output and tracebacks are captured per evaluation, so they do not corrupt the
 app log stream. The runtime serializes app execution and REPL evaluation
 through the interpreter lock; an app and a REPL command are never executing

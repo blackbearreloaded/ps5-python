@@ -7,6 +7,7 @@ import json
 import os
 import socket
 import struct
+from urllib.request import urlopen
 
 
 def frame(payload, opcode=1):
@@ -92,6 +93,16 @@ def main():
         _, _, pending = read_frame(connection, pending)
         pending = evaluate(connection, pending, "print(123)", "123")
         pending = evaluate(connection, pending, "1 + 1", "2")
+        pending = evaluate(connection, pending, "webrepl_reset_marker = 42", "")
+        with urlopen(f"http://{args.host}:{args.port}/api/repl/reset", timeout=5) as response:
+            reset = json.load(response)
+        if reset.get("reset") is not True:
+            raise AssertionError(f"interpreter reset failed: {reset!r}")
+        pending = evaluate(
+            connection, pending,
+            'globals().get("webrepl_reset_marker", "missing")',
+            "'missing'",
+        )
         connection.sendall(frame(b"", opcode=8))
     print("WEBREPL_CHECK: PASS")
 

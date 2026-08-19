@@ -70,7 +70,10 @@
               <p class="eyebrow">Embedded WebREPL</p>
               <h2>Interactive Python interpreter</h2>
             </div>
-            <button id="repl-clear" class="secondary-button" type="button">Clear</button>
+            <div class="repl-heading-actions">
+              <button id="repl-clear" class="secondary-button" type="button">Clear screen</button>
+              <button id="repl-reset" class="secondary-button" type="button">Restart interpreter</button>
+            </div>
           </div>
           <div class="repl-shell">
             <pre id="repl-terminal" class="terminal repl-terminal" role="log" aria-live="polite">CPython 3.14.7 WebREPL
@@ -85,7 +88,7 @@ Use Enter to evaluate a line; Shift+Enter inserts a new line.
           </div>
           <div class="repl-actions">
             <span id="repl-connection" class="repl-hint">Waiting for WebSocket…</span>
-            <span class="repl-hint">↑/↓ history · Shift+Enter newline</span>
+            <span class="repl-hint">↑/↓ history · Shift+Enter newline · Ctrl+L clear screen</span>
           </div>
         </section>
       </main>
