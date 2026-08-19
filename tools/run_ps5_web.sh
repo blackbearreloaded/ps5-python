@@ -56,7 +56,7 @@ for module in __init__.py module_docs.py topics.py; do
     upload "$runtime_dir/pydoc_data/$module" "/data/python/runtime/cpython-lib/pydoc_data/$module"
 done
 upload "$runtime_dir/_pyrepl/pager.py" /data/python/runtime/cpython-lib/_pyrepl/pager.py
-for package in logging string urllib http email unittest asyncio html compression zipfile xml sqlite3 dbm sysconfig _pyrepl; do
+for package in logging string urllib http wsgiref email unittest asyncio html compression zipfile xml sqlite3 dbm sysconfig _pyrepl; do
     mkdir_remote "/data/python/runtime/cpython-lib/$package"
     while IFS= read -r -d '' module_file; do
         relative_file="${module_file#"$runtime_dir/$package/"}"

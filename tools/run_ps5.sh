@@ -124,7 +124,7 @@ mkdir_remote "$remote_runtime/zoneinfo"
 for module in __init__.py _common.py _tzpath.py _zoneinfo.py; do
     upload "$runtime_dir/zoneinfo/$module" "$remote_runtime/zoneinfo/$module"
 done
-for package in logging string urllib http email unittest asyncio html compression zipfile xml sqlite3 dbm sysconfig _pyrepl; do
+for package in logging string urllib http wsgiref email unittest asyncio html compression zipfile xml sqlite3 dbm sysconfig _pyrepl; do
     mkdir_remote "$remote_runtime/$package"
     while IFS= read -r -d '' module_file; do
         relative_file="${module_file#"$runtime_dir/$package/"}"
