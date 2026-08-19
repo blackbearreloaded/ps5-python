@@ -39,39 +39,39 @@ adaptation policy, not a replacement for CPython's complete regression suite.
 | `stdlib/test_io.py` | `test_io.py` |
 | `stdlib/test_socket.py` | `test_socket.py` |
 | `stdlib/test_dns.py` | `test_socket.py` (`getaddrinfo`) |
-| `stdlib/test_core_modules.py` | `test_re.py`, `test_json`, `test_struct`, `test_math`, `test_unicodedata` |
+| `stdlib/test_core_modules.py` | `test_re.py`, `test_json/test_encode_basestring_ascii.py`, `test_struct.py`, `test_math.py`, `test_unicodedata.py` |
 | `stdlib/test_ssl_hashlib.py` | `test_hashlib.py`, `test_ssl.py` |
 | `stdlib/test_tls_handshake.py` | `test_ssl.py`, `test_socket.py` |
 | `stdlib/test_thread_context.py` | `test_thread.py`, `test_contextvars.py` |
-| `stdlib/test_concurrency.py` | `test_threading.py`, `test_concurrent_futures.py`, `_test_multiprocessing.py` |
+| `stdlib/test_concurrency.py` | `test_threading.py`, `test_concurrent_futures/test_future.py`, `test_concurrent_futures/test_thread_pool.py`, `test_multiprocessing_fork/test_processes.py` |
 | `stdlib/test_data_formats.py` | `test_csv.py`, `test_decimal.py`, `test_xml_etree.py` |
-| `stdlib/test_import_runtime.py` | `test_pathlib.py`, `test_zipimport.py`, `test_stat.py` |
-| `stdlib/test_filesystem.py` | `test_pathlib.py`, `test_tempfile.py` |
-| `stdlib/test_tier1.py` | `test_sys.py`, `test_typing.py`, `datetimetester.py` |
-| `stdlib/test_tier2.py` | `test_argparse.py`, `test_logging.py`, `test_shutil.py`, `test_random.py`, `test_copy.py`, `test_enum.py`, `test_csv.py`, `test_subprocess.py`, `test_urllib.py`, `test_hashlib.py`, `test_io.py`, `test_traceback.py`, `test_pprint.py`, `test_unittest.py` |
-| `stdlib/test_tier3.py` | `test_asyncio`, `test_threading.py`, `test_multiprocessing.py`, `test_concurrent_futures.py`, `test_socket.py`, `test_ssl.py`, `test_httpservers.py`, `test_queue.py`, `test_select.py`, `test_signal.py` |
-| `stdlib/test_tier4_formats.py` | `test_pickle.py`, `test_struct.py`, `test_bisect.py`, `test_heapq.py`, `test_array.py`, `test_fractions.py`, `test_base64.py`, `test_zlib.py`, `test_gzip.py`, `test_zipfile`, `test_tarfile.py`, `test_sqlite3`, `test_xml_etree.py`, `test_xml_dom_minidom.py`, `test_sax.py`, `test_glob.py`, `test_fnmatch.py` |
-| `stdlib/test_diagnostics.py` | `test_tracemalloc.py`, `test_multiprocessing.py` |
-| `stdlib/test_data_structures.py` | `test_collections.py`, `test_itertools.py`, `test_heapq.py`, `test_dataclasses.py` |
+| `stdlib/test_import_runtime.py` | `test_pathlib/test_pathlib.py`, `test_zipfile/test_core.py`, `test_stat.py`, `test_importlib/test_api.py` |
+| `stdlib/test_filesystem.py` | `test_pathlib/test_pathlib.py`, `test_tempfile.py` |
+| `stdlib/test_sys.py` | `test_sys.py`, `test_typing.py`, `datetimetester.py` |
+| `stdlib/test_argparse.py` | `test_argparse.py`, `test_logging.py`, `test_shutil.py`, `test_random.py`, `test_copy.py`, `test_enum.py`, `test_csv.py`, `test_subprocess.py`, `test_urllib.py`, `test_hashlib.py`, `test_io.py`, `test_traceback.py`, `test_pprint.py`, `test_unittest/` |
+| `stdlib/test_threading.py` | `test_asyncio/test_tasks.py`, `test_threading.py`, `test_multiprocessing_fork/test_processes.py`, `test_concurrent_futures/test_future.py`, `test_socket.py`, `test_ssl.py`, `test_httpservers.py`, `test_queue.py`, `test_select.py`, `test_signal.py` |
+| `stdlib/test_pickle.py` | `test_pickle.py`, `test_struct.py`, `test_bisect.py`, `test_heapq.py`, `test_array.py`, `test_fractions.py`, `test_base64.py`, `test_zlib.py`, `test_gzip.py`, `test_zipfile/test_core.py`, `test_tarfile.py`, `test_sqlite3/test_dbapi.py`, `test_xml_etree.py`, `test_xml_dom_minicompat.py`, `test_glob.py`, `test_fnmatch.py` |
+| `stdlib/test_diagnostics.py` | `test_tracemalloc.py`, `test_mmap.py`, `test_multiprocessing_fork/test_processes.py` |
+| `stdlib/test_data_structures.py` | `test_collections.py`, `test_itertools.py`, `test_heapq.py`, `test_dataclasses/test_dataclasses.py` |
 | `stdlib/test_profiling.py` | `test_timeit.py`, `test_dis.py`, `test_tracemalloc.py`, `test_struct.py`, `test_profile.py`, `test_cprofile.py`, `test_pstats.py` |
-| `stdlib/test_tier5_inspection.py` | `test_ast.py`, `test_dis.py`, `test_inspect.py` |
-| `stdlib/test_tier5_runtime.py` | `test_contextlib.py`, `test_gc.py`, `test_site.py`, `test_sysconfig.py`, `test_weakref.py`, `test_codecs.py`, `test_types.py` |
-| `stdlib/test_tier6_security_i18n.py` | `test_secrets.py`, `test_hmac.py`, `test_getpass.py`, `test_gettext.py`, `test_locale.py`, `test_unicodedata.py` |
-| `stdlib/test_tier6_text_formats.py` | `test_string/`, `test_textwrap.py`, `test_difflib.py`, `test_mimetypes.py`, `test_uuid.py`, `test_stat.py`, `test_filecmp.py` |
-| `stdlib/test_tier6_posix.py` | `test_fcntl.py`, `test_resource.py`, `test_tty.py` |
-| `stdlib/test_tier7_compile.py` | `test_doctest.py`, `test_py_compile.py`, `test_compileall.py`, `test_codeop.py`, `test_code.py` |
-| `stdlib/test_tier7_interactive.py` | `test_code_module.py`, `test_pdb.py`, `test_readline.py`, `test_rlcompleter.py` (portable API subset) |
-| `stdlib/test_tier8_pure.py` | `test_graphlib.py`, `test_statistics.py`, `test_cmath.py`, `test_ipaddress.py`, `test_colorsys.py`, `test_calendar.py`, `test_wave.py`, `test_binascii.py`, `test_zoneinfo` (portable API subset) |
-| `stdlib/test_tier8_compression.py` | `test_bz2.py`, `test_lzma.py`, `test_dbm_dumb.py`, `test_shelve.py` (portable backend subset) |
-| `stdlib/test_tier8_protocols.py` | `test_ftplib.py`, `test_poplib.py`, `test_imaplib.py`, `test_smtplib.py`, `test_mailbox.py` (local protocol/mail subset) |
-| `stdlib/test_tier9_legacy.py` | `test_shlex.py`, `test_getopt.py`, `test_optparse.py`, `test_cmd.py`, `test_symtable.py`, `test_pydoc.py`, `test_webbrowser.py` (portable API subset) |
-| `stdlib/test_tier9_core.py` | `test_future_stmt.py`, `test_marshal.py`, `test_copyreg.py`, `test_thread.py` (portable core subset) |
-| `stdlib/test_wsgi.py` | `test_wsgiref.py` (loopback server, environment, validation, and HTTP response subset) |
-| `stdlib/test_wsgi_threaded.py` | `test_wsgiref.py`, `test_httpservers.py` (ThreadingMixIn concurrency and shutdown subset) |
-| `stdlib/test_gunicorn.py` | Gunicorn 23.0.0 sync worker import and HTTP parser smoke checks, using the CPython WSGI/HTTP request boundary cases |
-| `stdlib/test_gunicorn_server.py` | `test_wsgiref.py`, `test_httpservers.py`, `test_os.py`, `test_signal.py` (Gunicorn sync master, forked worker, loopback request, SIGTERM, and waitpid) |
-| `stdlib/test_gunicorn_foundation.py` | `test_os.py`, `test_signal.py`, `test_socket.py` (pre-fork listener inheritance, worker reaping, and SIGCHLD subset) |
-| `stdlib/test_flask.py` | `test_wsgiref.py`, `test_http_cookies.py`, `test_http_cookiejar.py` (Flask routing, Werkzeug WSGI client, JSON, Jinja escaping, and signed session cookie subset) |
+| `stdlib/test_dis.py` | `test_ast/test_ast.py`, `test_dis.py`, `test_inspect/test_inspect.py` |
+| `stdlib/test_contextlib.py` | `test_contextlib.py`, `test_gc.py`, `test_site.py`, `test_sysconfig.py`, `test_weakref.py`, `test_codecs.py`, `test_types.py` |
+| `stdlib/test_secrets.py` | `test_secrets.py`, `test_hmac.py`, `test_getpass.py`, `test_gettext.py`, `test_locale.py`, `test_unicodedata.py` |
+| `stdlib/test_filecmp.py` | `test_string/`, `test_textwrap.py`, `test_difflib.py`, `test_mimetypes.py`, `test_uuid.py`, `test_stat.py`, `test_filecmp.py` |
+| `stdlib/test_fcntl.py` | `test_fcntl.py`, `test_resource.py`, `test_termios.py`, `test_tty.py` |
+| `stdlib/test_code.py` | `test_doctest/test_doctest.py`, `test_py_compile.py`, `test_compileall.py`, `test_codeop.py`, `test_code.py` |
+| `stdlib/test_code_module.py` | `test_code_module.py`, `test_pdb.py`, `test_readline.py`, `test_rlcompleter.py` (portable API subset) |
+| `stdlib/test_graphlib.py` | `test_graphlib.py`, `test_statistics.py`, `test_cmath.py`, `test_ipaddress.py`, `test_colorsys.py`, `test_calendar.py`, `test_wave.py`, `test_binascii.py`, `test_zoneinfo/` (portable API subset) |
+| `stdlib/test_bz2.py` | `test_bz2.py`, `test_lzma.py`, `test_dbm_dumb.py`, `test_shelve.py` (portable backend subset) |
+| `stdlib/test_ftplib.py` | `test_ftplib.py`, `test_poplib.py`, `test_imaplib.py`, `test_smtplib.py`, `test_mailbox.py` (local protocol/mail subset) |
+| `stdlib/test_shlex.py` | `test_shlex.py`, `test_getopt.py`, `test_optparse.py`, `test_cmd.py`, `test_symtable.py`, `test_pydoc/test_pydoc.py`, `test_webbrowser.py` (portable API subset) |
+| `stdlib/test_marshal.py` | `test_future_stmt/`, `test_marshal.py`, `test_copyreg.py`, `test_thread.py` (portable core subset) |
+| `stdlib/test_wsgiref.py` | `test_wsgiref.py` (loopback server, environment, validation, and HTTP response subset) |
+| `stdlib/test_httpservers.py` | `test_wsgiref.py`, `test_httpservers.py` (ThreadingMixIn concurrency and shutdown subset) |
+| `integration/test_gunicorn.py` | Third-party Gunicorn 23.0.0; CPython `test_wsgiref.py` and `test_httpservers.py` request-boundary basis |
+| `integration/test_gunicorn_server.py` | Third-party Gunicorn 23.0.0; CPython `test_wsgiref.py`, `test_httpservers.py`, `test_os.py`, and `test_signal.py` lifecycle basis |
+| `integration/test_gunicorn_foundation.py` | Third-party Gunicorn foundation; CPython `test_os.py`, `test_signal.py`, and `test_socket.py` process/socket basis |
+| `integration/test_flask.py` | Third-party Flask stack; CPython `test_wsgiref.py`, `test_http_cookies.py`, and `test_http_cookiejar.py` WSGI/cookie basis |
 | `stdlib/test_posix_boundary.py` | `test_os.py`, `test_signal.py` |
 | `stdlib/test_process.py` | `test_os.py` (`fork`, `waitpid`) |
 | `stdlib/test_worker_lifecycle.py` | `test_os.py`, `test_signal.py`, `test_socket.py` (forked listener/control-channel handoff, wait/restart, SIGCHLD, and TERM subset) |
@@ -79,8 +79,12 @@ adaptation policy, not a replacement for CPython's complete regression suite.
 | `stdlib/test_select.py` | `test_select.py`, `test_selectors.py` |
 
 The standard-library tests are intentionally direct, import-light adaptations
-of the upstream behavior checks. They keep the upstream module-to-test naming
-so each file can be compared directly with CPython. `time.sleep()` is excluded
+of the upstream behavior checks. Their filenames use an actual CPython
+3.14.7 `Lib/test` filename (or the matching package path) rather than synthetic
+`test_tier*.py` names. A few PS5 files are compact adapters whose primary
+filename identifies the first upstream source while the table records every
+additional source folded into that adapter; they can be split into those
+upstream paths as coverage grows. `time.sleep()` is excluded
 because the current PS5 libc sleep syscall returns `ENOSYS`; it will be added
 when the native sleep hook is implemented.
 

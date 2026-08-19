@@ -41,4 +41,4 @@ assert ssl.SSLContext is not None
 assert select.select is not None
 assert signal.getsignal(signal.SIGINT) is not None
 
-print("test_tier3: PASS")
+print("test_threading: PASS")

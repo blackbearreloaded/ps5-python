@@ -43,7 +43,7 @@ assert logging.handlers.MemoryHandler is not None
 assert logging.config.dictConfig is not None
 
 if sys.platform.startswith("win32"):
-    print("test_tier2: tempfile/shutil file checks skipped on host")
+        print("test_argparse: tempfile/shutil file checks skipped on host")
 else:
     with tempfile.TemporaryDirectory() as directory:
         source = directory + "/source.txt"
@@ -85,7 +85,7 @@ if sys.platform.startswith("freebsd"):
     try:
         subprocess.run(["true"], check=True)
     except (NotImplementedError, OSError):
-        print("test_tier2: subprocess execution unavailable")
+        print("test_argparse: subprocess execution unavailable")
     else:
         raise AssertionError("PS5 subprocess unexpectedly executed a child ELF")
 else:
@@ -97,4 +97,4 @@ else:
     )
     assert completed.stdout.strip() == "subprocess"
 
-print("test_tier2: PASS")
+print("test_argparse: PASS")

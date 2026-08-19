@@ -7,7 +7,7 @@ import os
 # tests.  Keep the desktop suite runnable on Windows while exercising the same
 # native APIs on PS5.
 if os.name != "posix":
-    print("test_tier6_posix: SKIP (POSIX modules unavailable)")
+    print("test_fcntl: SKIP (POSIX modules unavailable)")
 else:
     import fcntl
     import resource
@@ -60,4 +60,4 @@ else:
     assert cbreak[6][termios.VMIN] == 1
     assert cbreak[6][termios.VTIME] == 0
 
-    print("test_tier6_posix: PASS")
+print("test_fcntl: PASS")

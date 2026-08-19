@@ -23,7 +23,7 @@ APIs are recorded rather than implied to be complete.
 
 | Module | PS5 status | Coverage and remaining gap |
 | --- | --- | --- |
-| `sys` | Built in and available | Interpreter state, streams, version, and arguments in `test_tier1.py`; full startup/configuration coverage remains pending. |
+| `sys` | Built in and available | Interpreter state, streams, version, and arguments in `test_sys.py`; full startup/configuration coverage remains pending. |
 | `os` | Bundled | POSIX filesystem, environment, pipes, and process checks pass; advanced descriptor/process APIs remain limited. |
 | `pathlib` | Bundled | Concrete `Path` and `PurePosixPath` operations pass; full upstream pathlib coverage is pending. |
 | `typing` | Official wrapper plus native `_typing` | `TypeVar`, `Generic`, `Protocol`, aliases, `cast`, `TypedDict`, and basic annotation introspection pass; the complete upstream typing suite is pending. |
@@ -37,14 +37,14 @@ APIs are recorded rather than implied to be complete.
 | `functools` | Official wrapper | `lru_cache` and `partial` pass; broader helper coverage is pending. |
 | `itertools` | Native static module | `count`, `islice`, and `permutations` pass; broader iterator coverage is pending. |
 
-The combined smoke test is `tests/stdlib/test_tier1.py`, adapted from
+The combined smoke test is `tests/stdlib/test_sys.py`, adapted from
 `test_sys.py`, `test_typing.py`, and `datetimetester.py`; existing focused
 tests cover the other rows.
 
 ## Tier 2 utility status
 
 These modules use the pinned CPython 3.14.7 `Lib/` sources and the focused
-`tests/stdlib/test_tier2.py` smoke test. The table records the supported
+`tests/stdlib/test_argparse.py` smoke test. The table records the supported
 surface and the remaining PS5-specific gap for every requested module.
 
 | Module | PS5 status | Included and tested | Missing or limited |
@@ -73,7 +73,7 @@ dependency.
 ## Tier 3 concurrency and networking status
 
 The requested Tier 3 modules use the pinned CPython 3.14.7 `Lib/` sources and
-the focused `tests/stdlib/test_tier3.py` smoke test, alongside the existing
+the focused `tests/stdlib/test_threading.py` smoke test, alongside the existing
 socket, TLS, select, signal, and concurrency tests.
 
 | Module | PS5 status | Included and tested | Missing or limited |
@@ -97,7 +97,7 @@ inherit the documented `subprocess`/ELF-launch limitation.
 ## Tier 4 data structures, algorithms, and formats
 
 These modules use the pinned CPython 3.14.7 `Lib/` sources and the focused
-`tests/stdlib/test_tier4_formats.py` smoke test. Native dependencies are built
+`tests/stdlib/test_pickle.py` smoke test. Native dependencies are built
 and statically linked where the upstream module requires them.
 
 | Module | PS5 status | Included and tested | Missing or limited |
@@ -145,8 +145,8 @@ tests. PS5 startup and source-layout limitations are recorded explicitly.
 | `codecs` | Official wrapper plus native `_codecs` | Registry lookup and UTF-8 transforms | Full codec alias/error-handler and incremental-stream coverage pending |
 | `types` | Official wrapper plus native built-in types | `SimpleNamespace`, mapping proxies, and dynamic function types | Full dynamic-class/descriptor coverage pending |
 
-The focused tests are `tests/stdlib/test_tier5_inspection.py`,
-`test_tier5_import.py`, and `test_tier5_runtime.py`; their upstream mapping is
+The focused tests are `tests/stdlib/test_dis.py`,
+`test_abc.py`, and `test_contextlib.py`; their upstream mapping is
 recorded in `tests/UPSTREAM_TESTS.md`.
 
 ## Tier 6 security, internationalization, text, and POSIX status
@@ -175,8 +175,8 @@ from this PS5 target as requested.
 | `fcntl` | Native static module | Descriptor flags and `FD_CLOEXEC` through `fcntl()` | Full lock/ioctl/owner coverage pending |
 | `resource` | Native static module | `getrusage()`, `getrlimit()`, and `setrlimit()` | Full limit catalog and accounting coverage pending |
 
-The focused tests are `test_tier6_security_i18n.py`,
-`test_tier6_text_formats.py`, and `test_tier6_posix.py`; their upstream
+The focused tests are `test_secrets.py`,
+`test_filecmp.py`, and `test_fcntl.py`; their upstream
 CPython test sources are mapped in `tests/UPSTREAM_TESTS.md`.
 
 ## Tier 7 developer tools, debugging, and profiling status
@@ -201,8 +201,8 @@ terminal and subprocess-dependent portions remain explicitly limited.
 | `readline` | PS5-safe compatibility layer | History, completion hooks, line-buffer state, and file persistence APIs | GNU/editline native line editing is unavailable because no linkable backend is shipped |
 | `rlcompleter` | Official wrapper over readline-compatible APIs | Namespace completion behavior | Full interactive completion integration pending |
 
-The focused tests are `tests/stdlib/test_tier7_compile.py` and
-`test_tier7_interactive.py`; profiler coverage extends
+The focused tests are `tests/stdlib/test_code.py` and
+`test_code_module.py`; profiler coverage extends
 `tests/stdlib/test_profiling.py`. Their upstream mappings are recorded in
 `tests/UPSTREAM_TESTS.md`.
 
@@ -210,7 +210,7 @@ The focused tests are `tests/stdlib/test_tier7_compile.py` and
 
 These are the feasible, non-desktop portions of Tier 8, using the pinned
 CPython 3.14.7 `Lib/` sources and the focused
-`tests/stdlib/test_tier8_pure.py` test. Windows-only modules and GUI/terminal
+`tests/stdlib/test_graphlib.py` test. Windows-only modules and GUI/terminal
 database stacks are tracked as intentionally omitted.
 
 | Module | PS5 status | Included and tested | Missing or limited |
@@ -225,7 +225,7 @@ database stacks are tracked as intentionally omitted.
 | `wave` | Official wrapper bundled | In-memory PCM WAV write/read round trip | Compressed/extended chunks and full coverage pending |
 | `binascii` | Native static module | Hex conversion and CRC32 | Full ASCII/base64/quoted-printable error coverage pending |
 
-`test_tier8_pure.py` is adapted from the corresponding CPython tests listed in
+`test_graphlib.py` is adapted from the corresponding CPython tests listed in
 `tests/UPSTREAM_TESTS.md`.
 
 ## Tier 8 compression and persistence status
@@ -244,7 +244,7 @@ database backends remain outside the feasible PS5 subset.
 ## Tier 8 protocol and mail status
 
 These pure-Python clients and mailbox helpers use the pinned CPython 3.14.7
-`Lib/` sources. The focused `tests/stdlib/test_tier8_protocols.py` uses only
+`Lib/` sources. The focused `tests/stdlib/test_ftplib.py` uses only
 loopback fake servers and local mailbox files; it never contacts external
 services.
 
@@ -268,7 +268,7 @@ target.
 
 These modules are either provided by the CPython interpreter itself or are
 small official Python wrappers. The focused
-`tests/stdlib/test_tier9_core.py` test is adapted from CPython 3.14.7's
+`tests/stdlib/test_marshal.py` test is adapted from CPython 3.14.7's
 `test_future_stmt`, `test_marshal`, `test_copyreg`, and `test_thread` tests.
 
 | Module | PS5 status | Included and tested | Missing or limited |
@@ -288,7 +288,7 @@ pinned upstream `Lib/` tree into the runtime bundle; no host modules are used.
 ## Tier 9 legacy and low-level utility status
 
 The feasible Tier 9 wrappers use the pinned CPython 3.14.7 `Lib/` sources and
-the focused `tests/stdlib/test_tier9_legacy.py` checks. Terminal, browser, and
+the focused `tests/stdlib/test_shlex.py` checks. Terminal, browser, and
 GUI actions are represented only up to the point supported by the PS5
 payload; the implementation does not claim a desktop environment exists.
 
@@ -312,43 +312,20 @@ construction, but its OS browser backends cannot launch on the headless PS5.
 ## WSGI application boundary
 
 The official `wsgiref` package is the first supported WSGI server target. The
-focused `tests/stdlib/test_wsgi.py` check is adapted from CPython 3.14.7's
+focused `tests/stdlib/test_wsgiref.py` check is adapted from CPython 3.14.7's
 `test_wsgiref.py`: it runs a real `wsgiref.simple_server` on loopback, sends
 an HTTP request through `http.client`, and verifies the WSGI environment,
 response headers, body, and validation middleware. The companion
-`test_wsgi_threaded.py` check exercises a blocked request, a concurrent
+`test_httpservers.py` check exercises a blocked request, a concurrent
 request, and controlled server shutdown using `ThreadingMixIn`.
 
 | Module | PS5 status | Included and tested | Missing or limited |
 | --- | --- | --- | --- |
 | `wsgiref` | Official package bundled | Single-process and threaded loopback request/response, concurrency, and shutdown | Full CGI, signal, malformed-request, keep-alive, and high-throughput coverage pending |
-| `gunicorn` 23.0.0 | Vendored pure-Python package bundled | Official sync worker and HTTP parser; pre-fork master/worker; normal TCP bind and inherited `fd://` listener; loopback WSGI request; SIGTERM/SIGCHLD shutdown and reaping | Daemon/re-exec, Unix sockets, distribution-metadata plugin entry points, and optional gevent/eventlet workers are outside the PS5 contract |
 
-### Flask/Werkzeug application boundary
-
-The pinned pure-Python framework closure is bundled for CPython **3.14.7**:
-
-| Package | Version | PS5 status |
-| --- | --- | --- |
-| Flask | 3.1.3 | Bundled; routing, JSON responses, Jinja rendering, signed sessions, and Gunicorn WSGI serving pass |
-| Werkzeug | 3.1.8 | Bundled; WSGI test client and Flask request/response boundary pass |
-| Jinja2 / MarkupSafe | 3.1.6 / 3.0.3 | Bundled; pure-Python template rendering and HTML escaping pass; native speedups omitted |
-| ItsDangerous / Click / Blinker | 2.2.0 / 8.2.1 / 1.9.0 | Bundled; session signing and Flask dependency imports pass |
-
-The focused `tests/stdlib/test_flask.py` check is adapted from CPython's
-WSGI, cookie, and cookie-jar tests. It exercises Flask's test client,
-Werkzeug's WSGI client, JSON request/response handling, Jinja escaping, a
-signed session cookie, and a real Flask app served by Gunicorn's sync worker.
-The Flask development reloader/debugger, dotenv discovery, multi-process
-serving, and optional async workers remain disabled on PS5.
-
-This establishes the application/server interface needed by Flask-style WSGI
-applications and validates both the reference threaded server and Gunicorn's
-normal synchronous pre-fork path. The package does not silently enable
-daemonization, re-exec, Unix-domain sockets, plugin entry points, or
-third-party async workers on this target. See
-[`docs/gunicorn-foundation.md`](gunicorn-foundation.md) for the lifecycle
-contract and remaining bounded-test work.
+Third-party WSGI servers and frameworks are tracked separately in
+[`docs/web-stack-status.md`](web-stack-status.md); they are not CPython
+standard-library modules.
 
 ## `os`
 
@@ -691,7 +668,8 @@ Source and tests:
   fallback in `tools/patch_multiprocessing_util.py`)
 - `upstream/cpython/Modules/_multiprocessing/` and `Modules/arraymodule.c`
 - `tests/stdlib/test_concurrency.py`, adapted from `test_threading.py`,
-  `test_concurrent_futures.py`, and `_test_multiprocessing.py`
+  `test_concurrent_futures/test_future.py`, and
+  `test_multiprocessing_fork/test_processes.py`
 
 ## `csv`, `decimal`, and XML parsing
 
@@ -746,7 +724,7 @@ PS5 limitations:
   `os.scandir(fd)` returns `ENOTSUP`; the fallback still provides automatic
   `TemporaryDirectory` cleanup but does not provide fd-based symlink-race
   hardening.
-- Complete upstream `test_pathlib.py` and `test_tempfile.py` coverage remains
+- Complete upstream `test_pathlib/test_pathlib.py` and `test_tempfile.py` coverage remains
   out of scope for the portable PS5 suite.
 
 Source and tests:
@@ -756,9 +734,9 @@ Source and tests:
 - `upstream/cpython/Lib/zipimport.py`
 - `upstream/cpython/Lib/stat.py` and `Lib/posixpath.py`
 - `tools/patch_shutil_rmtree.py`
-- `tests/stdlib/test_import_runtime.py`, adapted from `test_pathlib.py`,
-  `test_zipimport.py`, and `test_stat.py`
-- `tests/stdlib/test_filesystem.py`, adapted from `test_pathlib.py` and
+- `tests/stdlib/test_import_runtime.py`, adapted from
+  `test_pathlib/test_pathlib.py`, `test_zipfile/test_core.py`, and `test_stat.py`
+- `tests/stdlib/test_filesystem.py`, adapted from `test_pathlib/test_pathlib.py` and
   `test_tempfile.py`
 
 ## Diagnostics and multiprocessing primitives

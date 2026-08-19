@@ -30,6 +30,6 @@ if os.name != "nt":
             shelf["message"] = {"value": 42}
             assert shelf["message"] == {"value": 42}
 else:
-    print("test_tier8_compression: persistence checks skipped on host")
+    print("test_bz2: persistence checks skipped on host")
 
-print("test_tier8_compression: PASS")
+print("test_bz2: PASS")

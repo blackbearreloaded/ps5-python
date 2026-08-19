@@ -70,4 +70,4 @@ assert not hold_thread.is_alive()
 assert not serve_thread.is_alive()
 assert not errors, errors
 
-print("test_wsgi_threaded: PASS")
+print("test_httpservers: PASS")

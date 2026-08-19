@@ -59,4 +59,4 @@ assert moment.astimezone(timezone(timedelta(hours=2))).hour == 14
 assert (moment + timedelta(days=1)).day == 1
 assert timezone.utc.utcoffset(moment) == timedelta(0)
 
-print("test_tier1: PASS")
+print("test_sys: PASS")

@@ -72,6 +72,6 @@ assert frame is not None
 assert inspect.isframe(frame)
 frame_filename = inspect.getframeinfo(frame).filename
 if not sys.platform.startswith("freebsd"):
-    assert frame_filename.endswith("test_tier5_inspection.py")
+    assert frame_filename.endswith("test_dis.py")
 
-print("test_tier5_inspection: PASS")
+print("test_dis: PASS")

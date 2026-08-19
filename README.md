@@ -93,16 +93,15 @@ Tier 9 core and legacy utilities are included where feasible: `__future__`,
 `getopt`, `pydoc`, `webbrowser`, and `symtable`. `turtle` remains omitted
 because it requires the unavailable Tcl/Tk GUI stack; browser and interactive
 terminal launch paths are documented as headless-PS5 limitations.
-The official `wsgiref` reference server is also bundled. Single-process and
-threaded loopback WSGI requests pass on PS5. Gunicorn 23.0.0 is vendored as a
-pure-Python package: its sync TCP worker, pre-fork master, inherited listener,
-SIGTERM shutdown, and worker reaping pass the PS5 loopback test. The pinned
-Flask 3.1.3 closure (Werkzeug 3.1.8, Jinja2 3.1.6, MarkupSafe 3.0.3,
-ItsDangerous 2.2.0, Click 8.2.1, and Blinker 1.9.0) is also bundled and serves
-routes through Gunicorn; JSON, Jinja escaping, signed sessions, and the
-Werkzeug WSGI client pass on PS5. Daemon/re-exec, Unix-domain sockets, plugin
-entry points, debug/reloader subprocesses, and optional gevent/eventlet
-workers remain outside the PS5 contract.
+The official CPython 3.14.7 `wsgiref` reference server is also bundled.
+Single-process and threaded loopback WSGI requests pass on PS5. Separately,
+the project vendors a constrained third-party web stack: Gunicorn 23.0.0 and
+the Flask 3.1.3 closure (Werkzeug 3.1.8, Jinja2 3.1.6, MarkupSafe 3.0.3,
+ItsDangerous 2.2.0, Click 8.2.1, and Blinker 1.9.0). Their sync serving,
+JSON, Jinja escaping, signed sessions, and Werkzeug WSGI client pass on PS5.
+Daemon/re-exec, Unix-domain sockets, plugin entry points, debug/reloader
+subprocesses, and optional gevent/eventlet workers remain outside the PS5
+contract. See [`docs/web-stack-status.md`](docs/web-stack-status.md).
 
 ## Build the first PS5 ELF
 

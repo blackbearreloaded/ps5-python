@@ -104,13 +104,25 @@ Static or bundled support now includes:
 - Tier 9 legacy utilities: official `cmd`, `shlex`, `optparse`, `getopt`,
   `pydoc`, `webbrowser`, and `symtable` wrappers are bundled and tested.
   `turtle` is omitted because PS5 has no Tcl/Tk GUI backend.
-- WSGI boundary: official `wsgiref` is bundled. Single-process and threaded
-  loopback requests, WSGI environment propagation, response handling, and
-  controlled shutdown pass on PS5. Gunicorn 23.0.0's official sync worker and
-  pre-fork master now serve a loopback request, accept an inherited `fd://`
-  listener, and shut down/reap workers on SIGTERM. Flask 3.1.3 and its pinned
-  pure-Python Werkzeug/Jinja2/MarkupSafe/ItsDangerous/Click/Blinker closure
-  now serve a Flask route through Gunicorn on PS5.
+- WSGI boundary: official CPython `wsgiref` is bundled. Single-process and
+  threaded loopback requests, WSGI environment propagation, response handling,
+  and controlled shutdown pass on PS5. Third-party web-server/framework
+  support is tracked separately below.
+
+### Third-party web stack
+
+- Vendored third-party Gunicorn 23.0.0's pure-Python package and wired it into
+  both PS5 runtime upload paths. The official sync worker, arbiter pre-fork
+  lifecycle, inherited TCP listeners, SIGTERM/SIGCHLD handling, and clean
+  `waitpid()` reaping pass `tests/integration/test_gunicorn_server.py`.
+  Daemon/re-exec, Unix-domain sockets, plugin entry points, and optional async
+  workers remain explicitly unsupported.
+- Vendored third-party Flask 3.1.3 with Werkzeug 3.1.8, Jinja2 3.1.6,
+  MarkupSafe 3.0.3, ItsDangerous 2.2.0, Click 8.2.1, and Blinker 1.9.0. The
+  Flask test client, Werkzeug WSGI client, JSON, Jinja escaping, signed
+  sessions, and a real Flask app served by Gunicorn pass
+  `tests/integration/test_flask.py` on PS5. Native MarkupSafe speedups and
+  debugger/reloader subprocess paths remain outside the target subset.
 
 ### Security and hashing
 
@@ -136,18 +148,6 @@ Static or bundled support now includes:
   pools, `multiprocessing.Pipe`, and `Process` with an explicit `fork`
   context; Queue/Semaphore/SharedMemory and ProcessPoolExecutor are recorded
   as platform limitations.
-- Vendored Gunicorn 23.0.0's pure-Python package and wired it into both PS5
-  runtime upload paths. The official sync worker, arbiter pre-fork lifecycle,
-  inherited TCP listeners, SIGTERM/SIGCHLD handling, and clean `waitpid()`
-  reaping pass `tests/stdlib/test_gunicorn_server.py`. Daemon/re-exec,
-  Unix-domain sockets, plugin entry points, and optional async workers remain
-  explicitly unsupported.
-- Vendored Flask 3.1.3 with Werkzeug 3.1.8, Jinja2 3.1.6, MarkupSafe 3.0.3,
-  ItsDangerous 2.2.0, Click 8.2.1, and Blinker 1.9.0. The Flask test client,
-  Werkzeug WSGI client, JSON, Jinja escaping, signed sessions, and a real
-  Flask app served by Gunicorn pass `tests/stdlib/test_flask.py` on PS5.
-  Native MarkupSafe speedups and debugger/reloader subprocess paths remain
-  outside the target subset.
 - Statically linked native `array` for multiprocessing reduction support.
 - Verified concrete `pathlib.Path` operations and tempfile context cleanup;
   patched `shutil.rmtree` to use its PS5-compatible path-based fallback.
@@ -176,7 +176,7 @@ Static or bundled support now includes:
 - Patched only the `_posixsubprocess` import boundary in official
   `subprocess.py`; the module imports and reports the platform execution limit
   instead of pretending child ELF execution works.
-- Added `tests/stdlib/test_tier2.py`, adapted from the pinned CPython
+- Added `tests/stdlib/test_argparse.py`, adapted from the pinned CPython
   `Lib/test/test_*.py` files, and recorded every requested module's gaps in
   `docs/stdlib-status.md`.
 
@@ -186,7 +186,7 @@ Static or bundled support now includes:
   official `html` and `mimetypes` dependencies required by `http.server`.
 - Verified an asyncio event loop, coroutine scheduling, `asyncio.Queue`,
   synchronized `queue.Queue`, and thread-pool execution on PS5.
-- Added `tests/stdlib/test_tier3.py`, adapted from the pinned asyncio,
+- Added `tests/stdlib/test_threading.py`, adapted from the pinned asyncio,
   threading, multiprocessing, futures, socket, SSL, HTTP, queue, select, and
   signal tests; documented all platform ceilings in `docs/stdlib-status.md`.
 
@@ -195,7 +195,7 @@ Static or bundled support now includes:
 - Built and linked static zlib 1.3.1 and SQLite 3.46.1 dependencies for PS5.
 - Linked native `zlib` and `_sqlite3`, bundled official SQLite/archive/XML
   wrappers, and closed the cp437 codec dependency required by ZIP metadata.
-- Added `tests/stdlib/test_tier4_formats.py`, adapted from the pinned CPython
+- Added `tests/stdlib/test_pickle.py`, adapted from the pinned CPython
   pickle, struct, zlib, gzip, ZIP, TAR, SQLite, XML, glob, and fnmatch tests.
 
 ### Tier 5 metaprogramming and inspection

@@ -110,8 +110,8 @@ except ImportError:
 try:
     utc = ZoneInfo("UTC")
 except ZoneInfoNotFoundError:
-    print("test_tier8_pure: named zoneinfo skipped (no PS5 tzdata)")
+        print("test_graphlib: named zoneinfo skipped (no PS5 tzdata)")
 else:
     assert utc.key == "UTC"
 
-print("test_tier8_pure: PASS")
+print("test_graphlib: PASS")
