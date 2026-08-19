@@ -116,7 +116,8 @@ evaluations until **Restart interpreter** is selected. Opening the Interpreter
 menu adds `?view=interpreter` to the URL, while Applications uses
 `?view=applications`, so a browser refresh returns to the selected view.
 Command text and its result are joined with a single terminal line break;
-the launcher does not insert an extra blank line after each command.
+the launcher does not insert an extra blank line after each command. Long
+sessions scroll inside the interpreter pane instead of expanding the page.
 Output and tracebacks are captured per evaluation, so they do not corrupt the
 app log stream. The runtime serializes app execution and REPL evaluation
 through the interpreter lock; an app and a REPL command are never executing
