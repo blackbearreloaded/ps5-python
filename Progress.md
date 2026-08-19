@@ -396,4 +396,4 @@ coverage remain incomplete.
 - `60f8187` Relax readline completer identity test
 - `e4623cf` Use portable tracemalloc filter pattern
 - `529df8e` Document Tier 7 developer tools
-- Tier 8 pure utility implementation checkpoint follows this commit.
+- `7c9b690` Add feasible Tier 8 utility modules
