@@ -148,6 +148,36 @@ The focused tests are `tests/stdlib/test_tier5_inspection.py`,
 `test_tier5_import.py`, and `test_tier5_runtime.py`; their upstream mapping is
 recorded in `tests/UPSTREAM_TESTS.md`.
 
+## Tier 6 security, internationalization, text, and POSIX status
+
+These modules use the pinned CPython 3.14.7 `Lib/` sources and focused Tier 6
+tests. Windows-only modules (`msvcrt`, `winreg`, and `winsound`) are excluded
+from this PS5 target as requested.
+
+| Module | PS5 status | Included and tested | Missing or limited |
+| --- | --- | --- | --- |
+| `secrets` | Official wrapper over OS/OpenSSL randomness | Tokens, `randbelow`, and constant-time comparisons | Full entropy-source and statistical regression coverage pending |
+| `hmac` | Official wrapper over OpenSSL-backed hashlib | SHA-256 MACs and digest comparison | Full digestmod/provider and streaming coverage pending |
+| `getpass` | Official wrapper | Non-interactive hidden-input helper and validation | Interactive terminal prompting is limited by PS5 console behavior |
+| `gettext` | Official wrapper | Null translations, plural forms, and contextual lookup | Catalog loading and locale discovery coverage pending |
+| `locale` | Official wrapper | C locale, numeric formatting, conventions, and encoding query | Full locale database/alias coverage pending |
+| `unicodedata` | Native Unicode database module | Names, categories, lookup, and normalization | Complete Unicode-version regression coverage pending |
+| `string` | Official package | `Template` and `Formatter` behavior | Full constants/format grammar coverage pending |
+| `textwrap` | Official wrapper | Wrapping, dedent, and indentation | Full whitespace and sentence-ending coverage pending |
+| `difflib` | Official wrapper | Sequence opcodes and unified diffs | Full matcher/autojunk and rendering coverage pending |
+| `mimetypes` | Official wrapper | Common MIME guessing and custom type registration | Complete system-database and platform mapping coverage pending |
+| `uuid` | Official wrapper plus recursive `platform` dependency | UUID parsing, UUID4/UUID5 generation, bytes, URN, and RFC 4122 variant | OS-specific node/MAC discovery and full entropy/provider coverage pending |
+| `stat` | Official wrapper plus native stat support | Mode predicates and `filemode()` | Full platform-specific flags and formatting coverage pending |
+| `filecmp` | Official wrapper | Shallow/deep file comparison and cache behavior using `/user/temp` | Directory comparison and symlink/metadata edge coverage pending |
+| `termios` | Native static module | PS5 termios constants and tty mode transformations | Real TTY device control and full ioctl coverage pending |
+| `tty` | Official wrapper | `cfmakeraw` and `cfmakecbreak` transformations | Interactive terminal state transitions pending |
+| `fcntl` | Native static module | Descriptor flags and `FD_CLOEXEC` through `fcntl()` | Full lock/ioctl/owner coverage pending |
+| `resource` | Native static module | `getrusage()`, `getrlimit()`, and `setrlimit()` | Full limit catalog and accounting coverage pending |
+
+The focused tests are `test_tier6_security_i18n.py`,
+`test_tier6_text_formats.py`, and `test_tier6_posix.py`; their upstream
+CPython test sources are mapped in `tests/UPSTREAM_TESTS.md`.
+
 ## `os`
 
 Status: Python-level POSIX wrapper and core filesystem operations included.

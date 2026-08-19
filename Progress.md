@@ -9,14 +9,14 @@ upstream source commit `823f0323ee6ec1402088b73bce1a38473cac36dc`.
 
 ## Follow-up
 
-- Host validation now passes all 51 discovered scripts. Tests that require PS5
+- Host validation now passes all 54 discovered scripts. Tests that require PS5
   capabilities (fork, `select.poll`, external DNS, and live TLS) skip cleanly
   on desktop Python instead of making the host baseline nondeterministic.
 - Added `tests/stdlib/test_tls_handshake.py` as a separate live PS5 smoke test;
   the PS5 handshake now passes with certificate checking disabled. A selected
   PS5 CA bundle is the next TLS increment.
 - PS5 aggregate suite passes with the profiling, concurrency, Tier 3, Tier 4,
-  and Tier 5 wrappers: `CPYTHON_CORE_SUITE: PASS (50 scripts)`.
+  Tier 5, and Tier 6 wrappers: `CPYTHON_CORE_SUITE: PASS (53 scripts)`.
 
 ## Completed Today
 
@@ -80,6 +80,10 @@ Static or bundled support now includes:
 - Tier 5 metaprogramming/inspection wrappers: `inspect`, `ast`, `dis`,
   `importlib`, `abc`, `contextlib`, `gc`, `site`, `sysconfig`, `weakref`,
   `codecs`, and `types`
+- Tier 6 security/i18n/text/POSIX wrappers: `secrets`, `hmac`, `getpass`,
+  `gettext`, `locale`, `unicodedata`, `string`, `textwrap`, `difflib`,
+  `mimetypes`, `uuid`, `stat`, `filecmp`, `termios`, `tty`, `fcntl`, and
+  `resource`
 
 ### Security and hashing
 
@@ -167,12 +171,23 @@ Static or bundled support now includes:
   inspection, importlib, ABC, contextlib, GC, site, sysconfig, weakref, codecs,
   and types tests.
 
+### Tier 6 security, text, and POSIX utilities
+
+- Bundled official security/i18n wrappers and verified secrets, HMAC, getpass,
+  gettext, locale, and Unicode database behavior.
+- Added official string/text/diff/MIME/UUID/stat/file comparison wrappers,
+  including the recursive `platform` dependency required by `uuid`.
+- Statically linked native `fcntl`, `resource`, and `termios`, and bundled
+  official `tty.py`.
+- Added focused tests derived from the pinned CPython Tier 6 test modules;
+  Windows-only modules are intentionally excluded from this PS5 target.
+
 ## Verification
 
 The final PS5 aggregate run completed with:
 
 ```text
-CPYTHON_CORE_SUITE: PASS (50 scripts)
+CPYTHON_CORE_SUITE: PASS (53 scripts)
 ```
 
 The suite includes adapted tests based on the pinned CPython `Lib/test` tree.
@@ -347,3 +362,9 @@ coverage remain incomplete.
 - `629bd85` Adapt inspect module test for PS5 launcher
 - `b11d62b` Add importlib test to Tier 5 aggregate
 - `edba95f` Correct Tier 5 host suite count
+- `ee60f46` Bundle getpass and test Tier 6 security i18n
+- `3e2a32c` Add Tier 6 text and file utility tests
+- `eaf2e95` Add native POSIX Tier 6 modules
+- `ba353e0` Map POSIX Tier 6 tests to CPython
+- `6d4fccb` Restore Tier 6 runtime upload closure
+- `fae618a` Bundle platform dependency for uuid
