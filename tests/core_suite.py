@@ -61,6 +61,7 @@ TEST_FILES = (
     "test_gunicorn.py",
     "test_gunicorn_server.py",
     "test_gunicorn_foundation.py",
+    "test_flask.py",
     "test_posix_boundary.py",
     "test_process.py",
     "test_network.py",

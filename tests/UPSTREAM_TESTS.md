@@ -71,6 +71,7 @@ adaptation policy, not a replacement for CPython's complete regression suite.
 | `stdlib/test_gunicorn.py` | Gunicorn 23.0.0 sync worker import and HTTP parser smoke checks, using the CPython WSGI/HTTP request boundary cases |
 | `stdlib/test_gunicorn_server.py` | `test_wsgiref.py`, `test_httpservers.py`, `test_os.py`, `test_signal.py` (Gunicorn sync master, forked worker, loopback request, SIGTERM, and waitpid) |
 | `stdlib/test_gunicorn_foundation.py` | `test_os.py`, `test_signal.py`, `test_socket.py` (pre-fork listener inheritance, worker reaping, and SIGCHLD subset) |
+| `stdlib/test_flask.py` | `test_wsgiref.py`, `test_http_cookies.py`, `test_http_cookiejar.py` (Flask routing, Werkzeug WSGI client, JSON, Jinja escaping, and signed session cookie subset) |
 | `stdlib/test_posix_boundary.py` | `test_os.py`, `test_signal.py` |
 | `stdlib/test_process.py` | `test_os.py` (`fork`, `waitpid`) |
 | `stdlib/test_worker_lifecycle.py` | `test_os.py`, `test_signal.py`, `test_socket.py` (forked listener/control-channel handoff, wait/restart, SIGCHLD, and TERM subset) |

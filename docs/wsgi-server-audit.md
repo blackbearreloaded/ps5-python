@@ -5,7 +5,7 @@ This audit applies to the pinned CPython **3.14.7** runtime in
 
 ## Result
 
-The smallest useful web-server target is the official CPython
+The smallest reference web-server target is the official CPython
 `wsgiref.simple_server` package. It is a pure-Python WSGI reference server and
 does not require Flask, Werkzeug, Waitress, Gunicorn, or a package installer.
 The existing PS5 runtime already provides its important lower-level pieces:
@@ -34,11 +34,10 @@ httpd = make_server(
 httpd.serve_forever()
 ```
 
-The current focused `tests/stdlib/test_wsgi.py` smoke test uses loopback, a
-small WSGI application, and a controlling thread to verify the status line,
-headers, body, WSGI environment, and request shutdown. A follow-up threaded
-case should add a second client request while the first handler is blocked;
-that is the minimum evidence needed before trying a real framework.
+The focused `tests/stdlib/test_wsgi.py` smoke test uses loopback, a small WSGI
+application, and a controlling thread to verify the status line, headers,
+body, WSGI environment, and request shutdown. Its threaded companion and the
+Flask/Gunicorn integration test now provide the next framework boundary.
 
 ## Limits and sequencing
 
@@ -61,10 +60,11 @@ current PS5 runtime also has these known constraints:
 
 Gunicorn 23.0.0 is now vendored for the supported sync pre-fork path; see
 `docs/gunicorn-foundation.md` for its lifecycle contract and limitations.
-Waitress remains a reasonable later candidate for a more robust threaded
-server, but it is third-party code and is not present in this source tree.
-Flask's development server is also not an independent target: Flask brings
-Werkzeug, Jinja, Click, and additional packaging/runtime dependencies.
+Flask 3.1.3 and its pure-Python dependency closure are now bundled and tested
+through Gunicorn's sync WSGI worker; the framework-specific coverage is listed
+in `docs/stdlib-status.md`. Flask's development server is not the production
+target here: its reloader/debugger and multi-process paths remain disabled.
+Waitress remains a possible later candidate for a separate threaded server.
 
 ## Upstream test basis
 

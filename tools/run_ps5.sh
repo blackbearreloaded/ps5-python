@@ -124,7 +124,7 @@ mkdir_remote "$remote_runtime/zoneinfo"
 for module in __init__.py _common.py _tzpath.py _zoneinfo.py; do
     upload "$runtime_dir/zoneinfo/$module" "$remote_runtime/zoneinfo/$module"
 done
-for package in logging string urllib http wsgiref email unittest asyncio html compression zipfile xml sqlite3 dbm sysconfig _pyrepl gunicorn; do
+for package in logging string urllib http wsgiref email unittest asyncio html compression zipfile xml sqlite3 dbm sysconfig _pyrepl gunicorn flask werkzeug jinja2 markupsafe itsdangerous click blinker; do
     mkdir_remote "$remote_runtime/$package"
     while IFS= read -r -d '' module_file; do
         relative_file="${module_file#"$runtime_dir/$package/"}"
@@ -137,6 +137,10 @@ mkdir_remote "$remote_runtime/importlib"
 for module in __init__.py _abc.py abc.py machinery.py util.py; do
     upload "$runtime_dir/importlib/$module" "$remote_runtime/importlib/$module"
 done
+mkdir_remote "$remote_runtime/importlib/metadata"
+while IFS= read -r -d '' module_file; do
+    upload "$module_file" "$remote_runtime/importlib/metadata/$(basename "$module_file")"
+done < <(find "$runtime_dir/importlib/metadata" -type f -name '*.py' -print0 | sort -z)
 mkdir_remote "$remote_runtime/importlib/resources"
 while IFS= read -r -d '' module_file; do
     upload "$module_file" "$remote_runtime/importlib/resources/$(basename "$module_file")"
