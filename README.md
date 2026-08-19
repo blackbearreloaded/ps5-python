@@ -73,6 +73,10 @@ Tier 5 metaprogramming and inspection modules are included as well: `inspect`,
 `ast`, `dis`, `importlib`, `abc`, `contextlib`, `gc`, `site`, `sysconfig`,
 `weakref`, `codecs`, and `types`. Their PS5-specific startup and source-layout
 limits are recorded in the standard-library status report.
+Tier 6 security, text, and POSIX utilities are included too: `secrets`, `hmac`,
+`getpass`, `gettext`, `locale`, `unicodedata`, `string`, `textwrap`, `difflib`,
+`mimetypes`, `uuid`, `stat`, `filecmp`, `termios`, `tty`, `fcntl`, and
+`resource`. Windows-only modules are intentionally excluded.
 
 ## Build the first PS5 ELF
 
@@ -160,7 +164,7 @@ PS5_HOST=192.168.4.30 make ps5-run SCRIPT=tests/stdlib/test_tls_handshake.py
 ```
 
 `ps5-core` and `ps5-web` only build artifacts; they do not run hardware tests.
-`ps5-test` builds the ELF, uploads the test bundle, and runs all 50 aggregate
+`ps5-test` builds the ELF, uploads the test bundle, and runs all 53 aggregate
 tests. `ps5-suite` adds the lifetime checks. `RUN_TIMEOUT` is set to 120
 seconds for the aggregate run.
 
