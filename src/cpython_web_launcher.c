@@ -1449,6 +1449,11 @@ main(int argc, char **argv)
         cpython_ps5_runtime_stop();
         return 1;
     }
+    printf("[launcher] started\n");
+    printf("[launcher] HTTP endpoint: http://<PS5-IP>:%lu/\n", port);
+    printf("[launcher] TCP REPL endpoint: tcp://<PS5-IP>:%u\n",
+           (unsigned)tcp_repl_port);
+    fflush(stdout);
     while (!server_stop)
         sleep(1);
     MHD_stop_daemon(daemon);
