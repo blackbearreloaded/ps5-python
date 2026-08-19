@@ -71,6 +71,10 @@ The deployment command detaches the payload loader, so the web manager remains
 running after the build command exits. Launch it from Homebrew Launcher or a
 payload manager using the same ELF if desired.
 
+On startup, the launcher writes separate debug lines for the running process,
+the HTTP endpoint, and the TCP REPL endpoint. They are available in the live
+application log and through `/api/logs`.
+
 ## API
 
 | Endpoint | Purpose |
