@@ -205,6 +205,31 @@ The focused tests are `tests/stdlib/test_tier7_compile.py` and
 `tests/stdlib/test_profiling.py`. Their upstream mappings are recorded in
 `tests/UPSTREAM_TESTS.md`.
 
+## Tier 8 feasible utility status
+
+These are the feasible, non-desktop portions of Tier 8, using the pinned
+CPython 3.14.7 `Lib/` sources and the focused
+`tests/stdlib/test_tier8_pure.py` test. Windows-only modules and GUI/terminal
+database stacks are tracked as intentionally omitted.
+
+| Module | PS5 status | Included and tested | Missing or limited |
+| --- | --- | --- | --- |
+| `graphlib` | Official wrapper bundled | `TopologicalSorter` ordering, completion, and cycle detection | Full parallel-worker and regression coverage pending |
+| `statistics` | Official wrapper bundled | Mean, median, mode, variance, and exact `Fraction` inputs | Full numeric-type/error and regression coverage pending |
+| `cmath` | Native static module | Complex square root, exponential, polar/rectangular conversion | Full platform floating-point and regression coverage pending |
+| `ipaddress` | Official wrapper bundled | IPv4/IPv6 parsing, membership, interfaces, and range summarization | Full formatting/error and regression coverage pending |
+| `colorsys` | Official wrapper bundled | RGB/HLS/HSV conversion round trips | Full conversion edge coverage pending |
+| `calendar` | Official wrapper bundled | Leap years, month ranges, and month iteration | Locale/CLI rendering and full coverage pending |
+| `zoneinfo` | Official package plus native `_zoneinfo` | Package import and named-zone lookup when PS5 tzdata is installed | No timezone database is shipped in the payload; named zones may raise `ZoneInfoNotFoundError` |
+| `wave` | Official wrapper bundled | In-memory PCM WAV write/read round trip | Compressed/extended chunks and full coverage pending |
+| `binascii` | Native static module | Hex conversion and CRC32 | Full ASCII/base64/quoted-printable error coverage pending |
+
+`test_tier8_pure.py` is adapted from the corresponding CPython tests listed in
+`tests/UPSTREAM_TESTS.md`. `tkinter`, `curses`, `dbm`, `shelve`, and desktop or
+interactive terminal integrations remain omitted until PS5 provides the
+required GUI, database, or terminal backends. bzip2/xz compression and mail
+protocol/server modules are tracked separately.
+
 ## `os`
 
 Status: Python-level POSIX wrapper and core filesystem operations included.

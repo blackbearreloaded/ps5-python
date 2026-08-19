@@ -81,6 +81,10 @@ Tier 7 developer tools are included as well: `pdb`, `timeit`, `cProfile`,
 `profile`, `pstats`, `tracemalloc`, `doctest`, `py_compile`, `compileall`,
 `code`, `codeop`, `readline`, and `rlcompleter`. PS5 uses a compatibility
 readline layer without GNU/editline native line editing.
+Tier 8's feasible utility subset is included too: `graphlib`, `statistics`,
+`cmath`, `ipaddress`, `colorsys`, `calendar`, `zoneinfo`, `wave`, and
+`binascii`. Named timezone data is not bundled, and GUI, Windows-only, dbm,
+and desktop terminal modules remain outside the PS5 target.
 
 ## Build the first PS5 ELF
 

@@ -87,6 +87,9 @@ Static or bundled support now includes:
 - Tier 7 developer-tool wrappers: `pdb`, `timeit`, `cProfile`, `profile`,
   `pstats`, `tracemalloc`, `doctest`, `py_compile`, `compileall`, `code`,
   `codeop`, `readline`, and `rlcompleter`
+- Tier 8 feasible utility wrappers: `graphlib`, `statistics`, `cmath`,
+  `ipaddress`, `colorsys`, `calendar`, `zoneinfo`, `wave`, and `binascii`;
+  named timezone data remains a deployment responsibility.
 
 ### Security and hashing
 
@@ -393,3 +396,4 @@ coverage remain incomplete.
 - `60f8187` Relax readline completer identity test
 - `e4623cf` Use portable tracemalloc filter pattern
 - `529df8e` Document Tier 7 developer tools
+- Tier 8 pure utility implementation checkpoint follows this commit.
