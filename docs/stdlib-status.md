@@ -647,9 +647,9 @@ Tests:
 
 ## Profiling and diagnostics wrappers
 
-Status: official CPython `timeit.py`, `dis.py`, `struct.py`, and
-`tracemalloc.py` wrappers are bundled. Native `_struct` and `_tracemalloc` are
-statically linked.
+Status: official CPython `timeit.py`, `dis.py`, `struct.py`, `tracemalloc.py`,
+`cProfile.py`, `profile.py`, and `pstats.py` wrappers are bundled. Native
+`_struct`, `_tracemalloc`, and `_lsprof` are statically linked.
 
 Included and tested:
 
@@ -661,6 +661,10 @@ Included and tested:
   layout sizing, and malformed-format errors
 - native tracemalloc counters plus snapshots, statistics, filtering,
   comparisons, traceback lookup, and snapshot persistence
+- `cProfile.Profile` and pure-Python `profile.Profile` call collection,
+  `runcall()`, context-manager profiling, and pstats-compatible reports
+- `pstats.Stats` sorting, text reports, and structured
+  `get_stats_profile()` summaries
 
 The full `tracemalloc.py` wrapper requires and now bundles the small pure-
 Python dependency closure for `functools`, `reprlib`, `operator`, `linecache`,
@@ -670,20 +674,29 @@ Missing or not yet verified:
 
 - the complete upstream `test_timeit.py`, `test_dis.py`, `test_struct.py`, and
   `test_tracemalloc.py` suites;
+- the complete upstream `test_profile.py`, `test_cprofile.py`, and
+  `test_pstats.py` suites;
 - command-line `timeit`/`dis` entry points and their `argparse` dependency;
 - long-running tracing and cross-process/fork tracing on PS5;
 - domain-specific allocators and cross-process/fork tracing behavior.
 
+The profilers are available for normal in-process execution.  PS5 validation
+currently covers deterministic call collection and report generation; profiler
+output involving forked workers, interactive terminals, or very long-running
+sessions remains unverified.
+
 Source:
 
 - `upstream/cpython/Modules/_tracemalloc.c`
-- `upstream/cpython/Lib/tracemalloc.py`, `Lib/timeit.py`, `Lib/dis.py`, and
-  `Lib/struct.py`
+- `upstream/cpython/Modules/_lsprof.c`, `Modules/rotatingtree.c`
+- `upstream/cpython/Lib/tracemalloc.py`, `Lib/timeit.py`, `Lib/dis.py`,
+  `Lib/struct.py`, `Lib/cProfile.py`, `Lib/profile.py`, and `Lib/pstats.py`
 
 Tests:
 
 - `tests/stdlib/test_profiling.py`, adapted from `test_timeit.py`, `test_dis.py`,
-  `test_tracemalloc.py`, and `test_struct.py`.
+  `test_tracemalloc.py`, `test_struct.py`, `test_profile.py`,
+  `test_cprofile.py`, and `test_pstats.py`.
 
 `_ctypes` is now statically linked against a PS5-built libffi 3.8.0 Unix SysV
 backend. The Python wrapper is bundled with a reduced PS5 `sysconfig` surface.
