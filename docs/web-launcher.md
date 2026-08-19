@@ -98,7 +98,8 @@ interpreter. Expressions use interactive-display behavior, while multi-line
 input is executed as a block. Variables and imports persist between
 evaluations until **Restart interpreter** is selected. Opening the Interpreter
 menu adds `?view=interpreter` to the URL so a browser refresh returns to that
-view.
+view. Command text and its result are joined with a single terminal line break;
+the launcher does not insert an extra blank line after each command.
 Output and tracebacks are captured per evaluation, so they do not corrupt the
 app log stream. The runtime serializes app execution and REPL evaluation
 through the interpreter lock; an app and a REPL command are never executing
