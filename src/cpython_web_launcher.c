@@ -52,6 +52,17 @@ typedef struct ws_client {
 static pthread_mutex_t ws_mutex = PTHREAD_MUTEX_INITIALIZER;
 static ws_client_t ws_clients[WS_MAX_CLIENTS];
 
+static void
+ws_debug(const char *stage)
+{
+    FILE *file = fopen("/data/python/runtime/ws-debug.log", "ab");
+
+    if (file != NULL) {
+        fprintf(file, "%s\n", stage);
+        fclose(file);
+    }
+}
+
 typedef struct app_launch {
     char script_path[PATH_CAPACITY];
     char app_root[PATH_CAPACITY];
@@ -470,8 +481,11 @@ ws_receive_frame(ws_client_t *client, unsigned *opcode_output,
     uint64_t i;
     int masked;
 
-    if (ws_read_bytes(client, header, sizeof header) != 0)
+    ws_debug("receive-header");
+    if (ws_read_bytes(client, header, sizeof header) != 0) {
+        ws_debug("receive-header-fail");
         return -1;
+    }
     opcode = header[0] & 0x0f;
     masked = (header[1] & 0x80) != 0;
     length = header[1] & 0x7f;
@@ -488,8 +502,10 @@ ws_receive_frame(ws_client_t *client, unsigned *opcode_output,
         for (i = 0; i < 8; i++)
             length = (length << 8) | extended[i];
     }
-    if (length > WS_FRAME_CAPACITY || (!masked && opcode != 8))
+    if (length > WS_FRAME_CAPACITY || (!masked && opcode != 8)) {
+        ws_debug("receive-invalid");
         return -1;
+    }
     if (masked && ws_read_bytes(client, mask, sizeof mask) != 0)
         return -1;
     if (length > 0) {
@@ -521,6 +537,7 @@ ws_receive_frame(ws_client_t *client, unsigned *opcode_output,
         free(payload);
     if (length_output != NULL)
         *length_output = (size_t)length;
+    ws_debug("receive-complete");
     return 0;
 }
 
@@ -565,6 +582,7 @@ ws_client_worker(void *data)
     size_t payload_length;
     long process_id;
 
+    ws_debug("worker-start");
     flags = fcntl(client->fd, F_GETFL, 0);
     if (flags >= 0)
         fcntl(client->fd, F_SETFL, flags & ~O_NONBLOCK);
@@ -577,6 +595,7 @@ ws_client_worker(void *data)
              app_finished ? "true" : "false", app_exit_code);
     pthread_mutex_unlock(&state_mutex);
     ws_send_text(client, message);
+    ws_debug("worker-status-sent");
 
     pthread_mutex_lock(&log_mutex);
     snapshot_length = log_length;
@@ -602,18 +621,23 @@ ws_client_worker(void *data)
     free(snapshot);
 
     while (client->active && !server_stop) {
+        ws_debug("worker-before-receive");
         payload = NULL;
         payload_length = 0;
         if (ws_receive_frame(client, &opcode, &payload, &payload_length) != 0)
             break;
-        if (opcode == 1 && payload != NULL)
+        ws_debug("worker-after-receive");
+        if (opcode == 1 && payload != NULL) {
+            ws_debug("worker-before-eval");
             ws_send_repl_result(client, payload, payload_length);
+        }
         free(payload);
     }
     pthread_mutex_lock(&ws_mutex);
     client->active = 0;
     pthread_mutex_unlock(&ws_mutex);
     MHD_upgrade_action(client->urh, MHD_UPGRADE_ACTION_CLOSE);
+    ws_debug("worker-closed");
     pthread_mutex_lock(&ws_mutex);
     client->in_use = 0;
     pthread_mutex_unlock(&ws_mutex);
