@@ -178,6 +178,33 @@ The focused tests are `test_tier6_security_i18n.py`,
 `test_tier6_text_formats.py`, and `test_tier6_posix.py`; their upstream
 CPython test sources are mapped in `tests/UPSTREAM_TESTS.md`.
 
+## Tier 7 developer tools, debugging, and profiling status
+
+These modules use the pinned CPython 3.14.7 `Lib/` sources and focused Tier 7
+tests. The PS5 payload supports deterministic in-process tooling; interactive
+terminal and subprocess-dependent portions remain explicitly limited.
+
+| Module | PS5 status | Included and tested | Missing or limited |
+| --- | --- | --- | --- |
+| `pdb` | Official wrapper with `bdb`/`cmd` dependencies | Debugger construction, prompt, and path canonicalization | Interactive stepping and terminal session coverage pending |
+| `timeit` | Official wrapper | Callable/source timing, repeats, validation, and GC handling | Full benchmark/statistical regression coverage pending |
+| `cProfile` | Official wrapper plus native `_lsprof` | `Profile`, `runcall`, context-manager profiling, and call statistics | Long-running/forked profiling and full upstream coverage pending |
+| `profile` | Official pure-Python profiler | Call collection, `runcall`, and pstats-compatible output | Full recursion/dispatch and performance coverage pending |
+| `pstats` | Official wrapper | Sorting, reports, and structured profile summaries | Complete input-format and browser/CLI coverage pending |
+| `tracemalloc` | Official wrapper plus native `_tracemalloc` | Counters, snapshots, statistics, filtering, comparison, traceback, and persistence | Long-running and cross-process tracing remain unverified |
+| `doctest` | Official wrapper | Parser, runner, and passing interactive example | Module discovery, CLI, and full traceback/output coverage pending |
+| `py_compile` | Official wrapper | Direct source-to-bytecode compilation | Full invalid-source, permissions, and cache-tag coverage pending |
+| `compileall` | Official wrapper | Single-file and recursive directory compilation | CLI, symlink, worker, and full filesystem coverage pending |
+| `code` | Official wrapper | `InteractiveInterpreter` and `InteractiveConsole` command execution | Interactive terminal loop and error-display coverage pending |
+| `codeop` | Official wrapper | Incomplete/complete/syntax-error command compilation | Full compiler flag and interactive buffering coverage pending |
+| `readline` | PS5-safe compatibility layer | History, completion hooks, line-buffer state, and file persistence APIs | GNU/editline native line editing is unavailable because no linkable backend is shipped |
+| `rlcompleter` | Official wrapper over readline-compatible APIs | Namespace completion behavior | Full interactive completion integration pending |
+
+The focused tests are `tests/stdlib/test_tier7_compile.py` and
+`test_tier7_interactive.py`; profiler coverage extends
+`tests/stdlib/test_profiling.py`. Their upstream mappings are recorded in
+`tests/UPSTREAM_TESTS.md`.
+
 ## `os`
 
 Status: Python-level POSIX wrapper and core filesystem operations included.
