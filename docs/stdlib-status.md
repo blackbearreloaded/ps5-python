@@ -227,8 +227,31 @@ database stacks are tracked as intentionally omitted.
 `test_tier8_pure.py` is adapted from the corresponding CPython tests listed in
 `tests/UPSTREAM_TESTS.md`. `tkinter`, `curses`, `dbm`, `shelve`, and desktop or
 interactive terminal integrations remain omitted until PS5 provides the
-required GUI, database, or terminal backends. bzip2/xz compression and mail
-protocol/server modules are tracked separately.
+required GUI, database, or terminal backends. bzip2/xz compression remains
+tracked separately.
+
+## Tier 8 protocol and mail status
+
+These pure-Python clients and mailbox helpers use the pinned CPython 3.14.7
+`Lib/` sources. The focused `tests/stdlib/test_tier8_protocols.py` uses only
+loopback fake servers and local mailbox files; it never contacts external
+services.
+
+| Module | PS5 status | Included and tested | Missing or limited |
+| --- | --- | --- | --- |
+| `ftplib` | Official wrapper bundled | Local FTP greeting/login/PWD exchange | TLS, active/passive data transfers, and full upstream coverage pending |
+| `poplib` | Official wrapper bundled | Local POP3 greeting and QUIT exchange | Authentication, message retrieval, TLS, and full upstream coverage pending |
+| `imaplib` | Official wrapper bundled | Local IMAP4 CAPABILITY/LOGIN/LOGOUT exchange | TLS, mailbox state/search/fetch, and full upstream coverage pending |
+| `smtplib` | Official wrapper bundled | Local SMTP EHLO/MAIL/RCPT/DATA exchange with `EmailMessage` | TLS/authentication, delivery semantics, and full upstream coverage pending |
+| `mailbox` | Official wrapper bundled | Maildir add/read round trip under `/user/temp` on PS5 | mbox locking, alternate mailbox formats, and full upstream coverage pending |
+| `email` | Complete official package tree bundled | Message parsing, MIME text, and SMTP serialization dependencies | Full parser/policy/attachment regression coverage pending |
+| `smtpd` | Unavailable in CPython 3.14.7 | Not present in the pinned upstream `Lib/` | Removed upstream; use an application-level SMTP server implementation when one is needed |
+
+The complete recursive `email` tree, including `email.mime`, is shipped so
+`smtplib` and `mailbox` do not depend on host-installed modules. Network
+clients are importable and loopback-tested, but PS5 has no external-service
+or daemon lifecycle guarantee. Windows-only behavior is outside this PS5
+target.
 
 ## `os`
 
