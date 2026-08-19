@@ -500,6 +500,7 @@ build_web_launcher() {
         -L"$bzip2_dir/lib" -lbz2 \
         -L"$zlib_dir/lib" -lz \
         -L"$xz_dir/lib" -llzma \
+        -L"$libffi_dir/lib" -lffi \
         -Wl,--wrap=clock_nanosleep -lmicrohttpd -ldl -lpthread
 }
 

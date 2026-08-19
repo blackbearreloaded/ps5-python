@@ -9,6 +9,7 @@ python-web.elf
  ├── WebSocket live-output bridge
  ├── app manifest scanner
  ├── CPython app runner
+ ├── persistent CPython WebREPL session
  └── stdout/stderr log buffer
 ```
 
@@ -60,7 +61,7 @@ payload manager using the same ELF if desired.
 | `/api/logs?since=0` | Returns new stdout/stderr bytes and `X-Log-Next` |
 | `/api/logs/clear` | Clears the server-side log buffer and connected consoles |
 | `/api/shutdown` | Stops the manager; useful for tests |
-| `/ws` | Streams JSON log and status events over WebSocket |
+| `/ws` | Streams JSON log/status events and accepts WebREPL source lines |
 
 The page makes one `/ws` attempt per page load and prefers it for live output.
 If the upgrade is interrupted, it falls back to the cursor API at one-second
@@ -71,6 +72,29 @@ WebSocket messages are JSON objects. Log events have the form
 `{"type":"log","data":"..."}`; status events contain `type`, `running`,
 `finished`, and `exit_code` fields. A newly connected browser receives the
 current status and buffered output before live events.
+
+## Interactive interpreter
+
+The **Interpreter** menu uses the same WebSocket connection as live logs. The
+browser sends a masked WebSocket text frame containing Python source; the
+running `python-web.elf` evaluates it in a persistent CPython **3.14.7**
+interpreter and returns:
+
+```json
+{"type":"repl","ok":true,"data":"3\n"}
+```
+
+Expressions use interactive-display behavior, while multi-line input is
+executed as a block. Variables and imports persist between evaluations. Output
+and tracebacks are captured per evaluation, so they do not corrupt the app log
+stream. The runtime serializes app execution and REPL evaluation through the
+interpreter lock; an app and a REPL command are never executing Python objects
+concurrently.
+
+This follows the MicroPython WebREPL pattern: the network server remains in
+the ELF, the interpreter session remains local to that process, and the
+browser is only a transport and terminal UI. The current implementation is
+intended for trusted LAN use; it has no authentication or encryption.
 
 The manager runs one app at a time. After an app exits, the same page can launch
 it again or select another app; the output buffer is reset for each run and
@@ -88,5 +112,6 @@ PS5_HOST=192.168.4.30 PS5_WEB_CHECK=1 make ps5-web
 ```
 
 This lists the apps, starts `hello`, fetches its live output, and shuts down
-the manager. A direct WebSocket handshake can be verified separately against
-`ws://<PS5-IP>:8090/ws`.
+the manager. It also evaluates `1 + 2` through the embedded WebREPL. A direct
+WebSocket handshake can be verified separately against
+`ws://<PS5-IP>:8090/ws` with `tools/check_web_repl.py`.
