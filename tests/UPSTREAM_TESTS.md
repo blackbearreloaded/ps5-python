@@ -53,7 +53,7 @@ adaptation policy, not a replacement for CPython's complete regression suite.
 | `stdlib/test_tier4_formats.py` | `test_pickle.py`, `test_struct.py`, `test_bisect.py`, `test_heapq.py`, `test_array.py`, `test_fractions.py`, `test_base64.py`, `test_zlib.py`, `test_gzip.py`, `test_zipfile`, `test_tarfile.py`, `test_sqlite3`, `test_xml_etree.py`, `test_xml_dom_minidom.py`, `test_sax.py`, `test_glob.py`, `test_fnmatch.py` |
 | `stdlib/test_diagnostics.py` | `test_tracemalloc.py`, `test_multiprocessing.py` |
 | `stdlib/test_data_structures.py` | `test_collections.py`, `test_itertools.py`, `test_heapq.py`, `test_dataclasses.py` |
-| `stdlib/test_profiling.py` | `test_timeit.py`, `test_dis.py`, `test_tracemalloc.py`, `test_struct.py` |
+| `stdlib/test_profiling.py` | `test_timeit.py`, `test_dis.py`, `test_tracemalloc.py`, `test_struct.py`, `test_profile.py`, `test_cprofile.py`, `test_pstats.py` |
 | `stdlib/test_tier5_inspection.py` | `test_ast.py`, `test_dis.py`, `test_inspect.py` |
 | `stdlib/test_tier5_runtime.py` | `test_contextlib.py`, `test_gc.py`, `test_site.py`, `test_sysconfig.py`, `test_weakref.py`, `test_codecs.py`, `test_types.py` |
 | `stdlib/test_tier6_security_i18n.py` | `test_secrets.py`, `test_hmac.py`, `test_getpass.py`, `test_gettext.py`, `test_locale.py`, `test_unicodedata.py` |
