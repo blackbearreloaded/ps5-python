@@ -344,3 +344,6 @@ coverage remain incomplete.
 - `739b451` Adapt frame source test for PS5 launcher
 - `b6e35d9` Add Tier 5 importlib and abc smoke test
 - `d29ec2e` Bundle Tier 5 runtime utility modules
+- `629bd85` Adapt inspect module test for PS5 launcher
+- `b11d62b` Add importlib test to Tier 5 aggregate
+- `edba95f` Correct Tier 5 host suite count
