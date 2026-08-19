@@ -700,6 +700,29 @@ Tests:
 
 `_ctypes` is now statically linked against a PS5-built libffi 3.8.0 Unix SysV
 backend. The Python wrapper is bundled with a reduced PS5 `sysconfig` surface.
+
+## Tier 7 interactive and debugging tools
+
+The portable interactive/developer helpers below use the pinned CPython 3.14.7
+`Lib/` sources and are bundled in both the core and web runtime payloads.
+
+| Module | PS5 status | Included and tested | Missing or limited |
+| --- | --- | --- | --- |
+| `pdb` | Official wrapper with `bdb`, `cmd`, and `_pyrepl` dependencies | `Pdb` construction, canonical filenames, debugger command plumbing, and non-interactive debugger use | Full upstream command/terminal and post-mortem regression coverage pending |
+| `code` | Official wrapper | `InteractiveConsole.push()`, multiline compilation, namespace execution, and prompt state | Full interactive console and terminal signal coverage pending |
+| `readline` | PS5-compatible pure-Python fallback | Import, history, completion registration, delimiter/startup-hook state, and ordinary input fallback | The SDK exposes editline headers but no linkable editline/readline archive; line editing, terminal redisplay, and GNU history file semantics are not provided |
+| `rlcompleter` | Official wrapper | Namespace and attribute completion, including debugger integration | Full completion grammar and terminal integration coverage pending |
+
+The focused `tests/stdlib/test_tier7_interactive.py` test is adapted from the
+official CPython 3.14.7 `test_code_module.py`, `test_pdb.py`,
+`test_readline.py`, and `test_rlcompleter.py` sources. It deliberately avoids
+PTY-only assertions so it can run deterministically on the PS5 launcher.
+
+Sources:
+
+- `upstream/cpython/Lib/code.py`, `Lib/cmd.py`, `Lib/bdb.py`, and `Lib/pdb.py`
+- `upstream/cpython/Lib/rlcompleter.py` and `Lib/_pyrepl/{utils,types,trace}.py`
+- `tools/minimal_readline.py` for the PS5 console-compatible fallback
 Basic `ctypes.c_int` construction and sizing pass on PS5; loading arbitrary
 `.sprx`/`.so` libraries remains unverified.
 
