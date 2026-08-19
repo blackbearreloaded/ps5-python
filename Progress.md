@@ -392,3 +392,4 @@ coverage remain incomplete.
 - `3b2ef93` Complete Tier 7 test and runtime closure
 - `60f8187` Relax readline completer identity test
 - `e4623cf` Use portable tracemalloc filter pattern
+- `529df8e` Document Tier 7 developer tools
