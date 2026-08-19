@@ -421,6 +421,7 @@ coverage remain incomplete.
 - `9efedc4` Bundle latin-1 codec for dbm dumb
 - `aa6324d` Register Latin-1 in PS5 codec bootstrap
 - `dd8146d` Handle PS5 Maildir filesystems without hard links
-- Tier 9 core/internal coverage is tracked in the Tier 9 checkpoint below.
 - `3efe506` Add Tier 9 legacy helper coverage
+- `339b4d6` Add feasible Tier 9 legacy modules
 - `8fd8dc5` Document Tier 9 core interpreter modules
+- `0061830` Complete Tier 9 feasible standard library support
