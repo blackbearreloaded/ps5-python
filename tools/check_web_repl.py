@@ -55,7 +55,8 @@ def evaluate(connection, pending, source, expected):
         if event.get("type") != "repl":
             continue
         assert event.get("ok") is True
-        assert expected in event.get("data", "")
+        if expected not in event.get("data", ""):
+            raise AssertionError(f"unexpected REPL data: {event!r}")
         return pending
 
 
