@@ -17,7 +17,7 @@ upstream source commit `823f0323ee6ec1402088b73bce1a38473cac36dc`.
   PS5 CA bundle is the next TLS increment.
 - PS5 aggregate suite passes with the profiling, concurrency, Tier 3, Tier 4,
   Tier 5, Tier 6, Tier 7, feasible Tier 8 wrappers, WSGI, and Gunicorn:
-  `CPYTHON_CORE_SUITE: PASS (66 scripts)`.
+  `CPYTHON_CORE_SUITE: PASS (67 scripts)`.
 
 ## Completed Today
 
