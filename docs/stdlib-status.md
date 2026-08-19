@@ -264,6 +264,27 @@ clients are importable and loopback-tested, but PS5 has no external-service
 or daemon lifecycle guarantee. Windows-only behavior is outside this PS5
 target.
 
+## Tier 9 core and interpreter modules
+
+These modules are either provided by the CPython interpreter itself or are
+small official Python wrappers. The focused
+`tests/stdlib/test_tier9.py` test is adapted from CPython 3.14.7's
+`test_future_stmt`, `test_marshal`, `test_copyreg`, and `test_thread` tests.
+
+| Module | PS5 status | Included and tested | Missing or limited |
+| --- | --- | --- | --- |
+| `__main__` | Interpreter-provided | Top-level module identity and execution namespace | Launcher-specific `-m`/script startup permutations remain pending |
+| `__future__` | Official wrapper bundled | Feature names, release metadata, compiler flags, and future annotations | Full syntax-error and interactive REPL matrix pending |
+| `builtins` | Interpreter-provided | Built-in lookup, functions, and exception identity | Complete builtins regression coverage pending |
+| `_thread` | Native static module | Locks, non-blocking acquire, thread identity, joinable thread startup, and join | Full stack-size, interrupt, shutdown, and stress coverage pending |
+| `marshal` | Native interpreter module | Scalar/container/code-object round trips and `allow_code=False` | Full format/version, malformed-input, and compatibility coverage pending |
+| `copyreg` | Official wrapper bundled | Custom reduction registration and private slot-name handling | Full extension-registry and pickle compatibility coverage pending |
+
+`__main__`, `builtins`, and `marshal` do not require runtime files: they are
+provided by the statically linked interpreter. `_thread` is likewise compiled
+into the executable. `__future__.py` and `copyreg.py` are copied from the
+pinned upstream `Lib/` tree into the runtime bundle; no host modules are used.
+
 ## `os`
 
 Status: Python-level POSIX wrapper and core filesystem operations included.
