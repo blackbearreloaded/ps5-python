@@ -49,6 +49,7 @@ TEST_FILES = (
     "test_tier6_security_i18n.py",
     "test_tier6_text_formats.py",
     "test_tier6_posix.py",
+    "test_tier7_compile.py",
     "test_tier7_interactive.py",
     "test_posix_boundary.py",
     "test_process.py",
