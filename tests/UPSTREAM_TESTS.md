@@ -81,7 +81,7 @@ adaptation policy, not a replacement for CPython's complete regression suite.
 The standard-library tests are intentionally direct, import-light adaptations
 of the upstream behavior checks. Their filenames use an actual CPython
 3.14.7 `Lib/test` filename (or the matching package path) rather than synthetic
-`test_tier*.py` names. A few PS5 files are compact adapters whose primary
+tier filenames. A few PS5 files are compact adapters whose primary
 filename identifies the first upstream source while the table records every
 additional source folded into that adapter; they can be split into those
 upstream paths as coverage grows. `time.sleep()` is excluded
