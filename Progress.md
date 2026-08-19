@@ -9,7 +9,7 @@ upstream source commit `823f0323ee6ec1402088b73bce1a38473cac36dc`.
 
 ## Follow-up
 
-- Host validation now passes all 61 discovered scripts. Tests that require PS5
+- Host validation now passes all 63 discovered scripts. Tests that require PS5
   capabilities (fork, `select.poll`, external DNS, and live TLS) skip cleanly
   on desktop Python instead of making the host baseline nondeterministic.
 - Added `tests/stdlib/test_tls_handshake.py` as a separate live PS5 smoke test;
@@ -17,7 +17,7 @@ upstream source commit `823f0323ee6ec1402088b73bce1a38473cac36dc`.
   PS5 CA bundle is the next TLS increment.
 - PS5 aggregate suite passes with the profiling, concurrency, Tier 3, Tier 4,
   Tier 5, Tier 6, Tier 7, and feasible Tier 8 wrappers:
-  `CPYTHON_CORE_SUITE: PASS (60 scripts)`.
+  `CPYTHON_CORE_SUITE: PASS (62 scripts)`.
 
 ## Completed Today
 
@@ -104,6 +104,10 @@ Static or bundled support now includes:
 - Tier 9 legacy utilities: official `cmd`, `shlex`, `optparse`, `getopt`,
   `pydoc`, `webbrowser`, and `symtable` wrappers are bundled and tested.
   `turtle` is omitted because PS5 has no Tcl/Tk GUI backend.
+- WSGI boundary: official `wsgiref` is bundled. Single-process and threaded
+  loopback requests, WSGI environment propagation, response handling, and
+  controlled shutdown pass on PS5. Gunicorn's pre-fork worker supervisor and
+  Flask/Werkzeug dependency stack remain unvalidated.
 
 ### Security and hashing
 
@@ -220,7 +224,7 @@ Static or bundled support now includes:
 The final PS5 aggregate run completed with:
 
 ```text
-CPYTHON_CORE_SUITE: PASS (60 scripts)
+CPYTHON_CORE_SUITE: PASS (62 scripts)
 ```
 
 The suite includes adapted tests based on the pinned CPython `Lib/test` tree.
@@ -425,3 +429,8 @@ coverage remain incomplete.
 - `339b4d6` Add feasible Tier 9 legacy modules
 - `8fd8dc5` Document Tier 9 core interpreter modules
 - `0061830` Complete Tier 9 feasible standard library support
+- `3ce300c` Bundle official wsgiref package
+- `5409b98` Add loopback WSGI smoke test
+- `e1de065` Document PS5 WSGI server path
+- `e7f0412` Clarify WSGI threaded follow-up
+- `5158c06` Validate threaded WSGI server lifecycle
