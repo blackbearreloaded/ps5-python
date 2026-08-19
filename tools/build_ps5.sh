@@ -118,6 +118,7 @@ configure_ps5() {
         "_hashlib _hashopenssl.c -I$openssl_dir/include -L$openssl_dir/lib -lcrypto" \
         "_sqlite3 _sqlite/blob.c _sqlite/connection.c _sqlite/cursor.c _sqlite/microprotocols.c _sqlite/module.c _sqlite/prepare_protocol.c _sqlite/row.c _sqlite/statement.c _sqlite/util.c -I$sqlite_dir/include -L$sqlite_dir/lib -lsqlite3 -lpthread" \
         "zlib zlibmodule.c -I$zlib_dir/include -L$zlib_dir/lib -lz" \
+        "_lsprof _lsprof.c rotatingtree.c" \
         >> "$build_dir/Modules/Setup.local"
 }
 
@@ -149,7 +150,7 @@ build_runtime_bundle() {
     # os is the Python-level POSIX wrapper; its native posix/time/stat pieces
     # are already compiled into Modules/config.c.
     cp "$root_dir/tools/minimal_selectors.py" "$runtime_dir/selectors.py"
-    for module in os.py stat.py genericpath.py posixpath.py abc.py _collections_abc.py io.py socket.py enum.py types.py signal.py ssl.py base64.py warnings.py contextvars.py numbers.py contextlib.py weakref.py copy.py copyreg.py hmac.py random.py bisect.py glob.py fnmatch.py functools.py operator.py reprlib.py linecache.py pickle.py struct.py timeit.py dis.py opcode.py fractions.py gzip.py tarfile.py uuid.py filecmp.py platform.py tty.py; do
+    for module in os.py stat.py genericpath.py posixpath.py abc.py _collections_abc.py io.py socket.py enum.py types.py signal.py ssl.py base64.py warnings.py contextvars.py numbers.py contextlib.py weakref.py copy.py copyreg.py hmac.py random.py bisect.py glob.py fnmatch.py functools.py operator.py reprlib.py linecache.py pickle.py struct.py timeit.py dis.py opcode.py fractions.py gzip.py tarfile.py uuid.py filecmp.py platform.py tty.py profile.py pstats.py cProfile.py; do
         cp "$source_dir/Lib/$module" "$runtime_dir/$module"
     done
     cp "$source_dir/Lib/_opcode_metadata.py" "$runtime_dir/_opcode_metadata.py"
@@ -163,7 +164,7 @@ build_runtime_bundle() {
     for module in "$source_dir"/Lib/logging/*.py; do
         cp "$module" "$runtime_dir/logging/$(basename "$module")"
     done
-    for module in __future__.py argparse.py getpass.py gettext.py locale.py traceback.py pprint.py textwrap.py codeop.py tokenize.py token.py _colorize.py difflib.py inspect.py calendar.py quopri.py ipaddress.py socketserver.py mimetypes.py; do
+    for module in __future__.py argparse.py getpass.py gettext.py locale.py traceback.py pprint.py textwrap.py codeop.py tokenize.py token.py _colorize.py difflib.py inspect.py calendar.py quopri.py ipaddress.py socketserver.py mimetypes.py doctest.py py_compile.py compileall.py code.py rlcompleter.py; do
         cp "$source_dir/Lib/$module" "$runtime_dir/$module"
     done
     mkdir -p "$runtime_dir/string"
@@ -299,6 +300,17 @@ ensure_tier4_native_modules() {
     rm -f "$build_dir/Modules/config.o" "$build_dir/libpython3.14.a"
 }
 
+ensure_tier7_native_modules() {
+    local setup_file="$build_dir/Modules/Setup.local"
+    if grep -q '^_lsprof ' "$setup_file" 2>/dev/null; then
+        return
+    fi
+    printf '%s\n' \
+        "_lsprof _lsprof.c rotatingtree.c" \
+        >> "$setup_file"
+    rm -f "$build_dir/Modules/config.o" "$build_dir/libpython3.14.a"
+}
+
 ensure_tier6_posix_native_modules() {
     local setup_file="$build_dir/Modules/Setup.local"
     if grep -q '^fcntl ' "$setup_file" 2>/dev/null &&
@@ -402,6 +414,7 @@ case "${1:-core}" in
         bash "$root_dir/tools/build_zlib_ps5.sh"
         bash "$root_dir/tools/build_sqlite3_ps5.sh"
         ensure_tier4_native_modules
+        ensure_tier7_native_modules
         ensure_tier6_posix_native_modules
         CONFIG_SITE="$root_dir/tools/ps5.config.site" \
             CC="$compiler_string" make -C "$build_dir" -j"$jobs" Modules/config.o libpython3.14.a
@@ -417,6 +430,7 @@ case "${1:-core}" in
         bash "$root_dir/tools/build_zlib_ps5.sh"
         bash "$root_dir/tools/build_sqlite3_ps5.sh"
         ensure_tier4_native_modules
+        ensure_tier7_native_modules
         ensure_tier6_posix_native_modules
         CONFIG_SITE="$root_dir/tools/ps5.config.site" \
             CC="$compiler_string" make -C "$build_dir" -j"$jobs" Modules/config.o libpython3.14.a
