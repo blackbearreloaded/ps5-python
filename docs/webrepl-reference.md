@@ -59,6 +59,13 @@ JSON status/log/REPL events so the browser can share one socket with the app
 manager. It is therefore not a drop-in client for the raw MicroPython terminal
 protocol. File-transfer frames are not implemented yet.
 
+For shell clients, the launcher also provides a separate raw TCP REPL listener.
+It accepts newline-terminated source lines and emits plain output plus `>>>`
+prompts, so tools such as `rlwrap nc` can be used without WebSocket support.
+It runs on `PS5_WEB_PORT + 1` by default (or `PS5_REPL_PORT` when configured),
+because the HTTP/WebSocket and raw TCP protocols cannot share one listening
+socket.
+
 ## Recommended compatibility boundary
 
 Keep the existing JSON manager socket stable for the launcher UI. If a raw
@@ -68,4 +75,3 @@ with one active session, raw text terminal frames, CR/LF normalization, and
 current socket with per-connection interpreter instances: that would make
 browser tabs observe different globals and would undermine the persistent
 session model.
-
