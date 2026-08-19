@@ -28,6 +28,19 @@ http://<PS5-IP>:8090/
 Port 8080 is intentionally avoided because the existing PS5 `websrv` commonly
 uses it. Override the port with `PS5_WEB_PORT`.
 
+The launcher also exposes a raw, line-oriented TCP REPL on the next port by
+default (`PS5_WEB_PORT + 1`). For example, with the test launcher on port
+9603, connect from a local shell with:
+
+```sh
+rlwrap nc 192.168.4.30 9604
+```
+
+Set `PS5_REPL_PORT` to choose another TCP port. The TCP and WebSocket REPLs
+share the same persistent CPython **3.14.7** interpreter state. The HTTP port
+and TCP REPL port must be different because one socket cannot simultaneously
+serve HTTP/WebSocket framing and raw line-oriented traffic.
+
 The WebSocket endpoint is `/ws`. The launcher uses libmicrohttpd for HTTP and
 HTTP upgrade handling, then implements the small RFC 6455 framing layer needed
 for the browser console. The static libmicrohttpd dependency is built by
@@ -61,7 +74,7 @@ payload manager using the same ELF if desired.
 | --- | --- |
 | `/` | Browser manager page |
 | `/api/apps` | Lists app IDs and display names |
-| `/api/status` | Reports the launcher PID, launch state, and exit code |
+| `/api/status` | Reports the launcher PID, launch state, exit code, and TCP REPL port |
 | `/api/launch?app=hello` | Starts one app bundle |
 | `/api/logs?since=0` | Returns new stdout/stderr bytes and `X-Log-Next` |
 | `/api/logs/clear` | Clears the server-side log buffer and connected consoles |
@@ -110,6 +123,11 @@ the ELF, the interpreter session remains local to that process, and the
 browser is only a transport and terminal UI. The current implementation is
 intended for trusted LAN use; it has no authentication or encryption.
 
+The TCP REPL sends a CPython prompt, accepts one source line per newline, and
+returns raw stdout/stderr or expression display text followed by the next
+`>>>` prompt. It is intended for trusted LAN use and does not provide
+authentication or encryption.
+
 The protocol comparison and compatibility boundary for the reference
 implementations are recorded in
 [`docs/webrepl-reference.md`](webrepl-reference.md). That note distinguishes
@@ -137,8 +155,9 @@ PS5_HOST=192.168.4.30 PS5_WEB_CHECK=1 make ps5-web
 ```
 
 This lists the apps, starts `hello`, fetches its live output, and shuts down
-the manager. It also evaluates `print(123)` and `1 + 1` through the embedded
-WebREPL. Input is line-terminated before evaluation, and expression results are
-captured explicitly so browser commands behave like an interactive prompt. A direct
-WebSocket handshake can be verified separately against
+the manager. It also evaluates `print(123)` and `1 + 1` through both the
+embedded WebREPL and the raw TCP REPL. Input is line-terminated before
+evaluation, and expression results are captured explicitly so clients behave
+like an interactive prompt. A direct WebSocket handshake can be verified
+separately against
 `ws://<PS5-IP>:8090/ws` with `tools/check_web_repl.py`.
