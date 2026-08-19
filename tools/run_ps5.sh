@@ -106,6 +106,7 @@ upload "$runtime_dir/encodings/ascii.py" "$remote_runtime/encodings/ascii.py"
 upload "$runtime_dir/encodings/aliases.py" "$remote_runtime/encodings/aliases.py"
 upload "$runtime_dir/encodings/utf_8.py" "$remote_runtime/encodings/utf_8.py"
 upload "$runtime_dir/encodings/cp437.py" "$remote_runtime/encodings/cp437.py"
+upload "$runtime_dir/encodings/latin_1.py" "$remote_runtime/encodings/latin_1.py"
 upload "$runtime_dir/encodings/idna.py" "$remote_runtime/encodings/idna.py"
 upload "$runtime_dir/selectors.py" "$remote_runtime/selectors.py"
 for module in os.py stat.py genericpath.py posixpath.py abc.py _collections_abc.py io.py socket.py enum.py types.py signal.py hashlib.py ssl.py base64.py warnings.py contextvars.py _py_warnings.py _weakrefset.py tracemalloc.py csv.py decimal.py fractions.py numbers.py contextlib.py weakref.py copy.py copyreg.py _compat_pickle.py hmac.py random.py bisect.py glob.py fnmatch.py functools.py operator.py reprlib.py linecache.py pickle.py struct.py timeit.py dis.py opcode.py _opcode_metadata.py gzip.py bz2.py lzma.py shelve.py tarfile.py uuid.py filecmp.py platform.py tty.py profile.py pstats.py cProfile.py; do
