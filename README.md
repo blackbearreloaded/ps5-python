@@ -27,6 +27,15 @@ process-backed application jobs, and a tested standard-library subset. It is
 still intended for development and homebrew payload environments, not stock
 retail consoles.
 
+## Demo
+
+<p align="center">
+  <video src="https://github.com/blackbearreloaded/ps5-python/raw/refs/heads/main/demo.mp4" controls width="900"></video>
+</p>
+
+[Download the demo video](demo.mp4) if your Markdown viewer does not play it
+inline.
+
 ## What is included
 
 - CPython **3.14.7**, pinned to upstream commit
