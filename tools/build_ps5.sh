@@ -17,6 +17,7 @@ jobs="${PS5_JOBS:-$(nproc 2>/dev/null || echo 2)}"
 launcher="$build_dir/python.elf"
 web_launcher="$build_dir/python-web.elf"
 web_test_launcher="$build_dir/python-web-test.elf"
+app_supervisor="$build_dir/python-app-supervisor.elf"
 runtime_dir="$build_dir/cpython-lib"
 
 if [ ! -f "$source_dir/Include/Python.h" ]; then
@@ -525,6 +526,46 @@ build_web_launcher() {
     echo "Test launcher: $web_test_launcher"
 }
 
+build_app_supervisor() {
+    if ! needs_rebuild "$app_supervisor" \
+        "$root_dir/src/web/app_supervisor_main.c" \
+        "$root_dir/src/runtime/cpython_runtime.c" \
+        "$root_dir/src/platform/ps5_time.c" \
+        "$root_dir/platform/cpython_ps5_host.c" \
+        "$build_dir/Modules/config.o" \
+        "$build_dir/libpython3.14.a" \
+        "$build_dir/Modules/expat/libexpat.a" \
+        "$build_dir/Modules/_decimal/libmpdec/libmpdec.a"; then
+        echo "App supervisor unchanged: $app_supervisor"
+        return
+    fi
+    "${compiler[@]}" \
+        "${linker_args[@]}" \
+        -DCPYTHON_PS5 \
+        -I"$root_dir/include" \
+        -I"$build_dir" \
+        -I"$source_dir/Include" \
+        -I"$source_dir" \
+        -I"$source_dir/Include/internal" \
+        -o "$app_supervisor" \
+        "$root_dir/src/web/app_supervisor_main.c" \
+        "$root_dir/src/runtime/cpython_runtime.c" \
+        "$root_dir/src/platform/ps5_time.c" \
+        "$root_dir/platform/cpython_ps5_host.c" \
+        "$build_dir/Modules/config.o" \
+        "$build_dir/libpython3.14.a" \
+        "$build_dir/Modules/expat/libexpat.a" \
+        "$build_dir/Modules/_decimal/libmpdec/libmpdec.a" \
+        -L"$openssl_dir/lib" -lssl -lcrypto \
+        -L"$sqlite_dir/lib" -lsqlite3 \
+        -L"$bzip2_dir/lib" -lbz2 \
+        -L"$libffi_dir/lib" -lffi \
+        -L"$zlib_dir/lib" -lz \
+        -L"$xz_dir/lib" -llzma \
+        -Wl,--wrap=clock_nanosleep -ldl -lpthread
+    echo "Built $app_supervisor"
+}
+
 case "${1:-core}" in
     configure)
         configure_ps5
@@ -562,6 +603,7 @@ case "${1:-core}" in
         ensure_tier6_posix_native_modules
         CONFIG_SITE="$root_dir/tools/ps5.config.site" \
             CC="$compiler_string" make -C "$build_dir" -j"$jobs" Modules/config.o libpython3.14.a
+        build_app_supervisor
         build_web_launcher
         build_runtime_bundle
         echo "Built $web_launcher"

@@ -5,7 +5,7 @@ upstream source commit `823f0323ee6ec1402088b73bce1a38473cac36dc`.
 
 ## Date
 
-2026-08-18
+2026-08-20
 
 ## Follow-up
 
@@ -18,6 +18,8 @@ upstream source commit `823f0323ee6ec1402088b73bce1a38473cac36dc`.
 - PS5 aggregate suite passes with the profiling, concurrency, Tier 3, Tier 4,
   Tier 5, Tier 6, Tier 7, feasible Tier 8 wrappers, WSGI, and Gunicorn:
   `CPYTHON_CORE_SUITE: PASS (67 scripts)`.
+- The repository is clean on `master` after the web-view update and native
+  launcher source split.
 
 ## Completed Today
 
@@ -37,6 +39,28 @@ upstream source commit `823f0323ee6ec1402088b73bce1a38473cac36dc`.
   `tools/package_app.py` plus `make package-app` for host-side pip collection
   of universal pure-Python wheels into an app's `lib/` directory. Native
   extensions are rejected because they require PS5-specific static integration.
+
+### Web launcher and script editor
+
+- Added the native `POST /api/script/run` route with a 65,536-byte source
+  limit, captured output, Python success state, and JSON escaping.
+- Connected the Run script view to that HTTP route while preserving the
+  WebSocket transport for the interactive REPL.
+- Added the native static route for the vendored Highlight.js asset used by
+  the updated web view.
+- Added the end-to-end web check for HTTP script execution and shared
+  persistent interpreter globals.
+- Changed `exit()`, `quit()`, and `sys.exit()` to restart the embedded
+  interpreter and clear persistent globals without stopping the launcher.
+- File persistence, workspace browsing, and isolated script jobs remain
+  outstanding as described in `roadmap.md`.
+
+- Added `python-app-supervisor.elf` for process-backed application execution.
+  The web launcher now starts one supervisor during deployment, launches each
+  packaged app as a forked child, forwards its output over a local TCP control
+  connection, reports the child PID, and stops it with bounded TERM/KILL
+  escalation. The timer app and WebREPL/TCP REPL remain usable during and after
+  the stop test.
 
 ### Networking and DNS
 
@@ -246,7 +270,7 @@ Static or bundled support now includes:
 The final PS5 aggregate run completed with:
 
 ```text
-CPYTHON_CORE_SUITE: PASS (62 scripts)
+CPYTHON_CORE_SUITE: PASS (63 scripts)
 ```
 
 The suite includes adapted tests based on the pinned CPython `Lib/test` tree.

@@ -12,5 +12,30 @@ int web_launch_started;
 int web_app_running;
 int web_app_finished;
 int web_app_exit_code;
+unsigned long web_app_job_id;
+long web_app_pid;
+char web_app_id[WEB_APP_ID_CAPACITY];
+int web_app_state = WEB_APP_IDLE;
 volatile sig_atomic_t server_stop;
+
+const char *web_app_state_name(int state)
+{
+    switch (state)
+    {
+    case WEB_APP_STARTING:
+        return "starting";
+    case WEB_APP_RUNNING:
+        return "running";
+    case WEB_APP_STOPPING:
+        return "stopping";
+    case WEB_APP_FINISHED:
+        return "finished";
+    case WEB_APP_FAILED:
+        return "failed";
+    case WEB_APP_STOPPED:
+        return "stopped";
+    default:
+        return "idle";
+    }
+}
 unsigned short tcp_repl_port;

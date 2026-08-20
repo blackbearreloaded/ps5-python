@@ -8,11 +8,16 @@ ftp_port="${PS5_FTP_PORT:-2121}"
 loader_port="${PS5_LOADER_PORT:-9021}"
 web_port="${PS5_WEB_PORT:-8090}"
 repl_port="${PS5_REPL_PORT:-$((web_port + 1))}"
+supervisor_port="${PS5_APP_SUPERVISOR_PORT:-$((web_port + 2))}"
 ftp_url="ftp://$ps5_host:$ftp_port"
 
 bash "$root_dir/tools/build_ps5.sh" web
 
+curl --connect-timeout 2 --max-time 5 --fail --silent --show-error \
+    "http://$ps5_host:$web_port/api/shutdown" >/dev/null 2>&1 || true
+
 web_elf="${PS5_WEB_ELF:-$root_dir/build/ps5/python-web.elf}"
+supervisor_elf="$root_dir/build/ps5/python-app-supervisor.elf"
 web_remote_name="${PS5_WEB_REMOTE_NAME:-$(basename "$web_elf")}"
 runtime_dir="$root_dir/build/ps5/cpython-lib"
 web_dir="$root_dir/web"
@@ -33,6 +38,7 @@ mkdir_remote /data/python/runtime/cpython-lib
 mkdir_remote /data/python/runtime/cpython-lib/encodings
 mkdir_remote /data/python/apps
 upload "$web_elf" "/data/python/runtime/$web_remote_name"
+upload "$supervisor_elf" /data/python/runtime/python-app-supervisor.elf
 upload "$web_dir/index.html" /data/python/web/index.html
 upload "$web_dir/app.css" /data/python/web/app.css
 upload "$web_dir/app.js" /data/python/web/app.js
@@ -126,7 +132,15 @@ done < <(find "$apps_dir" -type f \
     -print0 | sort -z)
 
 source "$sdk_dir/toolchain/prospero.sh"
-launch_uri="file:/data/python/runtime/$web_remote_name?args=$web_port%20$repl_port"
+supervisor_uri="file:/data/python/runtime/python-app-supervisor.elf?args=$supervisor_port"
+supervisor_log_file="$root_dir/build/ps5/python-app-supervisor-deploy.log"
+nohup "$sdk_dir/bin/prospero-deploy" -h "$ps5_host" -p "$loader_port" \
+    "$supervisor_uri" >"$supervisor_log_file" 2>&1 < /dev/null &
+supervisor_deploy_pid=$!
+
+sleep 1
+
+launch_uri="file:/data/python/runtime/$web_remote_name?args=$web_port%20$repl_port%20$supervisor_port"
 log_file="$root_dir/build/ps5/python-web-deploy.log"
 nohup "$sdk_dir/bin/prospero-deploy" -h "$ps5_host" -p "$loader_port" \
     "$launch_uri" >"$log_file" 2>&1 < /dev/null &
@@ -175,4 +189,5 @@ if [ "${PS5_WEB_CHECK:-0}" = "1" ]; then
     curl --connect-timeout 2 --max-time 5 --fail --silent --show-error \
         "http://$ps5_host:$web_port/api/shutdown" >/dev/null
     wait "$deploy_pid" || true
+    wait "$supervisor_deploy_pid" || true
 fi

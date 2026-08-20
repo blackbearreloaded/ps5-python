@@ -47,8 +47,10 @@ The current CPython 3.14.7 runtime bundle includes the official
 `threading.py`, `concurrent.futures.ThreadPoolExecutor`, and supported
 `multiprocessing` wrappers. Thread pools and `multiprocessing.Pipe` are
 verified on PS5; Queue/Semaphore, POSIX `SharedMemory`, and
-`ProcessPoolExecutor` remain unavailable until the payload gains named
-semaphores, file-backed `mmap`, and an ELF process broker. See
+`ProcessPoolExecutor` remain unavailable because the standard subprocess
+launch path is still unsupported. The web launcher now has a separate,
+project-specific app supervisor for packaged applications; it does not change
+the general stdlib subprocess contract. See
 [`docs/stdlib-status.md`](docs/stdlib-status.md) for the per-module contract.
 The same bundle includes `pathlib.Path` and `tempfile`; the PS5 launcher
 defaults temporary files to the managed `/user/temp` directory, which is
@@ -104,6 +106,12 @@ JSON, Jinja escaping, signed sessions, and Werkzeug WSGI client pass on PS5.
 Daemon/re-exec, Unix-domain sockets, plugin entry points, debug/reloader
 subprocesses, and optional gevent/eventlet workers remain outside the PS5
 contract. See [`docs/web-stack-status.md`](docs/web-stack-status.md).
+
+The browser web launcher deploys a small `python-app-supervisor.elf` alongside
+`python-web.elf`. Packaged applications run as forked child processes with
+separate PIDs and targeted Stop control, while the persistent interpreter and
+script editor remain in the web process. See
+[`docs/web-launcher.md`](docs/web-launcher.md).
 
 ## Build the first PS5 ELF
 
@@ -207,7 +215,7 @@ PS5_HOST=192.168.4.30 make ps5-run SCRIPT=tests/stdlib/test_tls_handshake.py
 ```
 
 `ps5-core` and `ps5-web` only build artifacts; they do not run hardware tests.
-`ps5-test` builds the ELF, uploads the test bundle, and runs all 55 aggregate
+`ps5-test` builds the ELF, uploads the test bundle, and runs all 63 aggregate
 tests. `ps5-suite` adds the lifetime checks. `RUN_TIMEOUT` is set to 120
 seconds for the aggregate run.
 
@@ -248,6 +256,11 @@ The browser-based manager is documented in
 ```sh
 PS5_HOST=192.168.4.30 make ps5-web
 ```
+
+The Run script view submits bounded source bodies to the native
+`POST /api/script/run` endpoint and shares persistent interpreter state with
+WebREPL. File-backed scripts, isolated jobs, and Stop controls remain on the
+web-launcher roadmap.
 
 The PS5 configure path uses the FreeBSD compatibility triplet expected by the
 SDK (`x86_64-pc-freebsd`) and the tracked patch in

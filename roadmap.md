@@ -96,17 +96,19 @@ expensive.
 Add a third top-level menu: **Run script**. This is separate from both the
 Applications menu and the interactive Interpreter.
 
-The first browser-only slice is now available: a complete-script editor with a
-dirty indicator, Run/Clear controls, Ctrl+Enter, URL-persisted `?view=script`,
-and an adjacent output pane. It uses the existing WebSocket runtime boundary
-and persistent interpreter, so it is useful for local experiments without
-changing the PS5 native API yet.
+The first slice is now available: a complete-script editor with a dirty
+indicator, Run/Clear controls, Ctrl+Enter, URL-persisted `?view=script`, an
+adjacent output pane, and a native `POST /api/script/run` backend. The backend
+accepts a bounded source body, evaluates it through the persistent interpreter
+mutex, and returns captured output and success state. It shares `__main__`
+globals with WebREPL and raw TCP REPL.
 
 The script view should provide:
 
 - A full-height Python editor with syntax highlighting.
 - New, open, save, save-as, and run actions. The current slice provides the
-  editor and run/clear actions; file persistence remains outstanding.
+  editor, run/clear actions, and the run backend; file persistence remains
+  outstanding.
 - A small file browser rooted at `/data/python/user` or another explicit user
   workspace, never an unrestricted filesystem browser.
 - Run output in the existing live console surface.
@@ -125,6 +127,10 @@ Native/API boundary:
 - Large scripts should be uploaded in bounded chunks or saved first; avoid
   putting an unbounded source file in a single HTTP request.
 
+The current `/api/script/run` implementation intentionally takes the bounded
+raw-body path first. Chunked upload, server-side workspace paths, file listing,
+and job-level stop control remain follow-up API work.
+
 Acceptance criteria:
 
 - A user can write and run a complete script without pasting it line by line
@@ -136,8 +142,12 @@ Acceptance criteria:
 
 ## P0 — Application tracking and stop controls
 
-The current launcher reports one app at a time but does not yet expose a proper
-job model. Introduce a process/job manager with:
+The web launcher now exposes the first process-backed slice of this job model:
+one app at a time is supervised by `python-app-supervisor.elf`, with a stable
+job ID, child PID, lifecycle state, exit code, live output, and browser Stop
+control. Remaining work is history/recovery and broader job types.
+
+The complete job model includes:
 
 - Stable job ID, app or script name, PID, start time, current state, exit code,
   and last output cursor.
@@ -170,49 +180,31 @@ Acceptance criteria:
 
 ### What works today
 
-An application launched from the Applications view can already be a
-long-running Python program. The launcher runs the selected entry point on a
-detached native worker thread, so a Flask app, Werkzeug server, or the
-supported synchronous Gunicorn path can keep serving while the launcher HTTP
-server, browser REPL, and raw TCP REPL remain available. The app must be
-packaged with its dependencies, listen on an application port different from
+An application launched from the Applications view runs in a child process
+created by the dedicated `python-app-supervisor.elf`. The web launcher and its
+REPL remain in `python-web.elf`; app output and lifecycle events cross a local
+TCP control connection. A crash, fatal extension, or unbounded application
+memory use therefore does not directly take down the web control plane. The
+app must be packaged with its dependencies, listen on a port different from
 the launcher ports, and currently there can be only one active app.
 
-This is an experimental in-process service mode, not a production supervisor.
-The app shares the CPython runtime with the launcher and REPL. A crash, fatal
-extension, unbounded memory use, or a non-cooperative native call can therefore
-affect the interpreter and the control plane. There is no browser Stop or
-Restart action yet, and “process is alive” is not the same as “HTTP service is
-ready”.
+### Current service model
 
-### Recommended service model
-
-Do not create a new OS process for every short-lived application. Keep ordinary
-one-shot apps on the lightweight job path. Add an explicit **Run as service**
-mode for programs that are expected to stay alive, and give that mode a
-dedicated worker process boundary once PS5 process creation and wait/signal
-behavior are validated end to end:
+The supervisor starts once during web deployment. It uses the validated PS5
+`fork()`/`waitpid()` path and does not attempt to implement a general ELF
+loader inside CPython:
 
 1. `python-web.elf` remains the trusted-LAN supervisor and control plane.
-2. A separate `python-app.elf` (or a supervisor-created per-app worker ELF)
-   owns the daemon's CPython interpreter, sockets, and application state.
-3. The supervisor starts the worker from a bounded manifest or config file in
-   `/user/temp`, rather than constructing an unbounded command line. The
-   manifest identifies the package root, entry point, working directory,
-   environment allowlist, advertised ports, and shutdown policy.
-4. The supervisor records a stable job/service ID, native PID, process group
-   where supported, stdout/stderr cursors, start/ready/exit times, exit code,
-   and restart count. Only PIDs issued by this supervisor may be stopped; it
-   must never enumerate or broadcast signals.
-5. Stop is graceful first, waits for a bounded timeout, and escalates only
-   through the validated PS5 process API. A worker crash or failed health
-   check can be restarted with bounded exponential backoff and a visible retry
-   limit.
+2. `python-app-supervisor.elf` owns a persistent CPython runtime and a local
+   TCP control socket.
+3. Each application runs in one child created by `fork()` and is reaped with
+   `waitpid()`.
+4. The supervisor forwards stdout/stderr, returns the child PID, and stops
+   only that known PID with bounded TERM/KILL escalation.
 
-An interim in-process daemon mode may be useful while the worker ELF is being
-validated, but it must be visibly marked experimental, share the existing
-runtime lock, disable interpreter reset while active, and never promise crash
-isolation.
+Script execution and the interactive interpreter remain in the web process for
+now. Moving scripts to the supervisor is a separate choice because it would
+remove their shared globals with the WebREPL.
 
 ### Manifest and readiness contract
 
@@ -259,18 +251,11 @@ can be considered later for a unified origin and access control.
 
 ### Dependencies and acceptance tests
 
-Implement this in stages:
+Remaining service work:
 
-1. Extend the existing job model with `kind=oneshot|daemon`, stable IDs,
-   lifecycle states, output cursors, and a browser Stop action.
-2. Validate the PS5 worker-process boundary (`fork`/`exec` or the supported
-   equivalent), `waitpid`, descriptor inheritance, and targeted TERM/kill
-   behavior with a small native test worker.
-3. Add the manifest, readiness probe, port-conflict checks, bounded restart
-   policy, and service cards.
-4. Move daemon execution to the dedicated worker ELF and keep the in-process
-   mode as an explicitly labeled fallback only if needed.
-5. Add a packaged Flask/Werkzeug and supported Gunicorn smoke service on a
+1. Add readiness probes, port-conflict checks, and service cards.
+2. Add bounded restart policy after the basic lifecycle is stable.
+3. Add a packaged Flask/Werkzeug and supported Gunicorn smoke service on a
    non-admin port. Start it, wait for readiness, make an HTTP request, stream
    logs, stop it, restart it after a controlled failure, and verify that the
    REPL and launcher remain usable throughout.
@@ -411,7 +396,8 @@ Every phase should preserve the existing rules:
 2. Add the editor bundle and syntax-highlighted Interpreter prompt.
 3. Add bounded completion and history-aware suggestions.
 4. Introduce the job manager and browser Stop control.
-5. Add the Run script menu and workspace file API.
+5. Add file-backed script persistence and the bounded workspace file API; the
+   Run script menu and source execution route are now in place.
 6. Split the native launcher around the stabilized job/runtime boundaries.
 7. Add the capability-based system dashboard.
 8. Finish command palette, tabs, themes, and TV/controller polish.

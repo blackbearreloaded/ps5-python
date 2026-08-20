@@ -30,11 +30,14 @@ def main():
         for _ in range(3):
             connection.sendall(b"\r")
             blank_output += read_until(connection, b">>> ")
-        connection.sendall(b"import sys; sys.exit()\r")
+        connection.sendall(b"exit()\r")
         exit_output = read_until(connection, b">>> ")
+        connection.sendall(b"import sys; sys.exit()\r")
+        sys_exit_output = read_until(connection, b">>> ")
     if (b"123" not in output or b"2" not in output or
             b"SyntaxError" in blank_output or
-            b"SystemExit" not in exit_output or b">>> " not in banner):
+            b"Interpreter restarted" not in exit_output or
+            b"Interpreter restarted" not in sys_exit_output or b">>> " not in banner):
         raise AssertionError(f"unexpected TCP REPL output: {banner + output + blank_output!r}")
     print("TCP_REPL_CHECK: PASS")
 
