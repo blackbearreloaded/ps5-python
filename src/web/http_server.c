@@ -30,12 +30,6 @@
 #define log_next web_log_next
 #define log_pipe web_log_pipe
 #define LOG_CAPACITY WEB_LOG_CAPACITY
-#define state_mutex web_state_mutex
-#define launch_started web_launch_started
-#define app_running web_app_running
-#define app_finished web_app_finished
-#define app_exit_code web_app_exit_code
-
 #define DEFAULT_PORT 8090
 #define PATH_CAPACITY 512
 #define TCP_REPL_LINE_CAPACITY 65536
@@ -394,29 +388,18 @@ static void *ws_client_worker(void *data)
 {
     ws_client_t *client = data;
     int flags;
-    char message[384];
+    char message[8192];
     char *snapshot = NULL;
     size_t snapshot_length;
     unsigned opcode = 0;
     unsigned char *payload;
     size_t payload_length;
-    long process_id;
 
     flags = fcntl(client->fd, F_GETFL, 0);
     if (flags >= 0)
         fcntl(client->fd, F_SETFL, flags & ~O_NONBLOCK);
-    pthread_mutex_lock(&state_mutex);
-    process_id = (long)getpid();
-    snprintf(message, sizeof message,
-             "{\"type\":\"status\",\"pid\":%ld,\"app_pid\":%ld,\"running\":%s,"
-             "\"finished\":%s,\"exit_code\":%d,\"repl_port\":%u,"
-             "\"job_id\":%lu,\"app\":\"%s\",\"state\":\"%s\"}",
-             process_id, web_app_pid, app_running ? "true" : "false",
-             app_finished ? "true" : "false",
-             app_exit_code, (unsigned)tcp_repl_port, web_app_job_id, web_app_id,
-             web_app_state_name(web_app_state));
-    pthread_mutex_unlock(&state_mutex);
-    websocket_send_text(client, message);
+    if (app_manager_status_json(message, sizeof message) >= 0)
+        websocket_send_text(client, message);
 
     pthread_mutex_lock(&log_mutex);
     snapshot_length = log_length;
@@ -532,49 +515,17 @@ static const char *query_value(const char *query, const char *key, char *out, si
 
 static enum MHD_Result status_response(struct MHD_Connection *connection)
 {
-    char body[384];
-    int started;
-    int running;
-    int finished;
-    int exit_code;
-    unsigned long job_id;
-    long app_pid;
-    int app_state;
-    char app_id[WEB_APP_ID_CAPACITY];
-    long process_id;
-
-    pthread_mutex_lock(&state_mutex);
-    started = launch_started;
-    running = app_running;
-    finished = app_finished;
-    exit_code = app_exit_code;
-    job_id = web_app_job_id;
-    app_pid = web_app_pid;
-    app_state = web_app_state;
-    snprintf(app_id, sizeof app_id, "%s", web_app_id);
-    pthread_mutex_unlock(&state_mutex);
-    process_id = (long)getpid();
-    snprintf(body, sizeof body,
-             "{\"pid\":%ld,\"app_pid\":%ld,\"started\":%s,\"running\":%s,"
-             "\"finished\":%s,\"exit_code\":%d,\"repl_port\":%u,"
-             "\"job_id\":%lu,\"app\":\"%s\",\"state\":\"%s\"}",
-             process_id, app_pid, started ? "true" : "false", running ? "true" : "false",
-             finished ? "true" : "false", exit_code, (unsigned)tcp_repl_port, job_id, app_id,
-             web_app_state_name(app_state));
+    char body[8192];
+    int length = app_manager_status_json(body, sizeof body);
+    if (length < 0)
+        return http_queue_text(connection, MHD_HTTP_INTERNAL_SERVER_ERROR, "text/plain",
+                               "status too large");
     return http_queue_response(connection, MHD_HTTP_OK, "application/json", NULL, body,
-                               strlen(body), MHD_RESPMEM_MUST_COPY);
+                               (size_t)length, MHD_RESPMEM_MUST_COPY);
 }
 
 static enum MHD_Result repl_reset_response(struct MHD_Connection *connection)
 {
-    int running;
-
-    pthread_mutex_lock(&state_mutex);
-    running = app_running;
-    pthread_mutex_unlock(&state_mutex);
-    if (running)
-        return http_queue_text(connection, MHD_HTTP_CONFLICT, "text/plain",
-                               "stop the running app before resetting the interpreter");
     if (cpython_ps5_runtime_reset(NULL) != 0)
         return http_queue_text(connection, MHD_HTTP_INTERNAL_SERVER_ERROR, "text/plain",
                                "interpreter reset failed");

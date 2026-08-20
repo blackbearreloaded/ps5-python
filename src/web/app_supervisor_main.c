@@ -18,6 +18,15 @@
 #define CONTROL_CAPACITY 2048
 #define LOG_CHUNK 1024
 #define STOP_TIMEOUT_SECONDS 3
+#define MAX_SESSIONS 16
+
+static volatile sig_atomic_t session_stop_requested;
+
+static void session_signal_handler(int signal_number)
+{
+    (void)signal_number;
+    session_stop_requested = 1;
+}
 
 static int write_all(int fd, const void *data, size_t length)
 {
@@ -84,6 +93,14 @@ static int run_child_session(int client_fd, const char *script_path, const char 
     time_t stop_started = 0;
     char pending[CONTROL_CAPACITY];
     size_t pending_length = 0;
+    struct sigaction action;
+
+    memset(&action, 0, sizeof action);
+    action.sa_handler = session_signal_handler;
+    sigemptyset(&action.sa_mask);
+    sigaction(SIGTERM, &action, NULL);
+    sigaction(SIGINT, &action, NULL);
+    session_stop_requested = 0;
     if (pipe(output_pipe) != 0)
         return -1;
 
@@ -143,6 +160,12 @@ static int run_child_session(int client_fd, const char *script_path, const char 
         ready = select(max_fd + 1, &read_set, NULL, NULL, &timeout);
         if (ready < 0 && errno != EINTR)
             break;
+        if (session_stop_requested && !stopping && child_pid > 0)
+        {
+            (void)kill(child_pid, SIGTERM);
+            stopping = 1;
+            stop_started = time(NULL);
+        }
         if (client_fd >= 0 && FD_ISSET(client_fd, &read_set))
         {
             ssize_t length = recv(client_fd, command, sizeof command, 0);
@@ -235,7 +258,7 @@ static int run_child_session(int client_fd, const char *script_path, const char 
     return shutdown_requested ? 1 : 0;
 }
 
-static int handle_connection(int client_fd)
+static int handle_connection(int client_fd, int server_fd, pid_t *session_pid)
 {
     char line[CONTROL_CAPACITY];
     if (read_line(client_fd, line, sizeof line) != 0)
@@ -267,7 +290,18 @@ static int handle_connection(int client_fd)
         fields[0][0] == '\0' || fields[1][0] == '\0' || fields[2][0] == '\0' ||
         fields[3][0] == '\0')
         return 0;
-    return run_child_session(client_fd, fields[1], fields[2], fields[3]);
+    *session_pid = fork();
+    if (*session_pid < 0)
+        return 0;
+    if (*session_pid == 0)
+    {
+        int result;
+        close(server_fd);
+        result = run_child_session(client_fd, fields[1], fields[2], fields[3]);
+        close(client_fd);
+        _exit(result == 0 ? 0 : 1);
+    }
+    return 0;
 }
 
 int main(int argc, char **argv)
@@ -275,6 +309,8 @@ int main(int argc, char **argv)
     unsigned long port = argc > 1 ? strtoul(argv[1], NULL, 10) : 8092;
     struct sockaddr_in address;
     int server_fd;
+    pid_t session_pids[MAX_SESSIONS] = {0};
+    unsigned session_count = 0;
 
     if (port == 0 || port > 65535 || cpython_ps5_runtime_start(NULL) != 0)
         return 2;
@@ -298,6 +334,15 @@ int main(int argc, char **argv)
     fflush(stdout);
     for (;;)
     {
+        for (unsigned i = 0; i < MAX_SESSIONS; i++)
+        {
+            if (session_pids[i] > 0 && waitpid(session_pids[i], NULL, WNOHANG) == session_pids[i])
+            {
+                session_pids[i] = 0;
+                if (session_count > 0)
+                    session_count--;
+            }
+        }
         int client_fd = accept(server_fd, NULL, NULL);
         if (client_fd < 0)
         {
@@ -305,9 +350,42 @@ int main(int argc, char **argv)
                 continue;
             break;
         }
-        if (handle_connection(client_fd))
+        char command[CONTROL_CAPACITY];
+        ssize_t peek_length = recv(client_fd, command, sizeof command, MSG_PEEK);
+        if (peek_length > 0 && !strncmp(command, "START\t", 6) && session_count >= MAX_SESSIONS)
+        {
+            (void)send_line(client_fd, "BUSY\n");
+            close(client_fd);
+            continue;
+        }
+        pid_t session_pid = 0;
+        if (handle_connection(client_fd, server_fd, &session_pid))
             break;
-        close(client_fd);
+        if (session_pid > 0)
+        {
+            for (unsigned i = 0; i < MAX_SESSIONS; i++)
+            {
+                if (session_pids[i] == 0)
+                {
+                    session_pids[i] = session_pid;
+                    session_count++;
+                    break;
+                }
+            }
+            close(client_fd);
+        }
+        else
+            close(client_fd);
+    }
+    for (unsigned i = 0; i < MAX_SESSIONS; i++)
+    {
+        if (session_pids[i] > 0)
+            (void)kill(session_pids[i], SIGTERM);
+    }
+    for (unsigned i = 0; i < MAX_SESSIONS; i++)
+    {
+        if (session_pids[i] > 0)
+            (void)waitpid(session_pids[i], NULL, 0);
     }
     close(server_fd);
     cpython_ps5_runtime_stop();

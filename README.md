@@ -259,7 +259,8 @@ PS5_HOST=192.168.4.30 make ps5-web
 
 The Run script view submits bounded source bodies to the native
 `POST /api/script/run` endpoint and shares persistent interpreter state with
-WebREPL. File-backed scripts, isolated jobs, and Stop controls remain on the
+WebREPL. Packaged applications run as independent process-backed jobs and can
+be launched and stopped concurrently; file-backed scripts remain on the
 web-launcher roadmap.
 
 The PS5 configure path uses the FreeBSD compatibility triplet expected by the

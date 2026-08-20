@@ -143,9 +143,10 @@ Acceptance criteria:
 ## P0 — Application tracking and stop controls
 
 The web launcher now exposes the first process-backed slice of this job model:
-one app at a time is supervised by `python-app-supervisor.elf`, with a stable
-job ID, child PID, lifecycle state, exit code, live output, and browser Stop
-control. Remaining work is history/recovery and broader job types.
+multiple packaged apps are supervised concurrently by
+`python-app-supervisor.elf`, each with a stable job ID, child PID, lifecycle
+state, exit code, live output, and browser Stop control. Remaining work is
+history/recovery and broader job types.
 
 The complete job model includes:
 
@@ -164,7 +165,8 @@ Safety rules:
 
 - Never enumerate or broadcast signals. Every stop request must use a PID/job
   previously issued by this launcher.
-- Do not reset the shared interpreter while a Python job is running.
+- App jobs use isolated processes; resetting the shared interpreter does not
+  stop them. Script jobs still use the interpreter runtime lock.
 - Make the UI show when a stop is requested but not yet confirmed.
 - Keep the existing test-only PID recovery helper separate from the normal UI
   stop path.
@@ -185,8 +187,9 @@ created by the dedicated `python-app-supervisor.elf`. The web launcher and its
 REPL remain in `python-web.elf`; app output and lifecycle events cross a local
 TCP control connection. A crash, fatal extension, or unbounded application
 memory use therefore does not directly take down the web control plane. The
-app must be packaged with its dependencies, listen on a port different from
-the launcher ports, and currently there can be only one active app.
+app must be packaged with its dependencies and listen on a port different from
+the launcher ports; multiple apps can run concurrently when their resources do
+not collide.
 
 ### Current service model
 
@@ -197,9 +200,9 @@ loader inside CPython:
 1. `python-web.elf` remains the trusted-LAN supervisor and control plane.
 2. `python-app-supervisor.elf` owns a persistent CPython runtime and a local
    TCP control socket.
-3. Each application runs in one child created by `fork()` and is reaped with
-   `waitpid()`.
-4. The supervisor forwards stdout/stderr, returns the child PID, and stops
+3. Each start request gets a session worker and an application child created
+   by `fork()`; both are reaped independently.
+4. The supervisor forwards stdout/stderr, returns each child PID, and stops
    only that known PID with bounded TERM/KILL escalation.
 
 Script execution and the interactive interpreter remain in the web process for
