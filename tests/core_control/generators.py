@@ -1,4 +1,4 @@
-"""Import-free generator protocol validation for CPythonPS5."""
+"""Import-free generator protocol validation for Python-PS5."""
 
 
 events = []

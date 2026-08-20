@@ -1,4 +1,4 @@
-# CPython PS5 static networking modules.
+# Python-PS5 static networking modules.
 *static*
 select selectmodule.c
 _socket socketmodule.c

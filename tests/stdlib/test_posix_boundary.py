@@ -5,7 +5,7 @@ import signal
 
 
 assert os.getpid() > 0
-variable = "CPYTHONPS5_POSIX_TEST"
+variable = "PYTHON_PS5_POSIX_TEST"
 os.putenv(variable, "present")
 os.environ[variable] = "present"
 try:

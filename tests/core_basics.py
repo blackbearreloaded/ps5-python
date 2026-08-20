@@ -1,4 +1,4 @@
-"""Import-free language-core smoke test for CPythonPS5."""
+"""Import-free language-core smoke test for Python-PS5."""
 
 
 def check(condition, name):

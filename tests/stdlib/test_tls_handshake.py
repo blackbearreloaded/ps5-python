@@ -10,8 +10,8 @@ import sys
 if not sys.platform.startswith("freebsd"):
     print("test_tls_handshake: SKIP (PS5 runtime only)")
 else:
-    host = os.getenv("CPYTHONPS5_TLS_HOST", "www.google.com")
-    port = int(os.getenv("CPYTHONPS5_TLS_PORT", "443"))
+    host = os.getenv("PYTHON_PS5_TLS_HOST", "www.google.com")
+    port = int(os.getenv("PYTHON_PS5_TLS_PORT", "443"))
     context = ssl.create_default_context()
     # Phase 1 proves the native socket/OpenSSL handshake. Certificate-store
     # loading is a separate follow-up once a PS5 CA bundle is selected.

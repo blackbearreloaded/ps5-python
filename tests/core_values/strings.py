@@ -11,8 +11,8 @@ def main():
 
     assert "PS5" + " Python" == "PS5 Python"
     assert "ha" * 3 == "hahaha"
-    assert "Python" in "CPython on PS5"
-    assert "java" not in "CPython on PS5"
+    assert "Python" in "Python-PS5"
+    assert "java" not in "Python-PS5"
     assert "  padded  ".strip() == "padded"
     assert "mixed".upper() == "MIXED"
     assert "MIXED".lower() == "mixed"

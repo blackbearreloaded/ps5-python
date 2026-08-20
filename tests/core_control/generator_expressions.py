@@ -1,4 +1,4 @@
-"""Import-free generator-expression validation for CPythonPS5."""
+"""Import-free generator-expression validation for Python-PS5."""
 
 
 source = [1, 2, 3, 4]

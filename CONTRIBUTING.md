@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping improve CPythonPS5. This project targets CPython 3.14.7 in
+Thanks for helping improve Python-PS5. This project targets CPython 3.14.7 in
 a jailbroken PS5 payload environment, so changes need both ordinary Python
 care and PS5-specific validation when they cross the native boundary.
 

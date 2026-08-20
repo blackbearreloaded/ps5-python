@@ -20,7 +20,7 @@ dt{color:#879492;margin-top:8px}dd{margin:2px 0;font-family:monospace;word-break
 a{color:#c7f36b}
 </style>
 <h1>Flask PS5 Dashboard</h1>
-<p>Useful baseline service for the CPython PS5 runtime.</p>
+<p>Useful baseline service for the Python-PS5 runtime.</p>
 <section><h2>Runtime</h2><dl>
 {% for key, value in info.items() %}<dt>{{ key }}</dt><dd>{{ value }}</dd>{% endfor %}
 </dl></section>

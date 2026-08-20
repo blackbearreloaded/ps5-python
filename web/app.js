@@ -194,8 +194,8 @@
     replShell.scrollTop = replShell.scrollHeight;
   }
   function resetReplPrompt() {
-    replTerminal.textContent = "CPython 3.14.7 WebREPL\n" +
-      "Connected to the running python-web.elf.\n" +
+    replTerminal.textContent = "Python-PS5 WebREPL\n" +
+      "Connected to the Python-PS5 web launcher.\n" +
       "Use Enter to evaluate a line; Shift+Enter inserts a new line.\n";
     replShell.scrollTop = replShell.scrollHeight;
     state.replCommandOpen = false;

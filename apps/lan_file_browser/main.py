@@ -10,7 +10,7 @@ from serve import serve
 
 app = Flask("lan_file_browser")
 PORT = 9105
-ROOT = os.path.abspath(os.environ.get("CPYTHONPS5_SHARE_ROOT", "/"))
+ROOT = os.path.abspath(os.environ.get("PYTHON_PS5_SHARE_ROOT", "/"))
 try:
     os.makedirs(ROOT, exist_ok=True)
 except OSError:
