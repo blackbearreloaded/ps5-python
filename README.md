@@ -31,8 +31,6 @@ retail consoles.
 
 ![Python-PS5 demo](demo.gif)
 
-[Download the original demo video](demo.mp4) if you prefer the full MP4.
-
 ## What is included
 
 - CPython **3.14.7**, pinned to upstream commit
