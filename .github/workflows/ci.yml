@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  host-suite:
+    name: Host suite
+    runs-on: windows-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Run focused stdlib checks
+        shell: pwsh
+        run: python tests/stdlib/test_missing_stdlib.py
+
+      - name: Run host aggregate suite
+        shell: pwsh
+        run: ./host/run_core_suite.ps1
+
+  shell-validation:
+    name: Shell and source validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Validate shell scripts
+        shell: bash
+        run: bash -n tools/*.sh
+
+      - name: Validate whitespace and focused Python syntax
+        shell: bash
+        run: |
+          git diff --check
+          python3 -m py_compile tests/stdlib/test_missing_stdlib.py

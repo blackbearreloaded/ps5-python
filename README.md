@@ -1,40 +1,68 @@
 # CPythonPS5
 
-Experimental port of the CPython language runtime to the jailbroken PS5 payload environment.
+Experimental but functional port of the CPython language runtime to the
+jailbroken PS5 payload environment.
 
 This repository currently targets **CPython 3.14.7**, pinned to upstream source
 commit `823f0323ee6ec1402088b73bce1a38473cac36dc`. The exact pin is recorded in
 [CPYTHON_VERSION.txt](CPYTHON_VERSION.txt); this is not an unpinned “latest
 Python” port.
 
-The first target is deliberately small: execute Python language semantics without depending on the Python standard library or third-party modules. The runtime will eventually be embedded in a native PS5 application, but this repository begins with a standalone interpreter proof of concept.
+The project now ships a standalone interpreter, a browser-based Python manager,
+process-backed application jobs, and a tested standard-library subset. It is
+still intended for development and homebrew payload environments, not stock
+retail consoles.
 
-## Scope of the first milestone
+## What is included
 
-- Cross-compile a released CPython version with the PS5 SDK.
-- Start the standalone CPython ELF directly.
-- Execute a script supplied as a separate file, for example `main.py`.
-- Validate expressions, functions, classes, exceptions, generators, comprehensions, and garbage collection.
+- CPython **3.14.7**, pinned to upstream commit
+  `823f0323ee6ec1402088b73bce1a38473cac36dc`.
+- Standalone and web-launcher ELF artifacts built with the PS5 Payload SDK.
+- 170 of 189 pinned top-level standard-library entries present in the runtime
+  bundle (about 90% module presence; not API-parity coverage).
+- Browser interpreter, script editor, app arguments, and independently
+  stoppable process-backed applications.
+- Practical examples for Flask, SQLite, storage, networking, files, logs,
+  Markdown, static sites, webhooks, and regular scripts.
 
-The first milestone did not include the standard-library package tree,
-networking, SQLite, `pip`, native extension loading, GUI support, or subprocess
-APIs. The current work selectively bundles tested CPython 3.14.7 standard
-library modules while retaining those broader exclusions. The interpreter
-still contains CPython’s required built-in runtime modules; the test script
-itself must remain import-free. Initial hardware testing uses one ELF plus an
-external `/data/python/main.py` file.
+The remaining limitations are explicit: ordinary `subprocess` execution,
+process pools, IPv6, GUI/PTY stacks, in-console packaging/bootstrap, and some
+native extension paths are outside the current PS5 payload contract.
 
-## References
+## Documentation
 
-- [CPython](https://github.com/python/cpython)
-- [MicroPython](https://github.com/micropython/micropython)
-- [PS5 PacBrew packages](https://github.com/ps5-payload-dev/pacbrew-repo)
+| Document | Purpose |
+| --- | --- |
+| [Standard-library status](docs/stdlib-status.md) | Coverage inventory, tested APIs, omissions, and upstream-derived checks |
+| [PS5 limitations](docs/ps5-limitations.md) | Platform, kernel, SDK, GUI, PTY, subprocess, and packaging boundaries |
+| [Web launcher guide](docs/web-launcher.md) | Browser manager, API, app lifecycle, arguments, and deployment |
+| [App bundles](docs/app-bundles.md) | Self-contained app manifests, dependencies, assets, and modes |
+| [Testing guide](docs/testing.md) | Host checks, PS5 aggregate tests, lifetime tests, and recovery |
+| [Release guide](docs/releasing.md) | Tags, release assets, self-hosted PS5 builds, and local fallback |
+| [Contributing](CONTRIBUTING.md) | Development workflow and pull-request checklist |
+| [Third-party notices](THIRD_PARTY_NOTICES.md) | Upstream projects, build-time dependencies, and attribution |
 
-See [PLAN.md](PLAN.md) for the implementation roadmap and acceptance criteria.
-The Web Launcher product roadmap is tracked separately in
-[roadmap.md](roadmap.md).
-The language-core test provenance and portable-subset rules are documented in
-[`tests/UPSTREAM_TESTS.md`](tests/UPSTREAM_TESTS.md).
+The implementation roadmap is in [PLAN.md](PLAN.md) and the web product
+roadmap is in [roadmap.md](roadmap.md). Test provenance and portable-subset
+rules are documented in [tests/UPSTREAM_TESTS.md](tests/UPSTREAM_TESTS.md).
+
+## Project references
+
+| Project | Role |
+| --- | --- |
+| [CPython](https://github.com/python/cpython/tree/v3.14.7) | Pinned interpreter and standard-library source |
+| [PS5 Payload SDK](https://github.com/ps5-payload-dev/sdk) | Prospero compiler, linker, headers, and ELF deployment tooling |
+| [PacBrew packages](https://github.com/ps5-payload-dev/pacbrew-repo) | PS5 payload ecosystem and packaged build dependencies |
+| [Flask](https://github.com/pallets/flask) | Practical web-app example |
+| [Gunicorn](https://github.com/benoitc/gunicorn) | Constrained synchronous WSGI serving example |
+| [OpenSSL](https://github.com/openssl/openssl) | Static TLS and cryptography dependency |
+| [SQLite](https://www.sqlite.org/) | Static database dependency and example app backend |
+| [zlib](https://github.com/madler/zlib), [bzip2](https://sourceware.org/bzip2/), [XZ Utils](https://github.com/tukaani-project/xz) | Compression dependencies |
+| [libffi](https://github.com/libffi/libffi), [libmicrohttpd](https://git.gnunet.org/libmicrohttpd.git/) | Native runtime and web-launcher dependencies |
+
+The PS5 SDK is a build-time prerequisite and is not copied into this repository.
+See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) before redistributing
+builds or bundled dependencies.
 
 ## Status
 
@@ -284,3 +312,17 @@ The PS5 configure path uses the FreeBSD compatibility triplet expected by the
 SDK (`x86_64-pc-freebsd`) and the tracked patch in
 `patches/ps5-freebsd-configure.patch`. Optional modules that require a
 separate math library are excluded from the core target.
+
+## CI and releases
+
+The [CI workflow](.github/workflows/ci.yml) runs the host suite and shell
+validation on every push and pull request. PS5 hardware tests remain an
+explicit operator step because the SDK and a jailbroken console are not
+available on GitHub-hosted runners.
+
+The [release workflow](.github/workflows/release.yml) builds the standalone
+and web ELF artifacts on a self-hosted runner labeled `ps5-sdk`, clones and
+installs the PS5 Payload SDK into temporary runner storage, packages the
+runtime bundle, and uploads the ELF files, archive, and checksums to an
+existing GitHub Release. [docs/releasing.md](docs/releasing.md) also provides
+the local `gh release upload` fallback.
