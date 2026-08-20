@@ -29,12 +29,9 @@ retail consoles.
 
 ## Demo
 
-<p align="center">
-  <video src="https://github.com/blackbearreloaded/ps5-python/raw/refs/heads/main/demo.mp4" controls width="900"></video>
-</p>
+![Python-PS5 demo](demo.gif)
 
-[Download the demo video](demo.mp4) if your Markdown viewer does not play it
-inline.
+[Download the original demo video](demo.mp4) if you prefer the full MP4.
 
 ## What is included
 
