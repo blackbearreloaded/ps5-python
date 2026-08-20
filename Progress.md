@@ -57,10 +57,10 @@ upstream source commit `823f0323ee6ec1402088b73bce1a38473cac36dc`.
 
 - Added `python-app-supervisor.elf` for process-backed application execution.
   The web launcher now starts one supervisor during deployment, launches each
-  packaged app as a forked child, forwards its output over a local TCP control
-  connection, reports the child PID, and stops it with bounded TERM/KILL
-  escalation. The timer app and WebREPL/TCP REPL remain usable during and after
-  the stop test.
+  packaged app in an independent session/child process, forwards its output
+  over a local TCP control connection, reports per-job child PIDs, and stops
+  selected jobs with bounded TERM/KILL escalation. Multiple apps can remain
+  active while the browser, WebREPL, and script editor continue to work.
 
 ### Networking and DNS
 

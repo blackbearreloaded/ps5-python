@@ -1,10 +1,12 @@
 (() => {
-  const state = { launching: false, selectedId: null, jobId: 0,
+  const state = { launching: false, selectedId: null, selectedJobId: 0, jobId: 0, jobs: [],
     socket: null, socketConnected: false, fallbackTimer: null,
     view: "apps", replBusy: false, scriptBusy: false, scriptDirty: false,
     replCommandOpen: false,
     replHistory: [], replHistoryIndex: -1 };
   const appsElement = document.getElementById("apps");
+  const runningApps = document.getElementById("running-apps");
+  const runningCount = document.getElementById("running-count");
   const statusElement = document.getElementById("status");
   const statusText = statusElement.querySelector(".status-text");
   const titleElement = document.getElementById("console-title");
@@ -108,58 +110,86 @@
     terminal.textContent += text;
     terminal.scrollTop = terminal.scrollHeight;
   }
-  function setButtonsDisabled(disabled) {
-    appsElement.querySelectorAll("button").forEach((button) => { button.disabled = disabled; });
-  }
   function setStopButton(enabled, label = "Stop app") {
     stopAppButton.disabled = !enabled;
     stopAppButton.textContent = label;
   }
-  function applyStatus(status) {
-    const appState = status.state || (status.running ? "running" : status.finished ? "finished" : "idle");
-    if (status.app) {
-      state.selectedId = status.app;
-      titleElement.textContent = status.app;
+  function jobActive(job) {
+    return job && (job.state === "starting" || job.state === "running" ||
+      job.state === "stopping" || job.running);
+  }
+  function selectedJob() {
+    const selected = state.jobs.find((job) => job.job_id === state.selectedJobId);
+    return jobActive(selected) ? selected : state.jobs.find(jobActive) || null;
+  }
+  function selectJob(jobId) {
+    state.selectedJobId = jobId;
+    const job = state.jobs.find((item) => item.job_id === jobId);
+    if (job) {
+      state.selectedId = job.app;
+      titleElement.textContent = job.app;
     }
-    if (status.job_id) state.jobId = status.job_id;
-    if (appState === "starting") {
-      state.launching = true;
-      setStatus("Starting", "running");
-      exitCode.textContent = "Starting app";
-      setStopButton(true);
-    } else if (appState === "running" || status.running) {
-      state.launching = true;
-      setStatus("Running", "running");
-      exitCode.textContent = "Streaming output";
-      setStopButton(true);
-    } else if (appState === "stopping") {
-      state.launching = true;
-      setStatus("Stopping", "running");
-      exitCode.textContent = "Stop requested";
-      setStopButton(true, "Stopping…");
-    } else if (appState === "stopped") {
-      state.launching = false;
-      setStatus("Stopped", "finished");
-      exitCode.textContent = "App stopped";
-      setStopButton(false);
-      setButtonsDisabled(false);
-    } else if (appState === "failed") {
-      state.launching = false;
-      setStatus("Failed", "error");
-      exitCode.textContent = "Exit code " + status.exit_code;
-      setStopButton(false);
-      setButtonsDisabled(false);
-    } else if (appState === "finished" || status.finished) {
-      state.launching = false;
+    applyStatus({ jobs: state.jobs });
+  }
+  function renderJobs(jobs) {
+    const active = jobs.filter(jobActive);
+    runningCount.textContent = String(active.length);
+    runningApps.textContent = "";
+    if (!active.length) {
+      const empty = document.createElement("div");
+      empty.className = "empty-card";
+      empty.textContent = "No running applications.";
+      runningApps.appendChild(empty);
+      return;
+    }
+    active.forEach((job) => {
+      const card = document.createElement("div");
+      card.className = "job-card" + (job.job_id === state.selectedJobId ? " selected" : "");
+      const select = document.createElement("button");
+      select.className = "job-select";
+      select.type = "button";
+      select.innerHTML = "<span class=\"job-name\"></span><span class=\"job-meta\"></span>";
+      select.querySelector(".job-name").textContent = job.app;
+      select.querySelector(".job-meta").textContent = "job " + job.job_id + " · PID " + (job.app_pid || "starting") +
+        " · " + job.state;
+      select.addEventListener("click", () => selectJob(job.job_id));
+      const stop = document.createElement("button");
+      stop.className = "job-stop";
+      stop.type = "button";
+      stop.textContent = job.state === "stopping" ? "Stopping…" : "Stop";
+      stop.disabled = job.state === "stopping";
+      stop.addEventListener("click", () => stopJob(job.job_id));
+      card.append(select, stop);
+      runningApps.appendChild(card);
+    });
+  }
+  function applyStatus(status) {
+    if (Array.isArray(status.jobs)) state.jobs = status.jobs;
+    const active = state.jobs.filter(jobActive);
+    const current = selectedJob();
+    state.launching = active.length > 0;
+    if (current) {
+      state.selectedJobId = current.job_id;
+      state.selectedId = current.app;
+      titleElement.textContent = current.app;
+      exitCode.textContent = current.state === "stopping" ? "Stop requested" :
+        active.length + " app" + (active.length === 1 ? "" : "s") + " running";
+      setStopButton(current.state !== "stopping", current.state === "stopping" ? "Stopping…" : "Stop app");
+      setStatus(current.state === "stopping" ? "Stopping" : "Running", "running");
+    } else if (status.state === "finished" || status.finished) {
       setStatus("Finished · exit " + status.exit_code, "finished");
       exitCode.textContent = "Exit code " + status.exit_code;
       setStopButton(false);
-      setButtonsDisabled(false);
-    } else if (!state.launching) {
+    } else if (status.state === "stopped") {
+      setStatus("Stopped", "finished");
+      exitCode.textContent = "App stopped";
+      setStopButton(false);
+    } else {
       setStatus(state.socketConnected ? "Live link" : "Ready", "ready");
       exitCode.textContent = "Waiting for a run";
       setStopButton(false);
     }
+    renderJobs(state.jobs);
   }
   function appendRepl(text) {
     replTerminal.textContent += text;
@@ -221,46 +251,50 @@
     }
   }
   async function launch(app) {
-    if (state.launching) return;
     state.launching = true;
     state.selectedId = app.id;
-    state.jobId = 0;
     titleElement.textContent = app.name;
     exitCode.textContent = "Running";
-    setOutput("[launcher] starting " + app.id + "\n");
+    appendOutput("\n[launcher] starting " + app.id + "\n");
     setStatus("Starting", "running");
     setStopButton(true);
-    setButtonsDisabled(true);
     try {
       const response = await fetch("/api/launch?app=" + encodeURIComponent(app.id));
       if (!response.ok) {
         appendOutput("[launcher] " + await response.text() + "\n");
         state.launching = false;
-        setButtonsDisabled(false);
         setStatus("Launch failed", "error");
         setStopButton(false);
+        return;
       }
+      const result = await response.json();
+      state.selectedJobId = result.job_id || state.selectedJobId;
+      state.jobId = state.selectedJobId;
     } catch (error) {
       appendOutput("[launcher] request failed: " + error + "\n");
       state.launching = false;
-      setButtonsDisabled(false);
       setStatus("Launch failed", "error");
       setStopButton(false);
     }
   }
-  async function stopRunningApp() {
-    if (!state.launching) return;
+  async function stopJob(jobId) {
+    const job = state.jobs.find((item) => item.job_id === jobId);
+    if (!jobActive(job)) return;
     setStopButton(true, "Stopping…");
     setStatus("Stopping", "running");
     exitCode.textContent = "Stop requested";
     try {
-      const response = await fetch("/api/app/stop", { method: "POST" });
+      const response = await fetch("/api/app/stop?job_id=" + encodeURIComponent(jobId), { method: "POST" });
       if (!response.ok) throw new Error(await response.text());
     } catch (error) {
       setStatus("Stop failed", "error");
       exitCode.textContent = String(error);
       setStopButton(true);
     }
+  }
+  async function stopRunningApp() {
+    const job = selectedJob();
+    if (job) await stopJob(job.job_id);
   }
   function handleSocketMessage(message) {
     let event;

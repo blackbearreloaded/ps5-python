@@ -5,6 +5,7 @@
 #include <unistd.h>
 
 #include "web_state.h"
+#include "app_manager.h"
 #include "web_utils.h"
 #include "websocket.h"
 
@@ -78,16 +79,7 @@ void websocket_broadcast_log(const char *data, size_t length)
 
 void websocket_broadcast_status(void)
 {
-    char message[384];
-    pthread_mutex_lock(&web_state_mutex);
-    snprintf(message, sizeof message,
-             "{\"type\":\"status\",\"pid\":%ld,\"running\":%s,"
-             "\"app_pid\":%ld,"
-             "\"finished\":%s,\"exit_code\":%d,\"repl_port\":%u,"
-             "\"job_id\":%lu,\"app\":\"%s\",\"state\":\"%s\"}",
-             (long)getpid(), web_app_running ? "true" : "false", web_app_pid,
-             web_app_finished ? "true" : "false", web_app_exit_code, (unsigned)tcp_repl_port,
-             web_app_job_id, web_app_id, web_app_state_name(web_app_state));
-    pthread_mutex_unlock(&web_state_mutex);
-    websocket_broadcast(message);
+    char message[8192];
+    if (app_manager_status_json(message, sizeof message) >= 0)
+        websocket_broadcast(message);
 }

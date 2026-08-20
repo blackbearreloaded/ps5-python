@@ -14,6 +14,7 @@ python-web.elf
 
 python-app-supervisor.elf
  ├── local TCP control socket
+ ├── one session worker per application
  ├── one forked CPython child per application
  └── targeted stop and waitpid lifecycle
 ```
@@ -104,9 +105,9 @@ application log and through `/api/logs`.
 | --- | --- |
 | `/` | Browser manager page |
 | `/api/apps` | Lists app IDs and display names |
-| `/api/status` | Reports launcher/app PIDs, launch state, exit code, and TCP REPL port |
-| `/api/launch?app=hello` | Starts one app bundle |
-| `POST /api/app/stop` | Stops the active application child |
+| `/api/status` | Reports launcher data plus the complete app-job list |
+| `/api/launch?app=hello` | Starts an app bundle and returns its job ID/PID |
+| `POST /api/app/stop?job_id=1` | Stops one selected application child |
 | `POST /api/script/run` | Runs a bounded script body in the persistent interpreter |
 | `/api/logs?since=0` | Returns new stdout/stderr bytes and `X-Log-Next` |
 | `/api/logs/clear` | Clears the server-side log buffer and connected consoles |
@@ -121,9 +122,10 @@ page tries WebSocket again. The cursor API remains available for diagnostics and
 automation, but is not used as a browser refresh loop.
 
 WebSocket messages are JSON objects. Log events have the form
-`{"type":"log","data":"..."}`; status events contain `type`, `running`,
-`pid`, `app_pid`, `finished`, and `exit_code` fields. A newly connected browser receives the
-current status and buffered output before live events.
+`{"type":"log","data":"..."}`; status events contain the legacy selected-job
+fields plus a `jobs` array. Each job includes `job_id`, `app`, `app_pid`,
+`running`, `finished`, `exit_code`, and `state`. A newly connected browser
+receives the current job list and buffered output before live events.
 
 ## Interactive interpreter
 
@@ -181,13 +183,15 @@ use the test-only helper documented in
 [`docs/ps5-process-recovery.md`](ps5-process-recovery.md). The helper requires
 an already-known PID and does not enumerate or broadcast signals.
 
-The manager runs one app at a time. The separate app supervisor forks the
-selected entry point, forwards its output, and reports its PID and exit state.
-The Stop button sends a targeted stop request; the supervisor sends `SIGTERM`,
-waits three seconds, and then uses `SIGKILL` if necessary. After an app exits,
-the same page can launch it again or select another app. The Clear button also
-clears the server buffer and all connected browser consoles. While an app is
-running, including a long-lived daemon, its live output remains available.
+The manager keeps a small in-memory table of application jobs. The separate
+app supervisor creates an independent session worker and forked child for each
+launch, forwards output, and reports each child PID and exit state. Applications
+can run concurrently, including long-lived daemons. The Active jobs panel
+selects a job and sends a targeted Stop request; the supervisor sends `SIGTERM`,
+waits three seconds, and then uses `SIGKILL` if necessary. The Clear button
+clears the shared output buffer and connected browser consoles. The table is
+intentionally not persisted because it describes live OS processes; completed
+slots are reused after their reader exits.
 
 ## Script workspace
 
@@ -217,11 +221,11 @@ file-backed New/Open/Save actions. Those controls, plus job-level elapsed time,
 exit state, and cooperative stopping, remain part of the dedicated script
 runner roadmap.
 
-Long-lived apps run in an isolated child process managed by
-`python-app-supervisor.elf`. The supervisor forwards output, reports the child
-PID and exit status, and stops only the PID it created. The current service
-contract still allows one active app and does not yet provide readiness probes
-or automatic restart policy. The interpreter remains in `python-web.elf`.
+Long-lived apps run in isolated child processes managed by
+`python-app-supervisor.elf`. The supervisor forwards output, reports each child
+PID and exit status, and stops only the PID it created. The service does not yet
+provide readiness probes or automatic restart policy. The interpreter remains
+in `python-web.elf` and can be used while packaged app jobs are active.
 
 ## Automated validation
 
