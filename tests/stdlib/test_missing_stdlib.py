@@ -195,10 +195,9 @@ if os.name != "nt":
         with open(netrc_path, "w", encoding="ascii") as stream:
             stream.write("machine example.com login user password secret\n")
         credentials = netrc.netrc(netrc_path)
-        assert credentials.authenticators("example.com") == (
-            "user",
-            None,
-            "secret",
+        assert credentials.authenticators("example.com") in (
+            ("user", None, "secret"),  # desktop CPython
+            ("user", "", "secret"),  # PS5's bundled parser
         )
 
         # modulefinder: discover the module created above without executing it.

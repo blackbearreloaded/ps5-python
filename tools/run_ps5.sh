@@ -115,6 +115,12 @@ done
 for module in threading.py queue.py runpy.py secrets.py getpass.py tempfile.py datetime.py typing.py annotationlib.py ast.py _ast_unparse.py keyword.py __future__.py argparse.py gettext.py locale.py traceback.py pprint.py textwrap.py codeop.py tokenize.py token.py _colorize.py difflib.py inspect.py calendar.py graphlib.py statistics.py colorsys.py ipaddress.py wave.py quopri.py socketserver.py mimetypes.py doctest.py py_compile.py compileall.py code.py cmd.py bdb.py pdb.py rlcompleter.py readline.py subprocess.py shutil.py ftplib.py poplib.py imaplib.py smtplib.py mailbox.py shlex.py getopt.py optparse.py pydoc.py webbrowser.py symtable.py pkgutil.py; do
     upload "$runtime_dir/$module" "$remote_runtime/$module"
 done
+for module in configparser.py fileinput.py modulefinder.py netrc.py pickletools.py plistlib.py pyclbr.py sched.py stringprep.py tabnanny.py trace.py zipapp.py _strptime.py _markupbase.py; do
+    upload "$runtime_dir/$module" "$remote_runtime/$module"
+done
+for module in _py_abc.py _pyio.py _pylong.py _threading_local.py ntpath.py nturl2path.py sre_compile.py sre_constants.py sre_parse.py; do
+    upload "$runtime_dir/$module" "$remote_runtime/$module"
+done
 mkdir_remote "$remote_runtime/pydoc_data"
 for module in __init__.py module_docs.py topics.py; do
     upload "$runtime_dir/pydoc_data/$module" "$remote_runtime/pydoc_data/$module"
@@ -124,7 +130,7 @@ mkdir_remote "$remote_runtime/zoneinfo"
 for module in __init__.py _common.py _tzpath.py _zoneinfo.py; do
     upload "$runtime_dir/zoneinfo/$module" "$remote_runtime/zoneinfo/$module"
 done
-for package in logging string urllib http wsgiref email unittest asyncio html compression zipfile xml sqlite3 dbm sysconfig _pyrepl gunicorn flask werkzeug jinja2 markupsafe itsdangerous click blinker; do
+for package in logging string urllib http wsgiref email unittest asyncio html compression zipfile xml sqlite3 dbm sysconfig _pyrepl tomllib xmlrpc gunicorn flask werkzeug jinja2 markupsafe itsdangerous click blinker; do
     mkdir_remote "$remote_runtime/$package"
     while IFS= read -r -d '' module_file; do
         relative_file="${module_file#"$runtime_dir/$package/"}"

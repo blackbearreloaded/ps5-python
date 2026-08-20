@@ -8,22 +8,18 @@ standard library is already bundled; the remaining gaps are documented below.
 
 The pinned CPython 3.14.7 `Lib/` comparison has 190 raw top-level source
 entries, including the non-stdlib `site-packages` directory. The current bundle
-inventory contains 161 of the 189 actual stdlib entries; 28 are absent. That is a roughly
-85% module-presence estimate, not a claim of 85% API parity. Full API parity
+inventory contains 170 of the 189 actual stdlib entries; 19 are absent. That is a roughly
+90% module-presence estimate, not a claim of 90% API parity. Full API parity
 and complete upstream regression coverage are lower and are tracked separately
 in [`stdlib-status.md`](stdlib-status.md).
 
-This is a static source/bundle inventory, not a claim that the current bundle
-has been uploaded to or executed on PS5. Nine currently absent entries are
-planned portable additions: `ntpath`, `nturl2path`, `_threading_local`,
-`_pyio`, `_pylong`, `_py_abc`, `sre_compile`, `sre_constants`, and `sre_parse`.
-If all nine are added, the projected count is 170 of 189 actual stdlib
-entries (89.9%, about 90%), leaving 19 actual absences. The raw absence count
-is 29 only because it also includes `site-packages`.
+This is a static source/bundle inventory. The final deployed bundle passes the
+68-script PS5 aggregate suite; the raw absence count is 20 only because it
+also includes `site-packages`.
 
-The current 28-entry absent set is fully classified as 9 planned portable
-additions, 17 blocked entries (2 packaging/bootstrap, 4 GUI, 2 PTY/terminal,
-5 platform-specific, and 4 demos), and 2 deliberately unnecessary
+The current 19-entry absent set is fully classified as 17 blocked entries
+(2 packaging/bootstrap, 4 GUI, 2 PTY/terminal, 5 platform-specific, and 4
+demos), and 2 deliberately unnecessary
 private/fallback files.
 
 ## Potentially possible with project work
@@ -32,8 +28,6 @@ These items are feasible with additional Python, C, build, packaging, or PS5
 SDK work. They do not require changing the CPython language runtime itself.
 
 - Complete upstream regression coverage for modules that already work.
-- Add the nine planned portable files listed above and review their dependency
-  closure; this is bundle work, not evidence of PS5 execution.
 - Expand the focused coverage for the newly bundled portable modules and the
   `_strptime`/`_markupbase` dependency closure into upstream-derived tests.
 - Finish advanced `dataclasses`, `typing`, `pathlib`, `datetime`, `json`, `re`,
@@ -106,14 +100,15 @@ A kernel-assisted ELF/process broker could remove some process-related
 blockers, but that would be a separate native PS5 subsystem, not a normal
 CPython-library implementation.
 
-The planned portable list includes private/fallback files because the goal is
-to close the selected upstream source inventory, not to imply that each file
+The portable helper closure includes private/deprecated files because the goal
+is to close the selected upstream source inventory, not to imply that each file
 is a public API requirement. Separately, `_pydatetime` and `_pydecimal` are
 deliberately unnecessary because native `_datetime` and `_decimal` provide
-the corresponding runtime paths. `_strptime` and `_markupbase` are already in
-the current bundle inventory because they have known public-module dependency
-impact. No PS5 validation is claimed for the planned additions, and no absent
-entry should be treated as a promise of full upstream parity.
+the corresponding runtime paths. `_strptime` and `_markupbase` are in the
+current bundle because they have known public-module dependency impact. No
+absent entry should be treated as a promise of full upstream parity. The
+aggregate run records the PS5-specific `netrc` representation of an omitted
+account as an empty string rather than desktop CPython's `None`.
 
 ## Packaging implication
 
