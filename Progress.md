@@ -21,13 +21,21 @@ upstream source commit `823f0323ee6ec1402088b73bce1a38473cac36dc`.
 - The repository is clean on `master` after the web-view update and native
   launcher source split.
 
-- Documented the complete pinned CPython 3.14.7 `Lib/` inventory: 190 raw
-  top-level entries, 145 present in the PS5 runtime, and 44 actual stdlib
-  omissions after excluding `site-packages`. The resulting 77% figure is
-  explicitly labeled module presence, not API parity. The omissions are
-  classified by portability, packaging, platform/GUI/terminal, demo, and
-  private/fallback status; `_strptime` and `_markupbase` are recorded as the
-  two functional dependency gaps being addressed.
+- Audited the complete pinned CPython 3.14.7 `Lib/` inventory against the
+  current bundle: 190 raw top-level entries, 161 present, and 28 actual stdlib
+  omissions after excluding `site-packages`. The resulting 85% figure is
+  explicitly labeled module presence, not API parity or PS5 validation.
+- Classified the current omissions as 9 planned portable additions, 17 blocked
+  entries (packaging/bootstrap, GUI, PTY/terminal, platform-specific, and
+  demo), and 2 deliberately unnecessary private/fallback files. The planned
+  additions are `ntpath`, `nturl2path`, `_threading_local`, `_pyio`,
+  `_pylong`, `_py_abc`, `sre_compile`, `sre_constants`, and `sre_parse`.
+  Adding all nine would project 170 of 189 entries (about 90%) and 19 actual
+  absences; this projection does not claim PS5 execution.
+- Added the remaining feasible pure-Python stdlib closure: `configparser`,
+  `fileinput`, `modulefinder`, `netrc`, `pickletools`, `plistlib`, `pyclbr`,
+  `sched`, `stringprep`, `tabnanny`, `tomllib`, `trace`, `xmlrpc`, `zipapp`,
+  `_strptime`, and `_markupbase`.
 
 ## Completed Today
 
@@ -285,7 +293,7 @@ Static or bundled support now includes:
 The final PS5 aggregate run completed with:
 
 ```text
-CPYTHON_CORE_SUITE: PASS (63 scripts)
+CPYTHON_CORE_SUITE: PASS (68 scripts)
 ```
 
 The suite includes adapted tests based on the pinned CPython `Lib/test` tree.
