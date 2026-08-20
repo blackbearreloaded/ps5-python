@@ -49,6 +49,7 @@ TEST_FILES = (
     "test_contextlib.py",
     "test_secrets.py",
     "test_filecmp.py",
+    "test_missing_stdlib.py",
     "test_fcntl.py",
     "test_code.py",
     "test_code_module.py",
