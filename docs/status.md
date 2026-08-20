@@ -1,6 +1,6 @@
 # Project status
 
-This is the current implementation snapshot for the CPython PS5 port. Module-
+This is the current implementation snapshot for the Python-PS5 port. Module-
 level coverage and individual API limitations are tracked separately in
 [`stdlib-status.md`](stdlib-status.md).
 

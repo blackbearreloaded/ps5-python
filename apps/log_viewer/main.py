@@ -10,7 +10,7 @@ from serve import serve
 
 app = Flask("log_viewer")
 PORT = 9106
-ROOT = os.path.abspath(os.environ.get("CPYTHONPS5_LOG_ROOT", "/data/shadowmount"))
+ROOT = os.path.abspath(os.environ.get("PYTHON_PS5_LOG_ROOT", "/data/shadowmount"))
 EXTENSIONS = (".log", ".txt")
 
 PAGE = """<!doctype html>

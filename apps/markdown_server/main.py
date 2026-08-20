@@ -12,7 +12,7 @@ from serve import serve
 app = Flask("markdown_server")
 PORT = 9107
 DEFAULT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "assets"))
-ROOT = os.path.abspath(os.environ.get("CPYTHONPS5_DOCS_ROOT", "/data/python/docs"))
+ROOT = os.path.abspath(os.environ.get("PYTHON_PS5_DOCS_ROOT", "/data/python/docs"))
 if not os.path.isdir(ROOT):
     ROOT = DEFAULT_ROOT
 

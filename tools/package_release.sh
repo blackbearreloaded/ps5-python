@@ -31,15 +31,15 @@ fi
 mkdir -p "$output_dir"
 staging_dir=$(mktemp -d)
 trap 'rm -rf "$staging_dir"' EXIT
-bundle_dir="$staging_dir/cpythonps5-$tag"
+bundle_dir="$staging_dir/python-ps5-$tag"
 mkdir -p "$bundle_dir/runtime"
 
 cp "$build_dir/python.elf" \
-    "$output_dir/cpythonps5-$tag-python.elf"
+    "$output_dir/python-ps5-$tag-python.elf"
 cp "$build_dir/python-web.elf" \
-    "$output_dir/cpythonps5-$tag-python-web.elf"
+    "$output_dir/python-ps5-$tag-python-web.elf"
 cp "$build_dir/python-app-supervisor.elf" \
-    "$output_dir/cpythonps5-$tag-python-app-supervisor.elf"
+    "$output_dir/python-ps5-$tag-python-app-supervisor.elf"
 cp "$build_dir/python.elf" "$bundle_dir/runtime/python.elf"
 cp "$build_dir/python-web.elf" "$bundle_dir/runtime/python-web.elf"
 cp "$build_dir/python-app-supervisor.elf" \
@@ -48,17 +48,17 @@ cp -a "$build_dir/cpython-lib" "$bundle_dir/runtime/cpython-lib"
 cp -a "$root_dir/web" "$bundle_dir/web"
 cp -a "$root_dir/apps" "$bundle_dir/apps"
 
-archive="$output_dir/cpythonps5-$tag.tar.gz"
+archive="$output_dir/python-ps5-$tag.tar.gz"
 tar --exclude='__pycache__' --exclude='*.pyc' \
-    -czf "$archive" -C "$staging_dir" "cpythonps5-$tag"
+    -czf "$archive" -C "$staging_dir" "python-ps5-$tag"
 
 (
     cd "$output_dir"
     sha256sum \
-        "cpythonps5-$tag.tar.gz" \
-        "cpythonps5-$tag-python.elf" \
-        "cpythonps5-$tag-python-web.elf" \
-        "cpythonps5-$tag-python-app-supervisor.elf"
-) > "$output_dir/cpythonps5-$tag-SHA256SUMS"
+        "python-ps5-$tag.tar.gz" \
+        "python-ps5-$tag-python.elf" \
+        "python-ps5-$tag-python-web.elf" \
+        "python-ps5-$tag-python-app-supervisor.elf"
+) > "$output_dir/python-ps5-$tag-SHA256SUMS"
 
 echo "Release assets written to $output_dir"

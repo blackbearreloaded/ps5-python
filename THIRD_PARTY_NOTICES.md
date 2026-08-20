@@ -1,6 +1,6 @@
 # Third-party notices
 
-CPythonPS5 combines project-owned launcher code with upstream CPython,
+Python-PS5 combines project-owned launcher code with upstream CPython,
 PS5-payload tooling, native libraries, and example web packages. This file is
 an attribution index; each upstream project remains the authority for its
 license and notice text.

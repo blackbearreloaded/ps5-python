@@ -1,4 +1,4 @@
-# CPythonPS5 Web Launcher Roadmap
+# Python-PS5 Web Launcher Roadmap
 
 This roadmap describes the next evolution of the PS5 Python launcher into a
 small, polished Python workspace. The runtime target remains CPython **3.14.7**
@@ -35,7 +35,7 @@ authentication, encryption, user accounts, or hostile-client isolation.
 | P0 | Process control | Track, stop, and inspect running applications |
 | P1 | System dashboard | Firmware, model, memory, CPU, temperature, storage, and uptime |
 | P1 | Launcher refactor | Smaller native/frontend modules with clear ownership |
-| P2 | Product polish | A memorable, fast “Python Studio on PS5” experience |
+| P2 | Product polish | A memorable, fast Python-PS5 experience |
 
 ## P0 — Editor foundation
 
@@ -405,7 +405,7 @@ Every phase should preserve the existing rules:
 7. Add the capability-based system dashboard.
 8. Finish command palette, tabs, themes, and TV/controller polish.
 
-The milestone for calling this a usable “Python Studio on PS5” is not visual
+The milestone for calling this a usable Python-PS5 workspace is not visual
 polish alone: a user must be able to discover the interpreter, write or run a
 script, see exactly what is running, stop it safely, and understand the
 console’s hardware/runtime limits from one page.

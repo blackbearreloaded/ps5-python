@@ -1,4 +1,4 @@
-<h1 align="center">CPythonPS5</h1>
+<h1 align="center">Python-PS5</h1>
 
 <p align="center">
   <strong>CPython for the PlayStation 5</strong><br>
@@ -266,6 +266,6 @@ the local `gh release upload` fallback.
 
 ## License
 
-CPythonPS5 is licensed under the [GNU General Public License v3.0](LICENSE).
+Python-PS5 is licensed under the [GNU General Public License v3.0](LICENSE).
 Bundled third-party components retain their respective licenses; see
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for attribution and details.

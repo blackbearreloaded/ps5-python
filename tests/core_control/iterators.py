@@ -1,4 +1,4 @@
-"""Import-free iterator and for-loop validation for CPythonPS5."""
+"""Import-free iterator and for-loop validation for Python-PS5."""
 
 
 items = ["a", "b", "c"]

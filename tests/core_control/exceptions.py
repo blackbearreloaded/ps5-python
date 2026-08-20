@@ -1,4 +1,4 @@
-"""Import-free exception-control smoke test for CPythonPS5."""
+"""Import-free exception-control smoke test for Python-PS5."""
 
 
 events = []

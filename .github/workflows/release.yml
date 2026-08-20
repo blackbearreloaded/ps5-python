@@ -72,7 +72,7 @@ jobs:
 
       - name: Package release assets
         shell: bash
-        run: bash tools/package_release.sh "$RELEASE_TAG" "$RUNNER_TEMP/cpythonps5-release"
+        run: bash tools/package_release.sh "$RELEASE_TAG" "$RUNNER_TEMP/python-ps5-release"
 
       - name: Upload assets to GitHub Release
         shell: bash
@@ -80,11 +80,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -eu
-          asset_dir="$RUNNER_TEMP/cpythonps5-release"
+          asset_dir="$RUNNER_TEMP/python-ps5-release"
           gh release upload "$RELEASE_TAG" \
-            "$asset_dir/cpythonps5-$RELEASE_TAG.tar.gz" \
-            "$asset_dir/cpythonps5-$RELEASE_TAG-python.elf" \
-            "$asset_dir/cpythonps5-$RELEASE_TAG-python-web.elf" \
-            "$asset_dir/cpythonps5-$RELEASE_TAG-python-app-supervisor.elf" \
-            "$asset_dir/cpythonps5-$RELEASE_TAG-SHA256SUMS" \
+            "$asset_dir/python-ps5-$RELEASE_TAG.tar.gz" \
+            "$asset_dir/python-ps5-$RELEASE_TAG-python.elf" \
+            "$asset_dir/python-ps5-$RELEASE_TAG-python-web.elf" \
+            "$asset_dir/python-ps5-$RELEASE_TAG-python-app-supervisor.elf" \
+            "$asset_dir/python-ps5-$RELEASE_TAG-SHA256SUMS" \
             --clobber

@@ -10,7 +10,7 @@ from serve import serve
 
 app = Flask("storage_inspector")
 PORT = 9102
-ROOT = os.path.abspath(os.environ.get("CPYTHONPS5_STORAGE_ROOT", "/data/python"))
+ROOT = os.path.abspath(os.environ.get("PYTHON_PS5_STORAGE_ROOT", "/data/python"))
 
 PAGE = """<!doctype html>
 <title>Storage Inspector</title>

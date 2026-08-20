@@ -65,7 +65,7 @@ export PS5_PAYLOAD_SDK="$sdk_dir"
 make ps5-core
 bash tools/build_ps5.sh web
 bash tools/package_release.sh v0.1.0
-gh release upload v0.1.0 dist/cpythonps5-v0.1.0-* --clobber
+gh release upload v0.1.0 dist/python-ps5-v0.1.0-* --clobber
 ```
 
 `tools/package_release.sh` never includes the SDK or local CPython checkout.

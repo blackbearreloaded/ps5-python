@@ -11,7 +11,7 @@ from serve import serve
 app = Flask("sqlite_notes")
 PORT = 9103
 DB_CANDIDATES = [
-    os.environ.get("CPYTHONPS5_NOTES_DB", "/download0/python/notes.db"),
+    os.environ.get("PYTHON_PS5_NOTES_DB", "/download0/python/notes.db"),
     "/data/python/notes.db",
 ]
 DB_PATH = None
