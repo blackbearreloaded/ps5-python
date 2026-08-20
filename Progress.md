@@ -9,7 +9,7 @@ upstream source commit `823f0323ee6ec1402088b73bce1a38473cac36dc`.
 
 ## Follow-up
 
-- Host validation now passes all 67 discovered scripts. Tests that require PS5
+- Host validation now passes all 68 discovered scripts. Tests that require PS5
   capabilities (fork, `select.poll`, external DNS, and live TLS) skip cleanly
   on desktop Python instead of making the host baseline nondeterministic.
 - Added `tests/stdlib/test_tls_handshake.py` as a separate live PS5 smoke test;
@@ -17,21 +17,25 @@ upstream source commit `823f0323ee6ec1402088b73bce1a38473cac36dc`.
   PS5 CA bundle is the next TLS increment.
 - PS5 aggregate suite passes with the profiling, concurrency, Tier 3, Tier 4,
   Tier 5, Tier 6, Tier 7, feasible Tier 8 wrappers, WSGI, and Gunicorn:
-  `CPYTHON_CORE_SUITE: PASS (67 scripts)`.
+  `CPYTHON_CORE_SUITE: PASS (68 scripts)`.
 - The repository is clean on `master` after the web-view update and native
   launcher source split.
 
 - Audited the complete pinned CPython 3.14.7 `Lib/` inventory against the
-  current bundle: 190 raw top-level entries, 161 present, and 28 actual stdlib
+  current bundle: 190 raw top-level entries, 170 present, and 19 actual stdlib
   omissions after excluding `site-packages`. The resulting 85% figure is
   explicitly labeled module presence, not API parity or PS5 validation.
-- Classified the current omissions as 9 planned portable additions, 17 blocked
-  entries (packaging/bootstrap, GUI, PTY/terminal, platform-specific, and
-  demo), and 2 deliberately unnecessary private/fallback files. The planned
-  additions are `ntpath`, `nturl2path`, `_threading_local`, `_pyio`,
-  `_pylong`, `_py_abc`, `sre_compile`, `sre_constants`, and `sre_parse`.
-  Adding all nine would project 170 of 189 entries (about 90%) and 19 actual
-  absences; this projection does not claim PS5 execution.
+- Classified the remaining omissions as 17 blocked entries
+  (packaging/bootstrap, GUI, PTY/terminal, platform-specific, and demo) and 2
+  deliberately unnecessary private/fallback files.
+- Added the portable helper closure: `ntpath`, `nturl2path`,
+  `_threading_local`, `_pyio`, `_pylong`, `_py_abc`, `sre_compile`,
+  `sre_constants`, and `sre_parse`, with focused aggregate coverage.
+- Deployed the complete 170-entry bundle and passed the PS5 aggregate:
+  `CPYTHON_CORE_SUITE: PASS (68 scripts)`. DNS resolution of `google.com`,
+  TLS handshake, forked Gunicorn lifecycle, Flask, and the new stdlib checks
+  all pass. The netrc test records PS5's empty-string account field as the
+  equivalent of desktop CPython's `None` for an omitted account.
 - Added the remaining feasible pure-Python stdlib closure: `configparser`,
   `fileinput`, `modulefinder`, `netrc`, `pickletools`, `plistlib`, `pyclbr`,
   `sched`, `stringprep`, `tabnanny`, `tomllib`, `trace`, `xmlrpc`, `zipapp`,

@@ -26,37 +26,39 @@ library, leaving 189 actual stdlib entries.
 | Measure | Count | Interpretation |
 | --- | ---: | --- |
 | Raw top-level entries | 190 | Pinned `Lib/` entries, including `site-packages` |
-| Present in the current bundle inventory | 161 | The top-level module/package is in the current bundle tree or provided by the runtime's native/public path |
-| Raw absent entries | 29 | The complete list below plus `site-packages` |
-| Actual stdlib entries absent | 28 | Raw absent entries after excluding `site-packages` |
-| Module-presence estimate | 161 / 189 = 85.2% (about 85%) | Presence only; it does not measure API parity or regression-test completeness |
+| Present in the current bundle inventory | 170 | The top-level module/package is in the current bundle tree or provided by the runtime's native/public path |
+| Raw absent entries | 20 | The complete list below plus `site-packages` |
+| Actual stdlib entries absent | 19 | Raw absent entries after excluding `site-packages` |
+| Module-presence estimate | 170 / 189 = 89.9% (about 90%) | Presence only; it does not measure API parity or regression-test completeness |
 
-The 28 actual absent entries are classified below. This is the complete
+The 19 actual absent entries are classified below. This is the complete
 comparison set; the supported set is its complement and is covered by the
-status sections that follow. `site-packages` is the 29th raw absence and is
+status sections that follow. `site-packages` is the 20th raw absence and is
 excluded from every stdlib category.
 
 This is a static comparison of `upstream/cpython/Lib` with the current bundle
-inventory. It is not a claim that the current bundle has been uploaded to or
-executed on PS5.
+inventory. The deployment and aggregate PS5 validation are recorded separately
+in `Progress.md` and the test logs.
 
 The current bundle inventory includes the previously absent portable modules
 and packages `configparser`, `fileinput`, `modulefinder`, `netrc`,
 `pickletools`, `plistlib`, `pyclbr`, `sched`, `stringprep`, `tabnanny`,
-`tomllib`, `trace`, `xmlrpc`, and `zipapp`. It also includes `_strptime` and
+`tomllib`, `trace`, `xmlrpc`, `zipapp`, `ntpath`, `nturl2path`,
+`_threading_local`, `_pyio`, `_pylong`, `_py_abc`, `sre_compile`,
+`sre_constants`, and `sre_parse`. It also includes `_strptime` and
 `_markupbase`, which are required by public `time`/`datetime` parsing and
 `html.parser` respectively. The focused checks are defined in
-`tests/stdlib/test_missing_stdlib.py`; no PS5 run is claimed by this inventory.
+`tests/stdlib/test_missing_stdlib.py`; the aggregate PS5 run passes this test.
 
 | Added surface | Bundle status | Available checks | Remaining limit |
 | --- | --- | --- | --- |
-| `configparser`, `fileinput`, `modulefinder`, `netrc`, `pickletools`, `plistlib`, `pyclbr`, `sched`, `stringprep`, `tabnanny`, `trace`, `zipapp` | Official CPython 3.14.7 pure-Python wrappers | Import and bounded local API checks | Full upstream regression coverage and unusual filesystem/CLI cases remain pending |
-| `tomllib`, `xmlrpc` | Official CPython 3.14.7 packages | TOML parsing and XML-RPC marshal/response checks without network or server execution | Full parser/protocol/server coverage remains pending |
-| `_strptime`, `_markupbase` | Official CPython 3.14.7 private dependencies in the current bundle | Focused `time.strptime()` and `html.parser.HTMLParser` checks | Full datetime/HTML parser regression coverage and PS5 execution remain unclaimed |
+| `configparser`, `fileinput`, `modulefinder`, `netrc`, `pickletools`, `plistlib`, `pyclbr`, `sched`, `stringprep`, `tabnanny`, `trace`, `zipapp` | Official CPython 3.14.7 pure-Python wrappers | Import and bounded local API checks pass on PS5 | Full upstream regression coverage and unusual filesystem/CLI cases remain pending |
+| `tomllib`, `xmlrpc` | Official CPython 3.14.7 packages | TOML parsing and XML-RPC marshal/response checks pass on PS5 without network or server execution | Full parser/protocol/server coverage remains pending |
+| `_strptime`, `_markupbase` | Official CPython 3.14.7 private dependencies in the current bundle | Focused `time.strptime()` and `html.parser.HTMLParser` checks pass on PS5 | Full datetime/HTML parser regression coverage remains pending |
+| `ntpath`, `nturl2path`, `_threading_local`, `_pyio`, `_pylong`, `_py_abc`, `sre_compile`, `sre_constants`, `sre_parse` | Official CPython 3.14.7 pure-Python helpers in the current bundle | Bounded path, URL, in-memory I/O, threading-local, integer, ABC, and regex checks pass on PS5 | Private/deprecated helpers retain upstream compatibility limits; full regression coverage remains pending |
 
 | Class | Absent entries | What the absence means |
 | --- | --- | --- |
-| Planned portable additions | `ntpath`, `nturl2path`, `_threading_local`, `_pyio`, `_pylong`, `_py_abc`, `sre_compile`, `sre_constants`, `sre_parse` | Pure-Python upstream files intended for a future bundle-closure pass; all nine remain absent from the current count and are not PS5-validated here |
 | Packaging/bootstrap blocked | `ensurepip`, `venv` | The console deployment model prepares self-contained bundles on the host; in-console pip/bootstrap environments are not shipped |
 | GUI blocked | `idlelib`, `tkinter`, `turtle`, `turtledemo` | These entries require the unavailable Tcl/Tk or desktop GUI stack |
 | PTY/terminal blocked | `curses`, `pty` | These entries require a conventional interactive terminal or pseudo-terminal environment outside the PS5 target |
@@ -64,15 +66,15 @@ and packages `configparser`, `fileinput`, `modulefinder`, `netrc`,
 | Demo entries blocked | `__hello__`, `__phello__`, `antigravity`, `this` | Demonstration/easter-egg content with no runtime compatibility value |
 | Deliberately unnecessary private/fallback files | `_pydatetime`, `_pydecimal` | Native `_datetime` and `_decimal` provide the corresponding runtime paths; no public dependency gap is known for these fallback files |
 
-The nine planned portable additions are not included in the current 161-entry
-count. If all nine are later added to the bundle, the projected inventory is
-170 of 189 actual stdlib entries (89.9%, about 90%) with 19 actual absences:
-17 blocked entries in the packaging/bootstrap, GUI, PTY/terminal,
-platform-specific, and demo classes above, plus the two deliberately
-unnecessary private/fallback files. This is a projection, not a validation
-result. The current `_strptime` and `_markupbase` bundle entries cover the
-known public dependency gaps; other private/fallback omissions do not
-automatically mean that
+The aggregate PS5 run completed with `CPYTHON_CORE_SUITE: PASS (68 scripts)`.
+The `netrc` check accepts the platform's empty-string account field as the
+equivalent of desktop CPython's `None` field for an omitted account.
+
+The current 170-entry inventory leaves 19 absences: 17 blocked entries in the
+packaging/bootstrap, GUI, PTY/terminal, platform-specific, and demo classes
+above, plus the two deliberately unnecessary private/fallback files. The
+current `_strptime` and `_markupbase` bundle entries cover the known public
+dependency gaps; other private/fallback omissions do not automatically mean that
 their public module is unavailable: native `_abc`, `_datetime`, `_decimal`,
 `_io`, and `_sre` paths cover the corresponding supported runtime surfaces.
 

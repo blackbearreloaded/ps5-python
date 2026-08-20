@@ -107,16 +107,14 @@ Daemon/re-exec, Unix-domain sockets, plugin entry points, debug/reloader
 subprocesses, and optional gevent/eventlet workers remain outside the PS5
 contract. See [`docs/web-stack-status.md`](docs/web-stack-status.md).
 
-The pinned `Lib/` inventory currently finds 161 of 189 actual stdlib top-level
-entries in the bundle inventory (about 85% module presence). The raw
+The pinned `Lib/` inventory currently finds 170 of 189 actual stdlib top-level
+entries in the bundle inventory (about 90% module presence). The raw
 comparison has 190 entries because it also sees `site-packages`. This is not
-an API-parity percentage or a PS5 validation result: individual modules remain
-subsets, and complete upstream regression coverage is still pending. Nine
-currently absent pure-Python files are planned for a later portable closure:
-`ntpath`, `nturl2path`, `_threading_local`, `_pyio`, `_pylong`, `_py_abc`,
-`sre_compile`, `sre_constants`, and `sre_parse`. If all nine are added, the
-projected inventory is 170 of 189 (about 90%), with 19 actual absences. The
-complete absent-entry classification is maintained in
+an API-parity percentage: individual modules remain subsets, and complete
+upstream regression coverage is still pending. The final deployed bundle
+passes the 68-script PS5 aggregate suite. The remaining 19 entries are
+platform/GUI/PTY/bootstrap/demo items or deliberately unnecessary private
+fallbacks. The complete absent-entry classification is maintained in
 [`docs/stdlib-status.md`](docs/stdlib-status.md).
 
 The browser web launcher deploys a small `python-app-supervisor.elf` alongside
