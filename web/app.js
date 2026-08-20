@@ -15,7 +15,6 @@
   const refreshButton = document.getElementById("refresh-apps");
   const clearButton = document.getElementById("clear-output");
   const stopAppButton = document.getElementById("stop-app");
-  const appsSidebar = document.getElementById("apps-sidebar");
   const appConsole = document.getElementById("app-console");
   const replConsole = document.getElementById("repl-console");
   const menuApps = document.getElementById("menu-apps");
@@ -80,7 +79,6 @@
     state.view = view;
     const repl = view === "repl";
     const script = view === "script";
-    appsSidebar.classList.toggle("hidden", repl || script);
     appConsole.classList.toggle("hidden", repl || script);
     replConsole.classList.toggle("hidden", !repl);
     scriptConsole.classList.toggle("hidden", !script);
