@@ -6,11 +6,16 @@ filesystem scans.  File-backed cases run on PS5 and are skipped by the
 Windows host syntax runner, matching the other filesystem tests.
 """
 
+import _py_abc
+import _pyio
+import _pylong
+import _threading_local
 import configparser
 import fileinput
 import html.parser
 import modulefinder
 import netrc
+import ntpath
 import os
 import pickletools
 import plistlib
@@ -22,9 +27,80 @@ import tempfile
 import time
 import tomllib
 import trace
+import warnings
 import zipapp
 from html.parser import HTMLParser
 from xmlrpc import client as xmlrpc_client
+
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore", DeprecationWarning)
+    import nturl2path
+    import sre_compile
+    import sre_constants
+    import sre_parse
+
+
+# ntpath: exercise Windows path parsing without touching the host filesystem.
+assert ntpath.normcase("C:/Temp/File.TXT") == r"c:\temp\file.txt"
+assert ntpath.join(r"C:\PS5", "tests", "sample.py") == r"C:\PS5\tests\sample.py"
+assert ntpath.splitdrive(r"C:\PS5\sample.py") == ("C:", r"\PS5\sample.py")
+assert ntpath.splitext(r"C:\PS5\sample.py") == (r"C:\PS5\sample", ".py")
+assert ntpath.commonpath([r"C:\PS5\one", r"C:\PS5\two"]) == r"C:\PS5"
+
+
+# nturl2path: convert a bounded local file URL without opening it.
+assert nturl2path.url2pathname("///C:/PS5/sample.py") == r"C:\PS5\sample.py"
+assert nturl2path.pathname2url(r"C:\PS5\sample.py") == "///C:/PS5/sample.py"
+
+
+# _threading_local: keep state on one local object without creating threads.
+thread_local = _threading_local.local()
+thread_local.answer = 42
+assert thread_local.answer == 42
+assert thread_local.__dict__ == {"answer": 42}
+
+
+# _pyio: exercise the in-memory stream implementations.
+binary = _pyio.BytesIO()
+assert binary.write(b"PS5") == 3
+binary.seek(0)
+assert binary.read() == b"PS5"
+text = _pyio.StringIO("PS5\n")
+assert text.readline() == "PS5\n"
+
+
+# _pylong: check bounded integer conversion and division helpers.
+assert _pylong.str_to_int("12_345") == 12345
+assert _pylong.int_from_string("12_345 ") == 12345
+assert _pylong.int_to_decimal_string(-12345) == "-12345"
+assert _pylong.int_divmod(-1234, 37) == divmod(-1234, 37)
+
+
+# _py_abc: register a virtual subclass with the Python ABC fallback.
+class Registered(metaclass=_py_abc.ABCMeta):
+    pass
+
+
+class Concrete:
+    pass
+
+
+cache_token = _py_abc.get_cache_token()
+assert Registered.register(Concrete) is Concrete
+assert issubclass(Concrete, Registered)
+assert isinstance(Concrete(), Registered)
+assert _py_abc.get_cache_token() != cache_token
+
+
+# sre_*: parse and compile one small regular expression through the shims.
+parsed_pattern = sre_parse.parse(r"ab+")
+assert parsed_pattern[0][0] == sre_constants.LITERAL
+min_width, max_width = parsed_pattern.getwidth()
+assert min_width == 2
+assert max_width > min_width
+assert sre_constants.MAXREPEAT > min_width
+compiled_pattern = sre_compile.compile(r"ab+")
+assert compiled_pattern.fullmatch("abbb").group() == "abbb"
 
 
 # configparser: parse a small configuration without touching the filesystem.
