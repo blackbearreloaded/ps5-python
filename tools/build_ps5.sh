@@ -180,8 +180,19 @@ build_runtime_bundle() {
     for module in "$source_dir"/Lib/logging/*.py; do
         cp "$module" "$runtime_dir/logging/$(basename "$module")"
     done
-    for module in __future__.py argparse.py getpass.py gettext.py locale.py traceback.py pprint.py textwrap.py codeop.py tokenize.py token.py _colorize.py difflib.py inspect.py calendar.py graphlib.py statistics.py colorsys.py ipaddress.py wave.py quopri.py socketserver.py mimetypes.py doctest.py py_compile.py compileall.py code.py cmd.py bdb.py pdb.py rlcompleter.py shlex.py getopt.py optparse.py pydoc.py webbrowser.py symtable.py pkgutil.py; do
+    for module in __future__.py argparse.py getpass.py gettext.py locale.py traceback.py pprint.py textwrap.py codeop.py tokenize.py token.py _colorize.py difflib.py inspect.py calendar.py graphlib.py statistics.py colorsys.py ipaddress.py wave.py quopri.py socketserver.py mimetypes.py doctest.py py_compile.py compileall.py code.py cmd.py bdb.py pdb.py rlcompleter.py shlex.py getopt.py optparse.py pydoc.py webbrowser.py symtable.py pkgutil.py configparser.py fileinput.py modulefinder.py netrc.py pickletools.py plistlib.py pyclbr.py sched.py stringprep.py tabnanny.py trace.py zipapp.py; do
         cp "$source_dir/Lib/$module" "$runtime_dir/$module"
+    done
+    # Functional pure-Python dependencies for the bundled stdlib surface.
+    cp "$source_dir/Lib/_strptime.py" "$runtime_dir/_strptime.py"
+    cp "$source_dir/Lib/_markupbase.py" "$runtime_dir/_markupbase.py"
+    mkdir -p "$runtime_dir/tomllib"
+    for module in "$source_dir"/Lib/tomllib/*.py; do
+        cp "$module" "$runtime_dir/tomllib/$(basename "$module")"
+    done
+    mkdir -p "$runtime_dir/xmlrpc"
+    for module in "$source_dir"/Lib/xmlrpc/*.py; do
+        cp "$module" "$runtime_dir/xmlrpc/$(basename "$module")"
     done
     mkdir -p "$runtime_dir/pydoc_data"
     for module in __init__.py module_docs.py topics.py; do
