@@ -263,3 +263,9 @@ installs the PS5 Payload SDK into temporary runner storage, packages the
 runtime bundle, and uploads the ELF files, archive, and checksums to an
 existing GitHub Release. [docs/releasing.md](docs/releasing.md) also provides
 the local `gh release upload` fallback.
+
+## License
+
+CPythonPS5 is licensed under the [GNU General Public License v3.0](LICENSE).
+Bundled third-party components retain their respective licenses; see
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for attribution and details.
