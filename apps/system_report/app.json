@@ -1,0 +1,8 @@
+{
+  "id": "system_report",
+  "name": "System Report",
+  "version": "1.0.0",
+  "entry": "main.py",
+  "runtime": "shared",
+  "mode": "script"
+}

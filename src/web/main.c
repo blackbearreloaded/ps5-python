@@ -20,7 +20,7 @@ int main(int argc, char **argv)
     unsigned long repl_port = 0;
     unsigned long supervisor_port = 0;
     struct MHD_Daemon *daemon;
-    cpython_run_options_t runtime_options;
+    cpython_run_options_t runtime_options = {0};
 
     if (argc > 1)
         port = strtoul(argv[1], NULL, 10);

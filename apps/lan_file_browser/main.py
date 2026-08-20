@@ -10,7 +10,7 @@ from serve import serve
 
 app = Flask("lan_file_browser")
 PORT = 9105
-ROOT = os.path.abspath(os.environ.get("CPYTHONPS5_SHARE_ROOT", "/data/python/share"))
+ROOT = os.path.abspath(os.environ.get("CPYTHONPS5_SHARE_ROOT", "/"))
 try:
     os.makedirs(ROOT, exist_ok=True)
 except OSError:
@@ -36,7 +36,7 @@ a{color:#c7f36b}.note{color:#879492}
 
 def safe_path(relative):
     candidate = os.path.realpath(os.path.join(ROOT, relative or ""))
-    if candidate != ROOT and not candidate.startswith(ROOT + os.sep):
+    if os.path.commonpath((ROOT, candidate)) != ROOT:
         raise ValueError("path is outside the share root")
     return candidate
 

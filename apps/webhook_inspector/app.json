@@ -4,5 +4,6 @@
   "version": "1.0.0",
   "entry": "main.py",
   "runtime": "shared",
+  "mode": "web",
   "port": 9108
 }

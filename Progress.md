@@ -64,12 +64,15 @@ upstream source commit `823f0323ee6ec1402088b73bce1a38473cac36dc`.
 
 ### Networking and practical app examples
 
-- Replaced the old toy app bundles with ten practical applications: a Flask
+- Replaced the old toy app bundles with ten practical web applications: a Flask
   dashboard, storage inspector, SQLite notes, network toolbox, LAN file
   browser, log viewer, Markdown server, webhook inspector, static site, and
-  media catalog. Their ports are documented in each app manifest and README.
+  media catalog, plus the regular `system_report` script. Their ports or
+  script behavior are documented in each app manifest and README.
 - The network toolbox exercises DNS, TCP connect, and HTTP requests directly
   from the deployed PS5 runtime.
+- App launches now accept optional command-line arguments and expose them as
+  `sys.argv`, including for non-web script apps.
 - Existing IPv4 TCP and UDP support remains verified.
 - Added non-blocking socket tests for `accept()` and `recv()`.
 - Added `select.poll()` readiness tests.

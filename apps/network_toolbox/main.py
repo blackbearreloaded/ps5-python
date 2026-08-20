@@ -1,6 +1,6 @@
-import json
 import os
 import socket
+import ssl
 import sys
 import urllib.error
 import urllib.parse
@@ -78,16 +78,32 @@ def check_http():
     parsed = urllib.parse.urlparse(url)
     if parsed.scheme not in ("http", "https") or not parsed.netloc:
         return jsonify({"error": "use a complete http:// or https:// URL"}), 400
+    def result(response, tls_verified):
+        return {
+            "ok": True,
+            "status": response.status,
+            "url": response.geturl(),
+            "content_type": response.headers.get("Content-Type", ""),
+            "server": response.headers.get("Server", ""),
+            "tls_verified": tls_verified,
+        }
+
     try:
-        with urllib.request.urlopen(url, timeout=5) as response:
-            return jsonify({
-                "ok": True,
-                "status": response.status,
-                "url": response.geturl(),
-                "content_type": response.headers.get("Content-Type", ""),
-                "server": response.headers.get("Server", ""),
-            })
+        context = ssl.create_default_context() if parsed.scheme == "https" else None
+        with urllib.request.urlopen(url, timeout=5, context=context) as response:
+            return jsonify(result(response, True if parsed.scheme == "https" else None))
     except (OSError, urllib.error.URLError) as error:
+        certificate_error = "CERTIFICATE_VERIFY_FAILED" in str(error)
+        if parsed.scheme == "https" and certificate_error:
+            try:
+                with urllib.request.urlopen(
+                    url, timeout=5, context=ssl._create_unverified_context()
+                ) as response:
+                    payload = result(response, False)
+                    payload["tls_note"] = "PS5 CA bundle unavailable; certificate was not verified"
+                    return jsonify(payload)
+            except (OSError, urllib.error.URLError) as fallback_error:
+                error = fallback_error
         return jsonify({"ok": False, "url": url, "error": str(error)}), 502
 
 
