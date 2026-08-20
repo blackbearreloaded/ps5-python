@@ -21,6 +21,14 @@ upstream source commit `823f0323ee6ec1402088b73bce1a38473cac36dc`.
 - The repository is clean on `master` after the web-view update and native
   launcher source split.
 
+- Documented the complete pinned CPython 3.14.7 `Lib/` inventory: 190 raw
+  top-level entries, 145 present in the PS5 runtime, and 44 actual stdlib
+  omissions after excluding `site-packages`. The resulting 77% figure is
+  explicitly labeled module presence, not API parity. The omissions are
+  classified by portability, packaging, platform/GUI/terminal, demo, and
+  private/fallback status; `_strptime` and `_markupbase` are recorded as the
+  two functional dependency gaps being addressed.
+
 ## Completed Today
 
 ### Build performance

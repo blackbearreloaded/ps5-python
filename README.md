@@ -90,8 +90,8 @@ Tier 8's feasible utility subset is included too: `graphlib`, `statistics`,
 `cmath`, `ipaddress`, `colorsys`, `calendar`, `zoneinfo`, `wave`, `binascii`,
 `ftplib`, `poplib`, `imaplib`, `smtplib`, `mailbox`, `email`, `shelve`, and
 pure `dbm.dumb`. Named timezone data is not bundled; `tkinter`, `curses`,
-native dbm backends, `smtpd`, Windows-only modules, and desktop terminal
-integrations remain outside the PS5 target.
+native dbm backends, Windows-only modules, and desktop terminal integrations
+remain outside the PS5 target.
 Tier 9 core and legacy utilities are included where feasible: `__future__`,
 `builtins`, `_thread`, `marshal`, `copyreg`, `cmd`, `shlex`, `optparse`,
 `getopt`, `pydoc`, `webbrowser`, and `symtable`. `turtle` remains omitted
@@ -106,6 +106,14 @@ JSON, Jinja escaping, signed sessions, and Werkzeug WSGI client pass on PS5.
 Daemon/re-exec, Unix-domain sockets, plugin entry points, debug/reloader
 subprocesses, and optional gevent/eventlet workers remain outside the PS5
 contract. See [`docs/web-stack-status.md`](docs/web-stack-status.md).
+
+The pinned `Lib/` inventory currently contains 145 of 189 actual stdlib
+top-level entries (about 77% module presence). The raw comparison has 190
+entries because it also sees `site-packages`. This is not an API-parity
+percentage: individual modules remain subsets, and complete upstream
+regression coverage is still pending. The complete absent-entry classification,
+including the `_strptime` and `_markupbase` dependency gaps being addressed,
+is maintained in [`docs/stdlib-status.md`](docs/stdlib-status.md).
 
 The browser web launcher deploys a small `python-app-supervisor.elf` alongside
 `python-web.elf`. Packaged applications run as forked child processes with

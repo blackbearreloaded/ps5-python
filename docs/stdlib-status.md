@@ -15,6 +15,43 @@ new module implementation must record:
 The goal is explicit compatibility reporting. A module must not be described
 as complete merely because it imports successfully.
 
+## Complete pinned-tree inventory
+
+This is a source-entry presence inventory, not an API-completeness score. The
+comparison uses the pinned CPython 3.14.7 `Lib/` tree, excluding CPython's
+test/cache bookkeeping entries. It finds 190 raw top-level entries. One of
+those is `site-packages`, which is packaging space rather than the standard
+library, leaving 189 actual stdlib entries.
+
+| Measure | Count | Interpretation |
+| --- | ---: | --- |
+| Raw top-level entries | 190 | Pinned `Lib/` entries, including `site-packages` |
+| Present in the PS5 runtime | 145 | The top-level module/package is shipped or provided by the runtime's native/public path |
+| Raw absent entries | 45 | The complete list below plus `site-packages` |
+| Actual stdlib entries absent | 44 | Raw absent entries after excluding `site-packages` |
+| Module-presence estimate | 145 / 189 = 76.7% (about 77%) | Presence only; it does not measure API parity or regression-test completeness |
+
+The 44 actual absent entries are classified below. This is the complete
+comparison set; the supported set is its complement and is covered by the
+status sections that follow. `site-packages` is the 45th raw absence and is
+excluded from every stdlib category.
+
+| Class | Absent entries | What the absence means |
+| --- | --- | --- |
+| Portable/user-facing omissions | `configparser`, `fileinput`, `modulefinder`, `netrc`, `pickletools`, `plistlib`, `pyclbr`, `sched`, `stringprep`, `tabnanny`, `tomllib`, `trace`, `xmlrpc`, `zipapp` | Pure-Python candidates for future work, but not currently part of the PS5 bundle |
+| Packaging/installer modules | `ensurepip`, `venv` | The console deployment model prepares self-contained bundles on the host; in-console pip/bootstrap environments are not shipped |
+| Platform/GUI/terminal modules | `_aix_support`, `_android_support`, `_apple_support`, `_ios_support`, `_osx_support`, `ntpath`, `nturl2path`, `pty`, `curses`, `idlelib`, `tkinter`, `turtle`, `turtledemo` | Host-platform helpers, desktop GUI, pseudo-terminal, or interactive terminal features outside the PS5 target |
+| Demo modules | `__hello__`, `__phello__`, `antigravity`, `this` | Demonstration/easter-egg content with no runtime compatibility value |
+| Private/fallback helpers | `_markupbase`, `_py_abc`, `_pydatetime`, `_pydecimal`, `_pyio`, `_pylong`, `_strptime`, `_threading_local`, `sre_compile`, `sre_constants`, `sre_parse` | Several are fallback/private files replaced by native modules or public wrappers; two remain functional dependency gaps |
+
+`_strptime` and `_markupbase` are the actionable functional gaps in the last
+class. `_strptime` is needed by `time.strptime()` and datetime parsing, while
+`_markupbase` is a dependency of `html.parser.HTMLParser`. They are being
+addressed as implementation work; this inventory does not claim that work is
+complete. Other private/fallback omissions do not automatically mean that
+their public module is unavailable: native `_abc`, `_datetime`, `_decimal`,
+`_io`, and `_sre` paths cover the corresponding supported runtime surfaces.
+
 ## Tier 1 daily-driver status
 
 The requested CPython 3.14.7 Tier 1 modules are covered by the focused PS5
