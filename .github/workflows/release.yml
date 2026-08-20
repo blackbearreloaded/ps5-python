@@ -1,0 +1,90 @@
+name: Release PS5 artifacts
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing GitHub Release tag to receive the artifacts
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-upload:
+    name: Build and attach PS5 artifacts
+    runs-on: [self-hosted, ps5-sdk]
+    env:
+      RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag }}
+      CPYTHON_REF: 823f0323ee6ec1402088b73bce1a38473cac36dc
+      PS5_SDK_REF: 4eb701204fc3f8d31e84cf8ca272974e2be9c867
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Verify release tools
+        shell: bash
+        run: |
+          set -eu
+          command -v git
+          command -v make
+          command -v tar
+          command -v sha256sum
+          command -v gh
+
+      - name: Fetch pinned CPython source
+        shell: bash
+        run: |
+          set -eu
+          source_dir="$GITHUB_WORKSPACE/upstream/cpython"
+          mkdir -p "$(dirname "$source_dir")"
+          git clone --depth 1 https://github.com/python/cpython.git "$source_dir"
+          git -C "$source_dir" fetch --depth 1 origin "$CPYTHON_REF"
+          git -C "$source_dir" checkout --detach "$CPYTHON_REF"
+          git -C "$source_dir" apply \
+            "$GITHUB_WORKSPACE/patches/ps5-freebsd-configure.patch"
+          test -f "$source_dir/Include/Python.h"
+
+      - name: Fetch and install PS5 Payload SDK
+        shell: bash
+        run: |
+          set -eu
+          sdk_source="$RUNNER_TEMP/ps5-payload-sdk-source"
+          sdk_dir="$RUNNER_TEMP/ps5-payload-sdk"
+          git clone --depth 1 \
+            https://github.com/ps5-payload-dev/sdk.git "$sdk_source"
+          git -C "$sdk_source" fetch --depth 1 origin "$PS5_SDK_REF"
+          git -C "$sdk_source" checkout --detach "$PS5_SDK_REF"
+          mkdir -p "$sdk_dir"
+          make -C "$sdk_source" DESTDIR="$sdk_dir" install
+          test -f "$sdk_dir/toolchain/prospero.sh"
+          echo "PS5_PAYLOAD_SDK=$sdk_dir" >> "$GITHUB_ENV"
+
+      - name: Build standalone and web artifacts
+        shell: bash
+        run: |
+          set -eu
+          make ps5-core
+          bash tools/build_ps5.sh web
+
+      - name: Package release assets
+        shell: bash
+        run: bash tools/package_release.sh "$RELEASE_TAG" "$RUNNER_TEMP/cpythonps5-release"
+
+      - name: Upload assets to GitHub Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          asset_dir="$RUNNER_TEMP/cpythonps5-release"
+          gh release upload "$RELEASE_TAG" \
+            "$asset_dir/cpythonps5-$RELEASE_TAG.tar.gz" \
+            "$asset_dir/cpythonps5-$RELEASE_TAG-python.elf" \
+            "$asset_dir/cpythonps5-$RELEASE_TAG-python-web.elf" \
+            "$asset_dir/cpythonps5-$RELEASE_TAG-python-app-supervisor.elf" \
+            "$asset_dir/cpythonps5-$RELEASE_TAG-SHA256SUMS" \
+            --clobber
