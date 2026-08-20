@@ -175,6 +175,12 @@ build_runtime_bundle() {
     cp "$source_dir/Lib/tracemalloc.py" "$runtime_dir/tracemalloc.py"
     cp "$source_dir/Lib/threading.py" "$runtime_dir/threading.py"
     cp "$source_dir/Lib/queue.py" "$runtime_dir/queue.py"
+    # Portable pure-Python path, I/O, threading, numeric, ABC, and regex
+    # compatibility helpers from the pinned CPython source tree.
+    for module in _py_abc.py _pyio.py _pylong.py _threading_local.py \
+        ntpath.py nturl2path.py sre_compile.py sre_constants.py sre_parse.py; do
+        cp "$source_dir/Lib/$module" "$runtime_dir/$module"
+    done
     rm -rf "$runtime_dir/logging"
     mkdir -p "$runtime_dir/logging"
     for module in "$source_dir"/Lib/logging/*.py; do
