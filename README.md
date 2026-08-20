@@ -141,9 +141,9 @@ The reproducible hardware loop builds the ELF and runtime bundle, creates the
 required PS5 FTP directories, uploads them, and launches the ELF:
 
 ```sh
-PS5_HOST=192.168.4.30 make ps5-run
-PS5_HOST=192.168.4.30 make ps5-run SCRIPT=examples/main.py
-PS5_HOST=192.168.4.30 make ps5-run SCRIPT=tests/core_suite.py
+PS5_HOST="<your-PS5-IP>" make ps5-run
+PS5_HOST="<your-PS5-IP>" make ps5-run SCRIPT=examples/main.py
+PS5_HOST="<your-PS5-IP>" make ps5-run SCRIPT=tests/core_suite.py
 ```
 
 The target is not a native app package yet; it is intentionally one ELF, one
@@ -153,26 +153,26 @@ Phase 4 lifetime checks are available with:
 
 ```sh
 make host-lifetime
-PS5_HOST=192.168.4.30 make ps5-lifetime
+PS5_HOST="<your-PS5-IP>" make ps5-lifetime
 ```
 
 Run the aggregate hardware tests, including the standard-library checks, with:
 
 ```sh
-PS5_HOST=192.168.4.30 make ps5-test
+PS5_HOST="<your-PS5-IP>" make ps5-test
 ```
 
 Run those tests plus the repeated-process lifetime checks with:
 
 ```sh
-PS5_HOST=192.168.4.30 make ps5-suite
+PS5_HOST="<your-PS5-IP>" make ps5-suite
 ```
 
 The live TLS smoke test can also be run directly when external DNS and internet
 access are available:
 
 ```sh
-PS5_HOST=192.168.4.30 make ps5-run SCRIPT=tests/stdlib/test_tls_handshake.py
+PS5_HOST="<your-PS5-IP>" make ps5-run SCRIPT=tests/stdlib/test_tls_handshake.py
 ```
 
 `ps5-core` and `ps5-web` only build artifacts; they do not run hardware tests.
@@ -204,7 +204,7 @@ Multiple applications can be packaged independently. See
 
 ```sh
 make host-app APP=apps/flask_dashboard
-PS5_HOST=192.168.4.30 make ps5-app APP=apps/flask_dashboard
+PS5_HOST="<your-PS5-IP>" make ps5-app APP=apps/flask_dashboard
 ```
 
 The web deployment ships a practical starter suite under `apps/`: a Flask
@@ -222,7 +222,7 @@ The browser-based manager is documented in
 [docs/web-launcher.md](docs/web-launcher.md). Start it with:
 
 ```sh
-PS5_HOST=192.168.4.30 make ps5-web
+PS5_HOST="<your-PS5-IP>" make ps5-web
 ```
 
 The Run script view submits bounded source bodies to the native

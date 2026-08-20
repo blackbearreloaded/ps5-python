@@ -10,8 +10,8 @@ Run the host checks first, then validate the target console:
 
 ```sh
 make host-suite
-PS5_HOST=192.168.4.30 make ps5-test
-PS5_HOST=192.168.4.30 make ps5-web
+PS5_HOST="<your-PS5-IP>" make ps5-test
+PS5_HOST="<your-PS5-IP>" make ps5-web
 ```
 
 Choose a version tag, for example `v0.1.0`. The release workflow attaches

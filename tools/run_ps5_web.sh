@@ -3,7 +3,7 @@ set -eu
 
 root_dir=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 sdk_dir="${PS5_PAYLOAD_SDK:-/opt/ps5-payload-sdk}"
-ps5_host="${PS5_HOST:-192.168.4.30}"
+ps5_host="${PS5_HOST:?Set PS5_HOST to your PS5 IP address}"
 ftp_port="${PS5_FTP_PORT:-2121}"
 loader_port="${PS5_LOADER_PORT:-9021}"
 web_port="${PS5_WEB_PORT:-8090}"

@@ -55,7 +55,7 @@ default (`PS5_WEB_PORT + 1`). For example, with the test launcher on port
 9603, connect from a local shell with:
 
 ```sh
-rlwrap nc 192.168.4.30 9604
+rlwrap nc "<your-PS5-IP>" 9604
 ```
 
 Set `PS5_REPL_PORT` to choose another TCP port. The TCP and WebSocket REPLs
@@ -72,7 +72,7 @@ into `python-web.elf`; it is not a runtime file that must be deployed.
 ## Build and deploy
 
 ```sh
-PS5_HOST=192.168.4.30 make ps5-web
+PS5_HOST="<your-PS5-IP>" make ps5-web
 ```
 
 The launcher is uploaded to:
@@ -262,7 +262,7 @@ in `python-web.elf` and can be used while packaged app jobs are active.
 The deployment script can run an end-to-end HTTP check:
 
 ```sh
-PS5_HOST=192.168.4.30 PS5_WEB_CHECK=1 make ps5-web
+PS5_HOST="<your-PS5-IP>" PS5_WEB_CHECK=1 make ps5-web
 ```
 
 This lists the apps, starts `flask_dashboard`, fetches its live output, and shuts down

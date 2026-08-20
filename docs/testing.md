@@ -11,7 +11,7 @@ make host-lifetime
 Run the bounded process-lifetime checks on the PS5:
 
 ```sh
-PS5_HOST=192.168.4.30 make ps5-lifetime
+PS5_HOST="<your-PS5-IP>" make ps5-lifetime
 ```
 
 The PS5 runner starts a fresh `python.elf` process for each test and repeats
