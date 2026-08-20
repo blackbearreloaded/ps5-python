@@ -10,3 +10,7 @@ __pycache__/
 
 # Local CPython source/build trees can be large; add deliberately after review.
 /upstream/
+
+# Temp.
+.temp/
+.tmp/
