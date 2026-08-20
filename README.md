@@ -107,13 +107,17 @@ Daemon/re-exec, Unix-domain sockets, plugin entry points, debug/reloader
 subprocesses, and optional gevent/eventlet workers remain outside the PS5
 contract. See [`docs/web-stack-status.md`](docs/web-stack-status.md).
 
-The pinned `Lib/` inventory currently contains 145 of 189 actual stdlib
-top-level entries (about 77% module presence). The raw comparison has 190
-entries because it also sees `site-packages`. This is not an API-parity
-percentage: individual modules remain subsets, and complete upstream
-regression coverage is still pending. The complete absent-entry classification,
-including the `_strptime` and `_markupbase` dependency gaps being addressed,
-is maintained in [`docs/stdlib-status.md`](docs/stdlib-status.md).
+The pinned `Lib/` inventory currently finds 161 of 189 actual stdlib top-level
+entries in the bundle inventory (about 85% module presence). The raw
+comparison has 190 entries because it also sees `site-packages`. This is not
+an API-parity percentage or a PS5 validation result: individual modules remain
+subsets, and complete upstream regression coverage is still pending. Nine
+currently absent pure-Python files are planned for a later portable closure:
+`ntpath`, `nturl2path`, `_threading_local`, `_pyio`, `_pylong`, `_py_abc`,
+`sre_compile`, `sre_constants`, and `sre_parse`. If all nine are added, the
+projected inventory is 170 of 189 (about 90%), with 19 actual absences. The
+complete absent-entry classification is maintained in
+[`docs/stdlib-status.md`](docs/stdlib-status.md).
 
 The browser web launcher deploys a small `python-app-supervisor.elf` alongside
 `python-web.elf`. Packaged applications run as forked child processes with
@@ -223,7 +227,7 @@ PS5_HOST=192.168.4.30 make ps5-run SCRIPT=tests/stdlib/test_tls_handshake.py
 ```
 
 `ps5-core` and `ps5-web` only build artifacts; they do not run hardware tests.
-`ps5-test` builds the ELF, uploads the test bundle, and runs all 63 aggregate
+`ps5-test` builds the ELF, uploads the test bundle, and runs all 68 aggregate
 tests. `ps5-suite` adds the lifetime checks. `RUN_TIMEOUT` is set to 120
 seconds for the aggregate run.
 

@@ -7,16 +7,24 @@ standard library is already bundled; the remaining gaps are documented below.
 ## Inventory boundary
 
 The pinned CPython 3.14.7 `Lib/` comparison has 190 raw top-level source
-entries, including the non-stdlib `site-packages` directory. The PS5 runtime
-contains 145 of the 189 actual stdlib entries; 44 are absent. That is a roughly
-77% module-presence estimate, not a claim of 77% API parity. Full API parity
+entries, including the non-stdlib `site-packages` directory. The current bundle
+inventory contains 161 of the 189 actual stdlib entries; 28 are absent. That is a roughly
+85% module-presence estimate, not a claim of 85% API parity. Full API parity
 and complete upstream regression coverage are lower and are tracked separately
 in [`stdlib-status.md`](stdlib-status.md).
 
-The absent set is fully classified there: 14 portable/user-facing omissions,
-2 packaging/installer modules, 13 platform/GUI/terminal modules, 4 demo
-modules, and 11 private/fallback helpers. The raw absence count is 45 only
-because it also includes `site-packages`.
+This is a static source/bundle inventory, not a claim that the current bundle
+has been uploaded to or executed on PS5. Nine currently absent entries are
+planned portable additions: `ntpath`, `nturl2path`, `_threading_local`,
+`_pyio`, `_pylong`, `_py_abc`, `sre_compile`, `sre_constants`, and `sre_parse`.
+If all nine are added, the projected count is 170 of 189 actual stdlib
+entries (89.9%, about 90%), leaving 19 actual absences. The raw absence count
+is 29 only because it also includes `site-packages`.
+
+The current 28-entry absent set is fully classified as 9 planned portable
+additions, 17 blocked entries (2 packaging/bootstrap, 4 GUI, 2 PTY/terminal,
+5 platform-specific, and 4 demos), and 2 deliberately unnecessary
+private/fallback files.
 
 ## Potentially possible with project work
 
@@ -24,9 +32,10 @@ These items are feasible with additional Python, C, build, packaging, or PS5
 SDK work. They do not require changing the CPython language runtime itself.
 
 - Complete upstream regression coverage for modules that already work.
-- Add the portable omissions listed in `stdlib-status.md`, prioritizing
-  `_strptime` and `_markupbase` because they are functional dependency gaps
-  for `strptime` and `html.parser`.
+- Add the nine planned portable files listed above and review their dependency
+  closure; this is bundle work, not evidence of PS5 execution.
+- Expand the focused coverage for the newly bundled portable modules and the
+  `_strptime`/`_markupbase` dependency closure into upstream-derived tests.
 - Finish advanced `dataclasses`, `typing`, `pathlib`, `datetime`, `json`, `re`,
   `struct`, compression, XML, and profiler edge cases.
 - Bundle a CA certificate store for verified HTTPS.
@@ -51,9 +60,6 @@ SDK work. They do not require changing the CPython language runtime itself.
   execution.
 - Add static PS5-native bridges for selected `ctypes` use cases.
 - Add static MarkupSafe/native acceleration if performance requires it.
-- Add other low-priority portable utilities such as `configparser`, `netrc`,
-  `sched`, `tomllib`, `trace`, `xmlrpc`, and `zipapp` as real application use
-  cases need them.
 
 Some of these items may require native C or SDK work rather than only Python
 changes.
@@ -79,13 +85,14 @@ native platform feature or a separate kernel-assisted broker would be needed.
   CPython's IPv6 configuration requirements.
 - **Arbitrary dynamic extension loading:** general `.sprx`/`.so` loading via
   `ctypes` is not available as a normal CPython capability.
-- **Desktop GUI stack:** `tkinter`, `turtle`, and GUI-dependent functionality
-  require Tcl/Tk, which the PS5 target does not provide.
-- **Curses and desktop browser integration:** there is no conventional
-  terminal desktop or browser process to control.
+- **Desktop GUI stack:** `idlelib`, `tkinter`, `turtle`, and `turtledemo`
+  require Tcl/Tk or another desktop GUI stack, which the PS5 target does not
+  provide.
+- **PTY/terminal integration:** `curses` and `pty` require a conventional
+  interactive terminal or pseudo-terminal environment outside the PS5 target.
 - **Host/platform-only entries:** the `_aix_support`, `_android_support`,
-  `_apple_support`, `_ios_support`, `_osx_support`, `ntpath`, and `nturl2path`
-  entries describe non-PS5 platform behavior and are not target requirements.
+  `_apple_support`, `_ios_support`, and `_osx_support` entries describe
+  non-PS5 platform behavior and are not target requirements.
 - **Demo entries:** `__hello__`, `__phello__`, `antigravity`, and `this` are
   intentionally omitted because they provide no PS5 runtime capability.
 - **Windows-only modules:** `msvcrt`, `winreg`, and `winsound` do not apply to
@@ -99,12 +106,14 @@ A kernel-assisted ELF/process broker could remove some process-related
 blockers, but that would be a separate native PS5 subsystem, not a normal
 CPython-library implementation.
 
-The private/fallback omissions need separate interpretation. `_py_abc`,
-`_pydatetime`, `_pydecimal`, `_pyio`, and the `sre_*` helpers are not
-individually required when their native or public runtime paths are present.
-`_strptime` and `_markupbase` are different: they have known public-module
-dependency impact and are the private/fallback gaps being addressed. No other
-absent entry should be treated as a promise of full upstream parity.
+The planned portable list includes private/fallback files because the goal is
+to close the selected upstream source inventory, not to imply that each file
+is a public API requirement. Separately, `_pydatetime` and `_pydecimal` are
+deliberately unnecessary because native `_datetime` and `_decimal` provide
+the corresponding runtime paths. `_strptime` and `_markupbase` are already in
+the current bundle inventory because they have known public-module dependency
+impact. No PS5 validation is claimed for the planned additions, and no absent
+entry should be treated as a promise of full upstream parity.
 
 ## Packaging implication
 
