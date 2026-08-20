@@ -245,6 +245,53 @@ WebREPL. Packaged applications run as independent process-backed jobs and can
 be launched and stopped concurrently; file-backed scripts remain on the
 web-launcher roadmap.
 
+## Manual release deployment
+
+For a prebuilt install, download `python-ps5-<version>.tar.gz` from the
+[Releases](https://github.com/blackbearreloaded/ps5-python/releases) page and
+extract it on your computer. Copy these extracted directories to the PS5 using
+your FTP client:
+
+```text
+runtime/cpython-lib/  -> /data/python/runtime/cpython-lib/
+web/                  -> /data/python/web/
+apps/                 -> /data/python/apps/
+```
+
+The archive also contains these three ELFs under `runtime/`:
+
+```text
+runtime/python.elf
+runtime/python-web.elf
+runtime/python-app-supervisor.elf
+```
+
+### Run one Python script
+
+Copy a `.py` file to `/data/python/main.py`, then launch the standalone ELF
+from `elfldr` or your payload manager:
+
+```text
+ELF:  /data/python/runtime/python.elf
+Args: /data/python/main.py /data/python/runtime/cpython-lib
+```
+
+### Run the web launcher
+
+Launch these ELFs in order from `elfldr` or your payload manager:
+
+```text
+1. ELF:  /data/python/runtime/python-app-supervisor.elf
+   Args: 8092
+
+2. ELF:  /data/python/runtime/python-web.elf
+   Args: 8090 8091 8092
+```
+
+Open `http://<PS5-IP>:8090/` in a browser. The arguments are the HTTP port,
+TCP WebREPL port, and local application-supervisor port. Keep the supervisor
+running while using the web launcher.
+
 The PS5 configure path uses the FreeBSD compatibility triplet expected by the
 SDK (`x86_64-pc-freebsd`) and the tracked patch in
 `patches/ps5-freebsd-configure.patch`. Optional modules that require a
