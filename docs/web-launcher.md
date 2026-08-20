@@ -186,7 +186,9 @@ an already-known PID and does not enumerate or broadcast signals.
 The manager keeps a small in-memory table of application jobs. The separate
 app supervisor creates an independent session worker and forked child for each
 launch, forwards output, and reports each child PID and exit state. Applications
-can run concurrently, including long-lived daemons. The Active jobs panel
+can run concurrently, including long-lived daemons. The Applications view keeps
+the library and process monitor in separate dashboard widgets above the output
+console, so each list has room to scroll independently. The Active jobs panel
 selects a job and sends a targeted Stop request; the supervisor sends `SIGTERM`,
 waits three seconds, and then uses `SIGKILL` if necessary. The Clear button
 clears the shared output buffer and connected browser consoles. The table is

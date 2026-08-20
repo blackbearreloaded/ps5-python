@@ -39,30 +39,6 @@
           <button id="menu-script" class="menu-tab" type="button"
                   role="tab" aria-selected="false">Run script</button>
         </div>
-        <div id="apps-sidebar" class="hidden">
-        <div class="panel-heading">
-          <div>
-            <p class="eyebrow">Library</p>
-            <h2>Applications</h2>
-          </div>
-          <button id="refresh-apps" class="icon-button" type="button"
-                  title="Refresh applications" aria-label="Refresh applications">↻</button>
-        </div>
-        <div id="apps" class="app-list">
-          <div class="loading-card">Loading applications…</div>
-        </div>
-        <div class="running-heading">
-          <span class="eyebrow">Active jobs</span>
-          <span class="running-count" id="running-count">0</span>
-        </div>
-        <div id="running-apps" class="running-apps">
-          <div class="empty-card">No running applications.</div>
-        </div>
-        <div class="sidebar-note">
-          <span class="note-icon">i</span>
-          <span>Apps are loaded from <code>/data/python/apps</code>.</span>
-        </div>
-        </div>
         <div class="rail-footer">
           <span class="rail-mark">01</span>
           <span>Trusted LAN<br><b>PS5 payload</b></span>
@@ -80,6 +56,37 @@
             <button id="clear-output" class="secondary-button" type="button">Clear logs</button>
             <button id="stop-app" class="danger-button" type="button" disabled>Stop app</button>
           </div>
+        </div>
+        <div class="app-dashboard">
+          <section class="app-widget library-widget">
+            <div class="widget-heading">
+              <div>
+                <p class="eyebrow">Library</p>
+                <h2>Applications</h2>
+              </div>
+              <button id="refresh-apps" class="icon-button" type="button"
+                      title="Refresh applications" aria-label="Refresh applications">↻</button>
+            </div>
+            <div id="apps" class="app-list">
+              <div class="loading-card">Loading applications…</div>
+            </div>
+            <div class="widget-note">
+              <span class="note-icon">i</span>
+              <span>Apps are loaded from <code>/data/python/apps</code>.</span>
+            </div>
+          </section>
+          <section class="app-widget jobs-widget">
+            <div class="widget-heading">
+              <div>
+                <p class="eyebrow">Process monitor</p>
+                <h2>Active jobs</h2>
+              </div>
+              <span class="running-count" id="running-count">0</span>
+            </div>
+            <div id="running-apps" class="running-apps">
+              <div class="empty-card">No running applications.</div>
+            </div>
+          </section>
         </div>
         <pre id="terminal" class="terminal" role="log" aria-live="polite"><span class="terminal-placeholder">Choose an application to stream its output here.</span></pre>
         <div class="console-footer">
