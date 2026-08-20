@@ -38,7 +38,7 @@ excluded from every stdlib category.
 
 This is a static comparison of `upstream/cpython/Lib` with the current bundle
 inventory. The deployment and aggregate PS5 validation are recorded separately
-in `Progress.md` and the test logs.
+in the project documentation and the test logs.
 
 The current bundle inventory includes the previously absent portable modules
 and packages `configparser`, `fileinput`, `modulefinder`, `netrc`,

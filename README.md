@@ -42,8 +42,7 @@ native extension paths are outside the current PS5 payload contract.
 | [Contributing](CONTRIBUTING.md) | Development workflow and pull-request checklist |
 | [Third-party notices](THIRD_PARTY_NOTICES.md) | Upstream projects, build-time dependencies, and attribution |
 
-The implementation roadmap is in [PLAN.md](PLAN.md) and the web product
-roadmap is in [roadmap.md](roadmap.md). Test provenance and portable-subset
+The implementation roadmap is in [roadmap.md](roadmap.md). Test provenance and portable-subset
 rules are documented in [tests/UPSTREAM_TESTS.md](tests/UPSTREAM_TESTS.md).
 
 ## Project references

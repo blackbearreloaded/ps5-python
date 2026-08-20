@@ -390,8 +390,8 @@ Every phase should preserve the existing rules:
 - Test refresh/navigation state, long scrollback, reset, Ctrl+L, script stop,
   and app stop.
 - Verify that `sys.exit()` cannot terminate the launcher process.
-- Commit every completed increment and keep `Progress.md` and the relevant
-  documentation status current.
+- Commit every completed increment and keep the relevant documentation status
+  current.
 
 ## Suggested implementation order
 
