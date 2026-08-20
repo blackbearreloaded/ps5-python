@@ -1,7 +1,0 @@
-{
-  "id": "socket_server",
-  "name": "Socket Server 9091",
-  "version": "0.1.0",
-  "entry": "main.py",
-  "runtime": "shared"
-}

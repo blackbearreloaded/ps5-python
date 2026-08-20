@@ -1,0 +1,8 @@
+{
+  "id": "storage_inspector",
+  "name": "Storage Inspector",
+  "version": "1.0.0",
+  "entry": "main.py",
+  "runtime": "shared",
+  "port": 9102
+}

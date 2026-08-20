@@ -76,5 +76,7 @@ The web deployment also starts `python-app-supervisor.elf`. Application
 validation should confirm that two `/api/launch` requests return distinct job
 IDs and child PIDs, that `/api/status` remains responsive while both jobs are
 active, and that `POST /api/app/stop?job_id=...` stops only the selected job.
-The existing `time_demo` app is the bounded manual stop test; use it alongside
-`socket_server` or another non-conflicting app for the concurrency check.
+The practical app suite is the manual process test. Start
+`flask_dashboard` (9101), `sqlite_notes` (9103), or `webhook_inspector`
+(9108), then start a second app and confirm both ports remain responsive. Use
+the Stop action on one job and verify that the other app continues serving.

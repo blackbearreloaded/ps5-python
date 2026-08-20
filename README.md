@@ -239,12 +239,18 @@ run `bash tools/build_openssl_ps5.sh` from WSL. The resulting `_ssl` and
 
 Multiple applications can be packaged independently. See
 [docs/app-bundles.md](docs/app-bundles.md) and the complete example in
-[apps/hello](apps/hello). Validate and deploy it with:
+[apps/flask_dashboard](apps/flask_dashboard). Validate and deploy it with:
 
 ```sh
-make host-app APP=apps/hello
-PS5_HOST=192.168.4.30 make ps5-app APP=apps/hello
+make host-app APP=apps/flask_dashboard
+PS5_HOST=192.168.4.30 make ps5-app APP=apps/flask_dashboard
 ```
+
+The web deployment ships a practical starter suite under `apps/`: a Flask
+runtime dashboard, storage and LAN file browsers, SQLite notes, network
+checks, log and Markdown viewers, a webhook inspector, a static-site starter,
+and a media catalog. Each web app listens on its own documented port so they
+can run together under the process supervisor.
 
 Prepare an app's pure-Python dependencies on the host with
 `make package-app APP=apps/myapp`; the PS5 receives the completed bundle and

@@ -24,11 +24,13 @@ web_dir="$root_dir/web"
 apps_dir="$root_dir/apps"
 
 mkdir_remote() {
-    curl --silent --show-error -Q "MKD $1" "$ftp_url/" >/dev/null 2>&1 || true
+    curl --connect-timeout 3 --max-time 10 --silent --show-error \
+        -Q "MKD $1" "$ftp_url/" >/dev/null 2>&1 || true
 }
 
 upload() {
-    curl --fail --silent --show-error --upload-file "$1" "$ftp_url$2"
+    curl --connect-timeout 3 --max-time 30 --fail --silent --show-error \
+        --upload-file "$1" "$ftp_url$2"
 }
 
 mkdir_remote /data/python
@@ -174,12 +176,12 @@ if [ "${PS5_WEB_CHECK:-0}" = "1" ]; then
     curl --connect-timeout 2 --max-time 5 --fail --silent --show-error "http://$ps5_host:$web_port/api/apps"
     echo
     curl --connect-timeout 2 --max-time 5 --fail --silent --show-error \
-        "http://$ps5_host:$web_port/api/launch?app=hello"
+        "http://$ps5_host:$web_port/api/launch?app=flask_dashboard"
     echo
     for attempt in $(seq 1 20); do
         logs=$(curl --connect-timeout 2 --max-time 5 --fail --silent --show-error \
             "http://$ps5_host:$web_port/api/logs?since=0")
-        if printf '%s' "$logs" | grep -q "Hello from a packaged Python app on PS5"; then
+        if printf '%s' "$logs" | grep -q "Flask dashboard listening on 0.0.0.0:9101"; then
             echo "Live app output: PASS"
             break
         fi

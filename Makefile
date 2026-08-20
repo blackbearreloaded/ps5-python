@@ -4,7 +4,7 @@ PS5_PAYLOAD_SDK ?= /opt/ps5-payload-sdk
 CPYTHON_SRC ?= upstream/cpython
 PS5_JOBS ?= $(shell nproc 2>/dev/null || echo 2)
 SCRIPT ?= examples/main.py
-APP ?= apps/hello
+APP ?= apps/flask_dashboard
 
 .PHONY: format format-check tidy lint host-test host-suite host-lifetime host-app package-app host-build source-fetch source-check ps5-check ps5-configure ps5-core ps5-run ps5-test ps5-suite ps5-lifetime ps5-app ps5-web ps5-web-test ps5-kill clean
 

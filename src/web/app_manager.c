@@ -118,9 +118,12 @@ enum MHD_Result app_list_response(struct MHD_Connection *connection)
         {
             char manifest[PATH_CAPACITY];
             char name[128];
+            char entry_script[128];
             if (entry->d_name[0] == '.' || !valid_app_id(entry->d_name))
                 continue;
             snprintf(manifest, sizeof manifest, "/data/python/apps/%s/app.json", entry->d_name);
+            if (manifest_value(manifest, "entry", entry_script, sizeof entry_script) != 0)
+                continue;
             if (manifest_value(manifest, "name", name, sizeof name) != 0)
                 snprintf(name, sizeof name, "%s", entry->d_name);
             if (!first)

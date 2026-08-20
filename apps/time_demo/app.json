@@ -1,7 +1,0 @@
-{
-  "id": "time_demo",
-  "name": "Time Demo",
-  "version": "0.1.0",
-  "entry": "main.py",
-  "runtime": "shared"
-}

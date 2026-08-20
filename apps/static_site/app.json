@@ -1,0 +1,8 @@
+{
+  "id": "static_site",
+  "name": "Static Site Starter",
+  "version": "1.0.0",
+  "entry": "main.py",
+  "runtime": "shared",
+  "port": 9109
+}

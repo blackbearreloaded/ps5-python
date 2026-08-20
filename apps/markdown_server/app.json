@@ -1,0 +1,8 @@
+{
+  "id": "markdown_server",
+  "name": "Markdown Documentation",
+  "version": "1.0.0",
+  "entry": "main.py",
+  "runtime": "shared",
+  "port": 9107
+}

@@ -1,5 +1,5 @@
 param(
-    [string]$AppPath = 'apps/hello'
+    [string]$AppPath = 'apps/flask_dashboard'
 )
 
 $ErrorActionPreference = 'Stop'
