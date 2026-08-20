@@ -1,4 +1,18 @@
-# CPythonPS5
+<h1 align="center">CPythonPS5</h1>
+
+<p align="center">
+  <strong>CPython for the PlayStation 5</strong><br>
+  A practical Python runtime, browser launcher, and app supervisor for PS5 homebrew.
+</p>
+
+<p align="center">
+  <a href="https://github.com/blackbearreloaded/ps5-python/actions/workflows/ci.yml?query=branch%3Amain"><img src="https://github.com/blackbearreloaded/ps5-python/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI status"></a>
+  <a href="https://github.com/blackbearreloaded/ps5-python/releases/latest"><img src="https://img.shields.io/github/v/release/blackbearreloaded/ps5-python?display_name=tag&amp;sort=semver&amp;label=latest%20release" alt="Latest release"></a>
+  <a href="https://github.com/blackbearreloaded/ps5-python/releases"><img src="https://img.shields.io/github/downloads/blackbearreloaded/ps5-python/total?label=downloads" alt="GitHub downloads"></a>
+  <a href="https://github.com/blackbearreloaded/ps5-python/blob/main/LICENSE"><img src="https://img.shields.io/github/license/blackbearreloaded/ps5-python" alt="License"></a>
+  <img src="https://img.shields.io/badge/CPython-3.14.7-3776AB?logo=python&amp;logoColor=white" alt="CPython 3.14.7">
+  <img src="https://img.shields.io/badge/platform-PS5-003791?logo=playstation&amp;logoColor=white" alt="PlayStation 5">
+</p>
 
 Experimental but functional port of the CPython language runtime to the
 jailbroken PS5 payload environment.
