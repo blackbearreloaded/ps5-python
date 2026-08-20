@@ -39,6 +39,16 @@
 #define DEFAULT_PORT 8090
 #define PATH_CAPACITY 512
 #define TCP_REPL_LINE_CAPACITY 65536
+#define SCRIPT_SOURCE_CAPACITY 65536
+#define SCRIPT_OUTPUT_CAPACITY 16384
+
+typedef struct script_request
+{
+    char source[SCRIPT_SOURCE_CAPACITY + 1];
+    size_t source_length;
+    int oversized;
+    int invalid;
+} script_request_t;
 
 typedef struct sha1_state
 {
@@ -355,6 +365,13 @@ static void ws_send_repl_result(ws_client_t *client, const unsigned char *source
     memcpy(source_text, source, source_length);
     source_text[source_length] = '\0';
     result = cpython_ps5_runtime_eval(source_text, output, output_capacity);
+    if (result == CPYTHON_PS5_RUNTIME_RESTARTED)
+    {
+        websocket_broadcast("{\"type\":\"repl_reset\",\"reason\":\"exit\"}");
+        free(source_text);
+        free(output);
+        return;
+    }
     message = malloc(strlen(output) * 2 + 96);
     if (message == NULL)
     {
@@ -377,7 +394,7 @@ static void *ws_client_worker(void *data)
 {
     ws_client_t *client = data;
     int flags;
-    char message[224];
+    char message[384];
     char *snapshot = NULL;
     size_t snapshot_length;
     unsigned opcode = 0;
@@ -391,10 +408,13 @@ static void *ws_client_worker(void *data)
     pthread_mutex_lock(&state_mutex);
     process_id = (long)getpid();
     snprintf(message, sizeof message,
-             "{\"type\":\"status\",\"pid\":%ld,\"running\":%s,"
-             "\"finished\":%s,\"exit_code\":%d,\"repl_port\":%u}",
-             process_id, app_running ? "true" : "false", app_finished ? "true" : "false",
-             app_exit_code, (unsigned)tcp_repl_port);
+             "{\"type\":\"status\",\"pid\":%ld,\"app_pid\":%ld,\"running\":%s,"
+             "\"finished\":%s,\"exit_code\":%d,\"repl_port\":%u,"
+             "\"job_id\":%lu,\"app\":\"%s\",\"state\":\"%s\"}",
+             process_id, web_app_pid, app_running ? "true" : "false",
+             app_finished ? "true" : "false",
+             app_exit_code, (unsigned)tcp_repl_port, web_app_job_id, web_app_id,
+             web_app_state_name(web_app_state));
     pthread_mutex_unlock(&state_mutex);
     websocket_send_text(client, message);
 
@@ -512,11 +532,15 @@ static const char *query_value(const char *query, const char *key, char *out, si
 
 static enum MHD_Result status_response(struct MHD_Connection *connection)
 {
-    char body[224];
+    char body[384];
     int started;
     int running;
     int finished;
     int exit_code;
+    unsigned long job_id;
+    long app_pid;
+    int app_state;
+    char app_id[WEB_APP_ID_CAPACITY];
     long process_id;
 
     pthread_mutex_lock(&state_mutex);
@@ -524,13 +548,19 @@ static enum MHD_Result status_response(struct MHD_Connection *connection)
     running = app_running;
     finished = app_finished;
     exit_code = app_exit_code;
+    job_id = web_app_job_id;
+    app_pid = web_app_pid;
+    app_state = web_app_state;
+    snprintf(app_id, sizeof app_id, "%s", web_app_id);
     pthread_mutex_unlock(&state_mutex);
     process_id = (long)getpid();
     snprintf(body, sizeof body,
-             "{\"pid\":%ld,\"started\":%s,\"running\":%s,"
-             "\"finished\":%s,\"exit_code\":%d,\"repl_port\":%u}",
-             process_id, started ? "true" : "false", running ? "true" : "false",
-             finished ? "true" : "false", exit_code, (unsigned)tcp_repl_port);
+             "{\"pid\":%ld,\"app_pid\":%ld,\"started\":%s,\"running\":%s,"
+             "\"finished\":%s,\"exit_code\":%d,\"repl_port\":%u,"
+             "\"job_id\":%lu,\"app\":\"%s\",\"state\":\"%s\"}",
+             process_id, app_pid, started ? "true" : "false", running ? "true" : "false",
+             finished ? "true" : "false", exit_code, (unsigned)tcp_repl_port, job_id, app_id,
+             web_app_state_name(app_state));
     return http_queue_response(connection, MHD_HTTP_OK, "application/json", NULL, body,
                                strlen(body), MHD_RESPMEM_MUST_COPY);
 }
@@ -550,6 +580,53 @@ static enum MHD_Result repl_reset_response(struct MHD_Connection *connection)
                                "interpreter reset failed");
     websocket_broadcast("{\"type\":\"repl_reset\"}");
     return http_queue_text(connection, MHD_HTTP_OK, "application/json", "{\"reset\":true}");
+}
+
+static enum MHD_Result script_run_response(struct MHD_Connection *connection,
+                                           const script_request_t *request)
+{
+    char *output = NULL;
+    char *body = NULL;
+    size_t body_capacity;
+    size_t at;
+    int result;
+    int restarted;
+
+    output = calloc(1, SCRIPT_OUTPUT_CAPACITY);
+    if (output == NULL)
+        return http_queue_text(connection, MHD_HTTP_INTERNAL_SERVER_ERROR, "text/plain",
+                               "out of memory");
+    result = cpython_ps5_runtime_eval(request->source, output, SCRIPT_OUTPUT_CAPACITY);
+    restarted = result == CPYTHON_PS5_RUNTIME_RESTARTED;
+    if (restarted)
+        websocket_broadcast("{\"type\":\"repl_reset\",\"reason\":\"exit\"}");
+    body_capacity = strlen(output) * 2 + 96;
+    body = malloc(body_capacity);
+    if (body == NULL)
+    {
+        free(output);
+        return http_queue_text(connection, MHD_HTTP_INTERNAL_SERVER_ERROR, "text/plain",
+                               "out of memory");
+    }
+    at = (size_t)snprintf(body, body_capacity, "{\"ok\":%s,\"restarted\":%s,\"data\":\"",
+                          result == 0 ? "true" : "false", restarted ? "true" : "false");
+    at = web_json_append(body, at, body_capacity, output);
+    (void)snprintf(body + at, body_capacity - at, "\",\"source_bytes\":%llu}",
+                   (unsigned long long)request->source_length);
+    free(output);
+    return http_queue_response(connection, MHD_HTTP_OK, "application/json", NULL, body,
+                               strlen(body), MHD_RESPMEM_MUST_FREE);
+}
+
+void web_request_completed(void *cls, struct MHD_Connection *connection, void **con_cls,
+                           enum MHD_RequestTerminationCode termination_code)
+{
+    (void)cls;
+    (void)connection;
+    (void)termination_code;
+    if (*con_cls != NULL && *con_cls != (void *)1 && *con_cls != (void *)2)
+        free(*con_cls);
+    *con_cls = NULL;
 }
 
 static enum MHD_Result logs_response(struct MHD_Connection *connection, const char *query)
@@ -631,20 +708,66 @@ enum MHD_Result web_access_handler(void *cls, struct MHD_Connection *connection,
                                    const char *method, const char *version, const char *upload_data,
                                    size_t *upload_data_size, void **con_cls)
 {
+    script_request_t *script_request;
     char target[1024];
     const char *argument;
     char query[160];
 
     (void)cls;
     (void)version;
-    (void)upload_data;
-    if (strcmp(method, "GET") != 0)
-        return http_queue_text(connection, MHD_HTTP_BAD_REQUEST, "text/plain", "GET required");
     if (*con_cls == NULL)
     {
+        if (!strcmp(method, "POST") && !strcmp(url, "/api/script/run"))
+        {
+            script_request = calloc(1, sizeof *script_request);
+            if (script_request == NULL)
+                return http_queue_text(connection, MHD_HTTP_INTERNAL_SERVER_ERROR, "text/plain",
+                                       "out of memory");
+            *con_cls = script_request;
+            return MHD_YES;
+        }
+        if (!strcmp(method, "POST") && !strcmp(url, "/api/app/stop"))
+        {
+            *con_cls = (void *)2;
+            return MHD_YES;
+        }
         *con_cls = (void *)1;
         return MHD_YES;
     }
+    if (*con_cls == (void *)2)
+    {
+        *upload_data_size = 0;
+        return app_stop_response(connection);
+    }
+    if (*con_cls != (void *)1)
+    {
+        script_request = *con_cls;
+        if (*upload_data_size != 0)
+        {
+            if (script_request->source_length + *upload_data_size > SCRIPT_SOURCE_CAPACITY)
+                script_request->oversized = 1;
+            else if (memchr(upload_data, '\0', *upload_data_size) != NULL)
+                script_request->invalid = 1;
+            else
+            {
+                memcpy(script_request->source + script_request->source_length, upload_data,
+                       *upload_data_size);
+                script_request->source_length += *upload_data_size;
+            }
+            *upload_data_size = 0;
+            return MHD_YES;
+        }
+        if (script_request->invalid)
+            return http_queue_text(connection, MHD_HTTP_BAD_REQUEST, "text/plain",
+                                   "script body contains a NUL byte");
+        if (script_request->oversized)
+            return http_queue_text(connection, MHD_HTTP_CONTENT_TOO_LARGE, "text/plain",
+                                   "script body exceeds 65536 bytes");
+        script_request->source[script_request->source_length] = '\0';
+        return script_run_response(connection, script_request);
+    }
+    if (strcmp(method, "GET") != 0)
+        return http_queue_text(connection, MHD_HTTP_BAD_REQUEST, "text/plain", "GET required");
     if (*upload_data_size != 0)
     {
         *upload_data_size = 0;
@@ -662,6 +785,10 @@ enum MHD_Result web_access_handler(void *cls, struct MHD_Connection *connection,
         return http_static_file_response(connection, "/data/python/web/app.css", "text/css");
     if (!strcmp(target, "/app.js"))
         return http_static_file_response(connection, "/data/python/web/app.js",
+                                         "application/javascript");
+    if (!strcmp(target, "/vendor/highlight.js/highlight.min.js"))
+        return http_static_file_response(connection,
+                                         "/data/python/web/vendor/highlight.js/highlight.min.js",
                                          "application/javascript");
     if (!strcmp(target, "/api/apps"))
         return app_list_response(connection);

@@ -11,14 +11,20 @@ python-web.elf
  ├── CPython app runner
  ├── persistent CPython WebREPL session
  └── stdout/stderr log buffer
+
+python-app-supervisor.elf
+ ├── local TCP control socket
+ ├── one forked CPython child per application
+ └── targeted stop and waitpid lifecycle
 ```
 
 The browser UI is kept outside the ELF in the tracked web/ directory:
 web/index.html, web/app.css, web/app.js, and the vendored Highlight.js asset
 under web/vendor/highlight.js/.
 Deployment uploads these files to /data/python/web/. The native server only
-serves the static files and owns the API/runtime boundary, so the UI can be
-restyled or extended without rebuilding the Python runtime.
+serves the static files, including the Highlight.js asset, and owns the
+API/runtime boundary, so the UI can be restyled or extended without rebuilding
+the Python runtime.
 
 The script editor and active WebREPL input use the locally vendored
 Highlight.js Python grammar. Highlighting is rendered in a read-only layer over
@@ -74,6 +80,11 @@ The launcher is uploaded to:
 /data/python/runtime/python-web.elf
 ```
 
+The deployment also uploads and starts `python-app-supervisor.elf`. It listens
+only on `127.0.0.1` at `PS5_WEB_PORT + 2` by default; override that port with
+`PS5_APP_SUPERVISOR_PORT` when needed. Packaged applications run through this
+supervisor and receive their own native PID.
+
 The build also emits `build/ps5/python-web-test.elf`, a separate test-only
 copy of the launcher. Use `tools/run_ps5_web_test.sh` to deploy that artifact;
 it defaults to port `9601`, leaving the production-named ELF and its port
@@ -93,8 +104,10 @@ application log and through `/api/logs`.
 | --- | --- |
 | `/` | Browser manager page |
 | `/api/apps` | Lists app IDs and display names |
-| `/api/status` | Reports the launcher PID, launch state, exit code, and TCP REPL port |
+| `/api/status` | Reports launcher/app PIDs, launch state, exit code, and TCP REPL port |
 | `/api/launch?app=hello` | Starts one app bundle |
+| `POST /api/app/stop` | Stops the active application child |
+| `POST /api/script/run` | Runs a bounded script body in the persistent interpreter |
 | `/api/logs?since=0` | Returns new stdout/stderr bytes and `X-Log-Next` |
 | `/api/logs/clear` | Clears the server-side log buffer and connected consoles |
 | `/api/repl/reset` | Restarts the embedded interpreter and clears its globals |
@@ -109,7 +122,7 @@ automation, but is not used as a browser refresh loop.
 
 WebSocket messages are JSON objects. Log events have the form
 `{"type":"log","data":"..."}`; status events contain `type`, `running`,
-`pid`, `finished`, and `exit_code` fields. A newly connected browser receives the
+`pid`, `app_pid`, `finished`, and `exit_code` fields. A newly connected browser receives the
 current status and buffered output before live events.
 
 ## Interactive interpreter
@@ -151,11 +164,11 @@ including empty lines, and returns raw stdout/stderr or expression display text
 followed by the next `>>>` prompt. It is intended for trusted LAN use and does
 not provide authentication or encryption.
 
-`sys.exit()` is contained by the embedded runtime: the client receives
-`SystemExit` and a fresh prompt, while the launcher ELF and other sessions keep
-running. A bare `exit` is not automatically installed in this isolated build;
-it behaves like any other unresolved Python name unless the user imports or
-defines it.
+`exit()`, `quit()`, and `sys.exit()` restart the embedded interpreter and
+return a fresh prompt. The launcher ELF and its control plane keep running, but
+all persistent `__main__` globals are cleared. The WebSocket manager broadcasts
+the reset to connected browser sessions, while the HTTP script route reports
+`restarted: true`.
 
 The protocol comparison and compatibility boundary for the reference
 implementations are recorded in
@@ -168,12 +181,13 @@ use the test-only helper documented in
 [`docs/ps5-process-recovery.md`](ps5-process-recovery.md). The helper requires
 an already-known PID and does not enumerate or broadcast signals.
 
-The manager runs one app at a time. After an app exits, the same page can launch
-it again or select another app; the output buffer is reset for each run and
-after the final exit message, so finished-app logs are not replayed to a new
-portal visit. The Clear button also clears the server buffer and all connected
-browser consoles. While an app is running, including a long-lived daemon, its
-live output remains available.
+The manager runs one app at a time. The separate app supervisor forks the
+selected entry point, forwards its output, and reports its PID and exit state.
+The Stop button sends a targeted stop request; the supervisor sends `SIGTERM`,
+waits three seconds, and then uses `SIGKILL` if necessary. After an app exits,
+the same page can launch it again or select another app. The Clear button also
+clears the server buffer and all connected browser consoles. While an app is
+running, including a long-lived daemon, its live output remains available.
 
 ## Script workspace
 
@@ -182,20 +196,32 @@ interactive REPL. Paste or write a Python program in the editor and select
 **Run script**, or press Ctrl+Enter. The result appears in the adjacent output
 pane, and unsaved edits are marked in the editor header.
 
-This first editor increment sends the source through the existing WebSocket
-REPL boundary and evaluates it in the persistent launcher interpreter. It does
-not yet save files, expose a workspace browser, create an isolated job, or
-provide a Stop action. Those controls remain part of the dedicated script
-runner roadmap; a script can be restarted or cleared from the editor without
-affecting the interactive REPL transcript.
+The editor sends a `text/plain` `POST` body to `/api/script/run`. The launcher
+accepts at most 65,536 source bytes, rejects embedded NUL bytes, evaluates the
+source under the same runtime mutex as the WebREPL, and returns JSON in this
+form:
 
-Long-lived apps are currently an experimental in-process mode: the entry point
-runs on a native worker thread in the same `python-web.elf` CPython runtime.
-This is sufficient for a packaged Flask/Werkzeug app or the supported
-synchronous Gunicorn path to serve requests, but there is no UI stop/restart
-control, readiness health check, or crash isolation yet. The planned daemon
-supervisor, manifest, and dedicated worker process are described in
-[`roadmap.md`](../roadmap.md#p0p1--long-running-daemons-and-web-services).
+```json
+{"ok":true,"restarted":false,"data":"hello\\n","source_bytes":15}
+```
+
+Python exceptions return HTTP 200 with `ok: false` and the captured traceback
+in `data`; malformed or oversized requests return an HTTP error. The script
+shares the persistent `__main__` globals with the browser and raw TCP REPL, so
+values created by one surface are visible to the others. Execution is
+synchronous and bounded by the HTTP request; it is not yet an isolated job and
+there is no Stop action.
+
+The editor still does not save files, expose a workspace browser, or provide
+file-backed New/Open/Save actions. Those controls, plus job-level elapsed time,
+exit state, and cooperative stopping, remain part of the dedicated script
+runner roadmap.
+
+Long-lived apps run in an isolated child process managed by
+`python-app-supervisor.elf`. The supervisor forwards output, reports the child
+PID and exit status, and stops only the PID it created. The current service
+contract still allows one active app and does not yet provide readiness probes
+or automatic restart policy. The interpreter remains in `python-web.elf`.
 
 ## Automated validation
 
@@ -207,8 +233,10 @@ PS5_HOST=192.168.4.30 PS5_WEB_CHECK=1 make ps5-web
 
 This lists the apps, starts `hello`, fetches its live output, and shuts down
 the manager. It also evaluates `print(123)` and `1 + 1` through both the
-embedded WebREPL and the raw TCP REPL. Input is line-terminated before
-evaluation, and expression results are captured explicitly so clients behave
+embedded WebREPL and the raw TCP REPL, then posts a complete script through
+`/api/script/run` and verifies its shared interpreter state. Input is
+line-terminated before evaluation, and expression results are captured
+explicitly so clients behave
 like an interactive prompt. A direct WebSocket handshake can be verified
 separately against
 `ws://<PS5-IP>:8090/ws` with `tools/check_web_repl.py`.

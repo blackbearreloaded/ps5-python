@@ -13,12 +13,32 @@
 #include "cpython_runtime.h"
 
 PyMODINIT_FUNC PyInit__codecs(void);
+PyMODINIT_FUNC PyInit__cpython_ps5_control(void);
 
 static pthread_mutex_t runtime_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t runtime_job_mutex = PTHREAD_MUTEX_INITIALIZER;
 static int runtime_active;
 static PyInterpreterState *runtime_interpreter;
 static PyThreadState *runtime_main_state;
+static int runtime_job_active;
+static int runtime_job_stop_requested;
 static int codecs_registered;
+static int control_module_registered;
+
+static PyObject *cpython_ps5_exit(PyObject *self, PyObject *args)
+{
+    PyObject *value = Py_None;
+
+    (void)self;
+    if (PyTuple_GET_SIZE(args) > 0)
+        value = PyTuple_GET_ITEM(args, 0);
+    PyErr_SetObject(PyExc_SystemExit, value);
+    return NULL;
+}
+
+static PyMethodDef cpython_ps5_exit_method = {
+    "exit", cpython_ps5_exit, METH_VARARGS, "Restart the embedded interpreter."
+};
 
 static long cpython_ps5_peak_rss(void)
 {
@@ -77,6 +97,26 @@ static int append_runtime_path(const char *path)
     return result;
 }
 
+static int install_exit_helpers(void)
+{
+    PyObject *builtins = PyEval_GetBuiltins();
+    PyObject *exit_function;
+
+    if (builtins == NULL)
+        return -1;
+    exit_function = PyCFunction_NewEx(&cpython_ps5_exit_method, NULL, NULL);
+    if (exit_function == NULL)
+        return -1;
+    if (PyDict_SetItemString(builtins, "exit", exit_function) != 0 ||
+        PyDict_SetItemString(builtins, "quit", exit_function) != 0)
+    {
+        Py_DECREF(exit_function);
+        return -1;
+    }
+    Py_DECREF(exit_function);
+    return 0;
+}
+
 static int runtime_initialize(const cpython_run_options_t *options)
 {
     PyConfig config;
@@ -102,6 +142,12 @@ static int runtime_initialize(const cpython_run_options_t *options)
             return -1;
         codecs_registered = 1;
     }
+    if (!control_module_registered)
+    {
+        if (PyImport_AppendInittab("_cpython_ps5_control", PyInit__cpython_ps5_control) != 0)
+            return -1;
+        control_module_registered = 1;
+    }
     if (append_module_path(&config, runtime_path) != 0)
     {
         PyConfig_Clear(&config);
@@ -115,6 +161,13 @@ static int runtime_initialize(const cpython_run_options_t *options)
     runtime_interpreter = PyInterpreterState_Get();
     if (runtime_interpreter == NULL)
     {
+        Py_Finalize();
+        return -1;
+    }
+    if (install_exit_helpers() != 0)
+    {
+        PyErr_PrintEx(0);
+        runtime_interpreter = NULL;
         Py_Finalize();
         return -1;
     }
@@ -134,11 +187,8 @@ int cpython_ps5_runtime_start(const cpython_run_options_t *options)
     return result;
 }
 
-int cpython_ps5_runtime_reset(const cpython_run_options_t *options)
+static void runtime_finalize_locked(void)
 {
-    int result;
-
-    pthread_mutex_lock(&runtime_mutex);
     if (runtime_active)
     {
         PyEval_RestoreThread(runtime_main_state);
@@ -147,6 +197,14 @@ int cpython_ps5_runtime_reset(const cpython_run_options_t *options)
         runtime_active = 0;
         Py_Finalize();
     }
+}
+
+int cpython_ps5_runtime_reset(const cpython_run_options_t *options)
+{
+    int result;
+
+    pthread_mutex_lock(&runtime_mutex);
+    runtime_finalize_locked();
     result = runtime_initialize(options);
     pthread_mutex_unlock(&runtime_mutex);
     return result;
@@ -155,14 +213,7 @@ int cpython_ps5_runtime_reset(const cpython_run_options_t *options)
 void cpython_ps5_runtime_stop(void)
 {
     pthread_mutex_lock(&runtime_mutex);
-    if (runtime_active)
-    {
-        PyEval_RestoreThread(runtime_main_state);
-        runtime_main_state = NULL;
-        runtime_interpreter = NULL;
-        runtime_active = 0;
-        Py_Finalize();
-    }
+    runtime_finalize_locked();
     pthread_mutex_unlock(&runtime_mutex);
 }
 
@@ -181,6 +232,73 @@ static void runtime_detach_thread(PyThreadState *thread_state)
 {
     PyThreadState_Clear(thread_state);
     PyThreadState_DeleteCurrent();
+}
+
+static void runtime_job_start(PyThreadState *thread_state)
+{
+    (void)thread_state;
+    pthread_mutex_lock(&runtime_job_mutex);
+    runtime_job_active = 1;
+    pthread_mutex_unlock(&runtime_job_mutex);
+}
+
+static int runtime_job_should_stop(void)
+{
+    int requested;
+
+    pthread_mutex_lock(&runtime_job_mutex);
+    requested = runtime_job_stop_requested;
+    pthread_mutex_unlock(&runtime_job_mutex);
+    return requested;
+}
+
+static void runtime_job_end(void)
+{
+    pthread_mutex_lock(&runtime_job_mutex);
+    runtime_job_active = 0;
+    runtime_job_stop_requested = 0;
+    pthread_mutex_unlock(&runtime_job_mutex);
+}
+
+static PyObject *cpython_ps5_stop_requested(PyObject *self, PyObject *args)
+{
+    (void)self;
+    (void)args;
+    if (runtime_job_should_stop())
+        Py_RETURN_TRUE;
+    Py_RETURN_FALSE;
+}
+
+static PyMethodDef cpython_ps5_control_methods[] = {
+    {"stop_requested", cpython_ps5_stop_requested, METH_NOARGS,
+     "Return whether the current app has received a stop request."},
+    {NULL, NULL, 0, NULL},
+};
+
+static struct PyModuleDef cpython_ps5_control_module = {
+    PyModuleDef_HEAD_INIT,
+    "_cpython_ps5_control",
+    NULL,
+    -1,
+    cpython_ps5_control_methods,
+};
+
+PyMODINIT_FUNC PyInit__cpython_ps5_control(void)
+{
+    return PyModule_Create(&cpython_ps5_control_module);
+}
+
+int cpython_ps5_runtime_request_stop(void)
+{
+    int active;
+
+    pthread_mutex_lock(&runtime_job_mutex);
+    runtime_job_stop_requested = 1;
+    active = runtime_job_active;
+    pthread_mutex_unlock(&runtime_job_mutex);
+    if (!active)
+        return 1;
+    return 0;
 }
 
 static int runtime_is_active(void)
@@ -228,6 +346,7 @@ static int evaluate_source_locked(const char *source, char *output, size_t outpu
     size_t source_length;
     int single_line;
     int failed = 0;
+    int restart_requested = 0;
 
     if (!runtime_active || source == NULL || output == NULL || output_size == 0)
         return -1;
@@ -287,7 +406,9 @@ static int evaluate_source_locked(const char *source, char *output, size_t outpu
         if (PyErr_ExceptionMatches(PyExc_SystemExit))
         {
             PyErr_Clear();
-            write_result = PyObject_CallMethod(capture, "write", "s", "SystemExit\n");
+            restart_requested = 1;
+            write_result = PyObject_CallMethod(capture, "write", "s",
+                                               "Interpreter restarted\n");
             if (write_result == NULL)
                 PyErr_Clear();
         }
@@ -342,7 +463,7 @@ restore:
     Py_XDECREF(io);
     free(source_text);
     runtime_detach_thread(thread_state);
-    return failed;
+    return restart_requested ? CPYTHON_PS5_RUNTIME_RESTARTED : failed;
 }
 
 int cpython_ps5_runtime_eval(const char *source, char *output, size_t output_size)
@@ -351,6 +472,16 @@ int cpython_ps5_runtime_eval(const char *source, char *output, size_t output_siz
 
     pthread_mutex_lock(&runtime_mutex);
     result = evaluate_source_locked(source, output, output_size);
+    if (result == CPYTHON_PS5_RUNTIME_RESTARTED)
+    {
+        runtime_finalize_locked();
+        if (runtime_initialize(NULL) != 0)
+        {
+            result = -1;
+            if (output_size > 0)
+                (void)snprintf(output, output_size, "Interpreter restart failed\n");
+        }
+    }
     pthread_mutex_unlock(&runtime_mutex);
     return result;
 }
@@ -363,11 +494,12 @@ int cpython_ps5_run_file(const char *script_path, const cpython_run_options_t *o
     char message[320];
     PyThreadState *thread_state;
     PyObject *main_module;
-    PyObject *main_globals;
+    PyObject *main_globals = NULL;
     PyObject *file_name;
     PyObject *run_result;
     long peak_rss;
     int persistent;
+    int job_started = 0;
     int result = 0;
 
     if (script_path == NULL || script_path[0] == '\0')
@@ -419,6 +551,8 @@ int cpython_ps5_run_file(const char *script_path, const cpython_run_options_t *o
         cpython_ps5_notify("CPYTHON THREAD STATE FAIL");
         return 1;
     }
+    runtime_job_start(thread_state);
+    job_started = 1;
     if (options != NULL && (append_runtime_path(options->app_root_path) != 0 ||
                             append_runtime_path(options->app_lib_path) != 0))
     {
@@ -437,23 +571,46 @@ int cpython_ps5_run_file(const char *script_path, const cpython_run_options_t *o
         result = 1;
         goto done;
     }
-    run_result = PyRun_StringFlags(script_source, Py_file_input, main_globals, main_globals, NULL);
+    if (runtime_job_should_stop())
+    {
+        PyErr_SetNone(PyExc_KeyboardInterrupt);
+        run_result = NULL;
+    }
+    else
+        run_result = PyRun_StringFlags(script_source, Py_file_input, main_globals, main_globals, NULL);
     Py_DECREF(file_name);
     if (run_result == NULL || PyErr_Occurred())
     {
-        PyErr_PrintEx(0);
+        if (runtime_job_should_stop() && PyErr_ExceptionMatches(PyExc_KeyboardInterrupt))
+        {
+            PyErr_Clear();
+            result = CPYTHON_PS5_RUNTIME_STOPPED;
+        }
+        else
+        {
+            PyErr_PrintEx(0);
+            result = 1;
+        }
         Py_XDECREF(run_result);
-        result = 1;
         goto done;
     }
     Py_DECREF(run_result);
 
 done:
+    if (job_started)
+    {
+        runtime_job_end();
+    }
     runtime_detach_thread(thread_state);
     pthread_mutex_unlock(&runtime_mutex);
     free(script_source);
     if (!persistent)
         cpython_ps5_runtime_stop();
+    if (result == CPYTHON_PS5_RUNTIME_STOPPED)
+    {
+        cpython_ps5_notify("CPYTHON STOPPED");
+        return result;
+    }
     if (result != 0)
     {
         cpython_ps5_notify("CPYTHON SCRIPT FAIL");

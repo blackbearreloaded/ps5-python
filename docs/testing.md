@@ -63,3 +63,18 @@ When this project becomes a native app, choose the path by lifetime:
 The exact writable paths remain app/sandbox-dependent on the target system;
 the table is a design choice for this project, not a claim that every PS5
 process can write every path.
+
+## Web launcher checks
+
+`PS5_WEB_CHECK=1 make ps5-web` now validates the HTTP script backend in
+addition to the WebSocket and raw TCP REPL paths. It posts a bounded complete
+script to `/api/script/run`, checks the captured output and byte count, then
+confirms that a variable created by the HTTP request is visible through the
+WebSocket REPL.
+
+The web deployment also starts `python-app-supervisor.elf`. Application
+validation should confirm that `/api/launch` returns an `app_pid` different
+from the launcher `pid`, that `/api/status` remains responsive while a
+long-running app is active, and that `POST /api/app/stop` reaches the final
+`stopped` state with exit code 130. The existing `time_demo` app is the bounded
+manual stop test.

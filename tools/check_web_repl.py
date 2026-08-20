@@ -7,7 +7,7 @@ import json
 import os
 import socket
 import struct
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 
 
 def frame(payload, opcode=1):
@@ -64,11 +64,29 @@ def evaluate(connection, pending, source, expected, ok=True, forbidden=()):
         return pending
 
 
+def restart_interpreter(connection, pending, source):
+    connection.sendall(frame(source if source.endswith("\n") else source + "\n"))
+    while True:
+        opcode, payload, pending = read_frame(connection, pending)
+        if opcode != 1:
+            continue
+        event = json.loads(payload.decode())
+        if event.get("type") == "repl_reset":
+            return pending
+        if event.get("type") == "repl":
+            raise AssertionError(f"exit did not restart interpreter: {event!r}")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--host", required=True)
     parser.add_argument("--port", type=int, required=True)
     args = parser.parse_args()
+    with urlopen(f"http://{args.host}:{args.port}/vendor/highlight.js/highlight.min.js",
+                 timeout=5) as response:
+        highlight_asset = response.read(64)
+    if b"highlight" not in highlight_asset.lower():
+        raise AssertionError("highlight asset was not served")
     key = base64.b64encode(os.urandom(16)).decode()
     expected = base64.b64encode(
         hashlib.sha1((key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").encode()).digest()
@@ -100,8 +118,19 @@ def main():
             pending = evaluate(
                 connection, pending, "", "", forbidden=("SyntaxError",)
             )
-        pending = evaluate(connection, pending, "import sys; sys.exit()",
-                           "SystemExit", ok=False)
+        pending = restart_interpreter(connection, pending, "exit()")
+        pending = evaluate(
+            connection, pending,
+            'globals().get("exit_reset_marker", "missing")',
+            "'missing'",
+        )
+        pending = evaluate(connection, pending, "exit_reset_marker = 42", "")
+        pending = restart_interpreter(connection, pending, "import sys; sys.exit()")
+        pending = evaluate(
+            connection, pending,
+            'globals().get("exit_reset_marker", "missing")',
+            "'missing'",
+        )
         pending = evaluate(connection, pending, "webrepl_reset_marker = 42", "")
         with urlopen(f"http://{args.host}:{args.port}/api/repl/reset", timeout=5) as response:
             reset = json.load(response)
@@ -112,6 +141,20 @@ def main():
             'globals().get("webrepl_reset_marker", "missing")',
             "'missing'",
         )
+        script_source = b'print("script api")\nscript_backend_marker = 42\n'
+        script_request = Request(
+            f"http://{args.host}:{args.port}/api/script/run",
+            data=script_source,
+            headers={"Content-Type": "text/plain; charset=utf-8"},
+            method="POST",
+        )
+        with urlopen(script_request, timeout=5) as response:
+            script_result = json.load(response)
+        if (script_result.get("ok") is not True or
+                "script api" not in script_result.get("data", "") or
+                script_result.get("source_bytes") != len(script_source)):
+            raise AssertionError(f"script API failed: {script_result!r}")
+        pending = evaluate(connection, pending, "script_backend_marker", "42")
         connection.sendall(frame(b"", opcode=8))
     print("WEBREPL_CHECK: PASS")
 

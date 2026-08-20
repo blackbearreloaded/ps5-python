@@ -8,8 +8,13 @@ typedef struct cpython_run_options {
     const char *app_lib_path;
 } cpython_run_options_t;
 
+#define CPYTHON_PS5_RUNTIME_RESTARTED 1
+#define CPYTHON_PS5_RUNTIME_STOPPED 2
+
 int cpython_ps5_run_file(const char *script_path,
                          const cpython_run_options_t *options);
+/* Request a cooperative KeyboardInterrupt in the currently running app. */
+int cpython_ps5_runtime_request_stop(void);
 
 /* Persistent interpreter services used by the web launcher. */
 int cpython_ps5_runtime_start(const cpython_run_options_t *options);

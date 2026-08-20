@@ -1,5 +1,5 @@
 (() => {
-  const state = { launching: false, selectedId: null,
+  const state = { launching: false, selectedId: null, jobId: 0,
     socket: null, socketConnected: false, fallbackTimer: null,
     view: "apps", replBusy: false, scriptBusy: false, scriptDirty: false,
     replCommandOpen: false,
@@ -12,6 +12,7 @@
   const exitCode = document.getElementById("exit-code");
   const refreshButton = document.getElementById("refresh-apps");
   const clearButton = document.getElementById("clear-output");
+  const stopAppButton = document.getElementById("stop-app");
   const appsSidebar = document.getElementById("apps-sidebar");
   const appConsole = document.getElementById("app-console");
   const replConsole = document.getElementById("repl-console");
@@ -83,7 +84,6 @@
     scriptConsole.classList.toggle("hidden", !script);
     replConsole.setAttribute("aria-hidden", repl ? "false" : "true");
     scriptConsole.setAttribute("aria-hidden", script ? "false" : "true");
-    menuApps.classList.toggle("active", !repl);
     menuApps.classList.toggle("active", view === "apps");
     menuRepl.classList.toggle("active", repl);
     menuScript.classList.toggle("active", script);
@@ -111,18 +111,54 @@
   function setButtonsDisabled(disabled) {
     appsElement.querySelectorAll("button").forEach((button) => { button.disabled = disabled; });
   }
+  function setStopButton(enabled, label = "Stop app") {
+    stopAppButton.disabled = !enabled;
+    stopAppButton.textContent = label;
+  }
   function applyStatus(status) {
-    if (status.running) {
+    const appState = status.state || (status.running ? "running" : status.finished ? "finished" : "idle");
+    if (status.app) {
+      state.selectedId = status.app;
+      titleElement.textContent = status.app;
+    }
+    if (status.job_id) state.jobId = status.job_id;
+    if (appState === "starting") {
+      state.launching = true;
+      setStatus("Starting", "running");
+      exitCode.textContent = "Starting app";
+      setStopButton(true);
+    } else if (appState === "running" || status.running) {
+      state.launching = true;
       setStatus("Running", "running");
       exitCode.textContent = "Streaming output";
-    } else if (status.finished) {
+      setStopButton(true);
+    } else if (appState === "stopping") {
+      state.launching = true;
+      setStatus("Stopping", "running");
+      exitCode.textContent = "Stop requested";
+      setStopButton(true, "Stopping…");
+    } else if (appState === "stopped") {
+      state.launching = false;
+      setStatus("Stopped", "finished");
+      exitCode.textContent = "App stopped";
+      setStopButton(false);
+      setButtonsDisabled(false);
+    } else if (appState === "failed") {
+      state.launching = false;
+      setStatus("Failed", "error");
+      exitCode.textContent = "Exit code " + status.exit_code;
+      setStopButton(false);
+      setButtonsDisabled(false);
+    } else if (appState === "finished" || status.finished) {
+      state.launching = false;
       setStatus("Finished · exit " + status.exit_code, "finished");
       exitCode.textContent = "Exit code " + status.exit_code;
-      state.launching = false;
+      setStopButton(false);
       setButtonsDisabled(false);
     } else if (!state.launching) {
       setStatus(state.socketConnected ? "Live link" : "Ready", "ready");
       exitCode.textContent = "Waiting for a run";
+      setStopButton(false);
     }
   }
   function appendRepl(text) {
@@ -188,10 +224,12 @@
     if (state.launching) return;
     state.launching = true;
     state.selectedId = app.id;
+    state.jobId = 0;
     titleElement.textContent = app.name;
     exitCode.textContent = "Running";
     setOutput("[launcher] starting " + app.id + "\n");
     setStatus("Starting", "running");
+    setStopButton(true);
     setButtonsDisabled(true);
     try {
       const response = await fetch("/api/launch?app=" + encodeURIComponent(app.id));
@@ -200,12 +238,28 @@
         state.launching = false;
         setButtonsDisabled(false);
         setStatus("Launch failed", "error");
+        setStopButton(false);
       }
     } catch (error) {
       appendOutput("[launcher] request failed: " + error + "\n");
       state.launching = false;
       setButtonsDisabled(false);
       setStatus("Launch failed", "error");
+      setStopButton(false);
+    }
+  }
+  async function stopRunningApp() {
+    if (!state.launching) return;
+    setStopButton(true, "Stopping…");
+    setStatus("Stopping", "running");
+    exitCode.textContent = "Stop requested";
+    try {
+      const response = await fetch("/api/app/stop", { method: "POST" });
+      if (!response.ok) throw new Error(await response.text());
+    } catch (error) {
+      setStatus("Stop failed", "error");
+      exitCode.textContent = String(error);
+      setStopButton(true);
     }
   }
   function handleSocketMessage(message) {
@@ -276,7 +330,7 @@
         setStatus("Live link", "ready");
         replConnection.textContent = "WebREPL connected";
         replConnection.className = "repl-hint repl-connected";
-        scriptRuntime.textContent = "WebREPL connected";
+        scriptRuntime.textContent = "Launcher connected";
       };
       socket.onmessage = (event) => handleSocketMessage(event.data);
       socket.onerror = () => socket.close();
@@ -290,13 +344,13 @@
         setStatus("Live link unavailable", "error");
         replConnection.textContent = "WebREPL requires the live WebSocket";
         replConnection.className = "repl-hint repl-error";
-        scriptRuntime.textContent = "WebSocket unavailable";
+        scriptRuntime.textContent = "Script runner uses HTTP";
       };
     } catch (error) {
       setStatus("Live link unavailable", "error");
       replConnection.textContent = "WebREPL requires the live WebSocket";
       replConnection.className = "repl-hint repl-error";
-      scriptRuntime.textContent = "WebSocket unavailable";
+      scriptRuntime.textContent = "Script runner uses HTTP";
     }
   }
   refreshButton.addEventListener("click", refreshApps);
@@ -310,6 +364,7 @@
       exitCode.textContent = "Clear failed: " + error;
     }
   });
+  stopAppButton.addEventListener("click", stopRunningApp);
   replForm.addEventListener("submit", (event) => {
     event.preventDefault();
     const source = replInput.value;
@@ -367,8 +422,8 @@
   replInput.addEventListener("input", resizeReplInput);
   function runScript() {
     if (state.scriptBusy) return;
-    if (!state.socketConnected || state.socket === null) {
-      scriptStatus.textContent = "WebSocket unavailable";
+    if (state.replBusy) {
+      scriptStatus.textContent = "Interpreter busy";
       scriptStatus.className = "repl-hint repl-error";
       return;
     }
@@ -382,11 +437,48 @@
     scriptRun.disabled = true;
     scriptStatus.textContent = "Running…";
     scriptStatus.className = "repl-hint";
-    scriptRuntime.textContent = "Evaluating complete script…";
+    scriptRuntime.textContent = "Sending script to launcher…";
     scriptOutput.textContent = "";
-    state.scriptDirty = false;
-    scriptDirty.textContent = "Saved";
-    state.socket.send(source.endsWith("\n") ? source : source + "\n");
+    fetch("/api/script/run", {
+      method: "POST",
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
+      body: source.endsWith("\n") ? source : source + "\n"
+    }).then(async (response) => {
+      const responseText = await response.text();
+      let event;
+      try {
+        event = JSON.parse(responseText);
+      } catch (error) {
+        if (!response.ok) throw new Error(responseText || "HTTP " + response.status);
+        throw new Error("invalid launcher response");
+      }
+      if (!response.ok) throw new Error(event.data || responseText || "HTTP " + response.status);
+      scriptOutput.textContent = event.data || "(script completed without output)";
+      if (event.restarted) {
+        resetReplPrompt();
+        replInput.value = "";
+        resizeReplInput();
+        state.replHistory = [];
+        state.replHistoryIndex = -1;
+        scriptStatus.textContent = "Interpreter restarted";
+        scriptStatus.className = "repl-hint repl-connected";
+        scriptRuntime.textContent = "Interpreter restarted";
+      } else {
+        scriptStatus.textContent = event.ok ? "Completed" : "Failed";
+        scriptStatus.className = event.ok ? "repl-hint repl-connected" : "repl-hint repl-error";
+        scriptRuntime.textContent = event.ok ? "Script finished" : "Script raised an exception";
+      }
+      state.scriptDirty = false;
+      scriptDirty.textContent = "Last run";
+    }).catch((error) => {
+      scriptOutput.textContent = String(error);
+      scriptStatus.textContent = "Backend unavailable";
+      scriptStatus.className = "repl-hint repl-error";
+      scriptRuntime.textContent = "Script request failed";
+    }).finally(() => {
+      state.scriptBusy = false;
+      scriptRun.disabled = false;
+    });
   }
   scriptRun.addEventListener("click", runScript);
   scriptInput.addEventListener("input", () => {
@@ -408,7 +500,7 @@
     renderHighlight("", scriptHighlight);
     scriptOutput.textContent = "Paste a complete Python script above, then run it here.";
     state.scriptDirty = false;
-    scriptDirty.textContent = "Saved";
+    scriptDirty.textContent = "Draft";
     scriptStatus.textContent = "Ready";
     scriptStatus.className = "repl-hint";
   });
