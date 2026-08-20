@@ -33,6 +33,7 @@ native extension paths are outside the current PS5 payload contract.
 
 | Document | Purpose |
 | --- | --- |
+| [Project status](docs/status.md) | Concise implementation, verification, and limitation matrix |
 | [Standard-library status](docs/stdlib-status.md) | Coverage inventory, tested APIs, omissions, and upstream-derived checks |
 | [PS5 limitations](docs/ps5-limitations.md) | Platform, kernel, SDK, GUI, PTY, subprocess, and packaging boundaries |
 | [Web launcher guide](docs/web-launcher.md) | Browser manager, API, app lifecycle, arguments, and deployment |
@@ -65,90 +66,13 @@ builds or bundled dependencies.
 
 ## Status
 
-Core scaffold started. The pinned CPython checkout is kept outside Git under
-`upstream/cpython`; run `make source-fetch` to recreate it. The host-side
-language-core suite and its PS5 aggregate run pass. The PS5 core ELF and
-static library build with WSL and the installed PS5 SDK.
-
-The current CPython 3.14.7 runtime bundle includes the official
-`threading.py`, `concurrent.futures.ThreadPoolExecutor`, and supported
-`multiprocessing` wrappers. Thread pools and `multiprocessing.Pipe` are
-verified on PS5; Queue/Semaphore, POSIX `SharedMemory`, and
-`ProcessPoolExecutor` remain unavailable because the standard subprocess
-launch path is still unsupported. The web launcher now has a separate,
-project-specific app supervisor for packaged applications; it does not change
-the general stdlib subprocess contract. See
-[`docs/stdlib-status.md`](docs/stdlib-status.md) for the per-module contract.
-The same bundle includes `pathlib.Path` and `tempfile`; the PS5 launcher
-defaults temporary files to the managed `/user/temp` directory, which is
-cleaned on restart.
-It also includes the official `typing.py` dependency closure (`annotationlib`,
-`ast`, and `keyword`) and `datetime.py` over native `_typing` and `_datetime`;
-the timezone database remains outside the current subset.
-Tier 2 utility modules are also bundled from the same CPython 3.14.7 pin,
-including `argparse`, `logging`, `shutil`, `random`, `copy`, `enum`, `csv`,
-`unittest`, `subprocess` (import-only on PS5), `urllib`, `hashlib`, `io`,
-`traceback`, and `pprint`; their individual omissions are tracked in
-[`docs/stdlib-status.md`](docs/stdlib-status.md).
-Tier 3 concurrency and networking modules are now included as well: official
-`asyncio`, `threading`, `multiprocessing`, and `concurrent.futures` wrappers,
-plus the native-backed `socket`, `ssl`, `http`, `queue`, `select`, and `signal`
-surfaces. Async event loops and IPv4 socket readiness are verified on PS5;
-process pools, child-process transports, IPv6, and certificate verification
-remain platform-limited as documented.
-Tier 4 data structures and formats are also included: static SQLite 3.46.1,
-static zlib 1.3.1, `pickle`, `struct`, `bisect`, `heapq`, `array`, `operator`,
-`decimal`, `fractions`, `zlib`, `gzip`, `bz2`, `lzma`, `zipfile`, `tarfile`,
-`base64`, XML, `tempfile`, `glob`, and `fnmatch`. bzip2 1.0.8 and xz/liblzma
-5.6.3 are statically linked for the tested compression subset.
-Tier 5 metaprogramming and inspection modules are included as well: `inspect`,
-`ast`, `dis`, `importlib`, `abc`, `contextlib`, `gc`, `site`, `sysconfig`,
-`weakref`, `codecs`, and `types`. Their PS5-specific startup and source-layout
-limits are recorded in the standard-library status report.
-Tier 6 security, text, and POSIX utilities are included too: `secrets`, `hmac`,
-`getpass`, `gettext`, `locale`, `unicodedata`, `string`, `textwrap`, `difflib`,
-`mimetypes`, `uuid`, `stat`, `filecmp`, `termios`, `tty`, `fcntl`, and
-`resource`. Windows-only modules are intentionally excluded.
-Tier 7 developer tools are included as well: `pdb`, `timeit`, `cProfile`,
-`profile`, `pstats`, `tracemalloc`, `doctest`, `py_compile`, `compileall`,
-`code`, `codeop`, `readline`, and `rlcompleter`. PS5 uses a compatibility
-readline layer without GNU/editline native line editing.
-Tier 8's feasible utility subset is included too: `graphlib`, `statistics`,
-`cmath`, `ipaddress`, `colorsys`, `calendar`, `zoneinfo`, `wave`, `binascii`,
-`ftplib`, `poplib`, `imaplib`, `smtplib`, `mailbox`, `email`, `shelve`, and
-pure `dbm.dumb`. Named timezone data is not bundled; `tkinter`, `curses`,
-native dbm backends, Windows-only modules, and desktop terminal integrations
-remain outside the PS5 target.
-Tier 9 core and legacy utilities are included where feasible: `__future__`,
-`builtins`, `_thread`, `marshal`, `copyreg`, `cmd`, `shlex`, `optparse`,
-`getopt`, `pydoc`, `webbrowser`, and `symtable`. `turtle` remains omitted
-because it requires the unavailable Tcl/Tk GUI stack; browser and interactive
-terminal launch paths are documented as headless-PS5 limitations.
-The official CPython 3.14.7 `wsgiref` reference server is also bundled.
-Single-process and threaded loopback WSGI requests pass on PS5. Separately,
-the project vendors a constrained third-party web stack: Gunicorn 23.0.0 and
-the Flask 3.1.3 closure (Werkzeug 3.1.8, Jinja2 3.1.6, MarkupSafe 3.0.3,
-ItsDangerous 2.2.0, Click 8.2.1, and Blinker 1.9.0). Their sync serving,
-JSON, Jinja escaping, signed sessions, and Werkzeug WSGI client pass on PS5.
-Daemon/re-exec, Unix-domain sockets, plugin entry points, debug/reloader
-subprocesses, and optional gevent/eventlet workers remain outside the PS5
-contract. See [`docs/web-stack-status.md`](docs/web-stack-status.md).
-
-The pinned `Lib/` inventory currently finds 170 of 189 actual stdlib top-level
-entries in the bundle inventory (about 90% module presence). The raw
-comparison has 190 entries because it also sees `site-packages`. This is not
-an API-parity percentage: individual modules remain subsets, and complete
-upstream regression coverage is still pending. The final deployed bundle
-passes the 68-script PS5 aggregate suite. The remaining 19 entries are
-platform/GUI/PTY/bootstrap/demo items or deliberately unnecessary private
-fallbacks. The complete absent-entry classification is maintained in
-[`docs/stdlib-status.md`](docs/stdlib-status.md).
-
-The browser web launcher deploys a small `python-app-supervisor.elf` alongside
-`python-web.elf`. Packaged applications run as forked child processes with
-separate PIDs and targeted Stop control, while the persistent interpreter and
-script editor remain in the web process. See
-[`docs/web-launcher.md`](docs/web-launcher.md).
+The implementation snapshot is summarized in a table in
+[`docs/status.md`](docs/status.md). In brief, the project builds CPython 3.14.7
+for PS5, passes the 68-script aggregate suite, includes 170 of 189 pinned
+stdlib entries, and provides a browser launcher with independently stoppable
+process-backed applications. Module-level coverage is in
+[`docs/stdlib-status.md`](docs/stdlib-status.md); platform boundaries are in
+[`docs/ps5-limitations.md`](docs/ps5-limitations.md).
 
 ## Build the first PS5 ELF
 
