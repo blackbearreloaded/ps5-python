@@ -52,6 +52,29 @@ The remaining limitations are explicit: ordinary `subprocess` execution,
 process pools, IPv6, GUI/PTY stacks, in-console packaging/bootstrap, and some
 native extension paths are outside the current PS5 payload contract.
 
+### Built-in examples
+
+The release includes these manifest-backed examples. Web apps use the listed
+default port; the regular script app has no listening port.
+
+| Example | Mode | Port | Purpose |
+| --- | --- | ---: | --- |
+| [Flask Dashboard](apps/flask_dashboard) | Web | 9101 | Runtime information, current time, and a JSON health endpoint |
+| [Storage Inspector](apps/storage_inspector) | Web | 9102 | Read-only `/data/python` directory and file browser |
+| [SQLite Notes](apps/sqlite_notes) | Web | 9103 | Persistent notes stored in SQLite |
+| [Network Toolbox](apps/network_toolbox) | Web | 9104 | DNS, TCP connectivity, and HTTP status checks |
+| [LAN File Browser](apps/lan_file_browser) | Web | 9105 | Read-only file browsing and downloads from `/` |
+| [Log Viewer](apps/log_viewer) | Web | 9106 | ShadowMountPlus log selection, tailing, and filtering |
+| [Markdown Documentation](apps/markdown_server) | Web | 9107 | Safe browser view of local Markdown files |
+| [Webhook Inspector](apps/webhook_inspector) | Web | 9108 | Captures and displays the last 25 HTTP requests |
+| [Static Site Starter](apps/static_site) | Web | 9109 | App-local HTML, CSS, JavaScript, and JSON endpoint |
+| [Media Catalog](apps/media_catalog) | Web | 9110 | Read-only `/data` media index grouped by type and size |
+| [System Report](apps/system_report) | Script | — | Prints runtime details and supplied command-line arguments |
+
+The standalone interpreter also includes [`examples/main.py`](examples/main.py)
+as a minimal script-launch example. Each app has its own README with usage
+details, paths, and configuration options.
+
 ## Documentation
 
 | Document | Purpose |
