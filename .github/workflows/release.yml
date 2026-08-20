@@ -67,7 +67,8 @@ jobs:
         shell: bash
         run: |
           set -eu
-          make ps5-core
+          make host-build
+          bash tools/build_ps5.sh core
           bash tools/build_ps5.sh web
 
       - name: Package release assets

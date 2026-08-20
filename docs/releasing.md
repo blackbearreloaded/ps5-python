@@ -62,7 +62,8 @@ git -C "$sdk_source" fetch --depth 1 origin "$sdk_ref"
 git -C "$sdk_source" checkout --detach "$sdk_ref"
 make -C "$sdk_source" DESTDIR="$sdk_dir" install
 export PS5_PAYLOAD_SDK="$sdk_dir"
-make ps5-core
+make host-build
+bash tools/build_ps5.sh core
 bash tools/build_ps5.sh web
 bash tools/package_release.sh v0.1.0
 gh release upload v0.1.0 dist/python-ps5-v0.1.0-* --clobber
