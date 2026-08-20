@@ -1,3 +1,4 @@
+# Build output
 /build/
 /out/
 /dist/
@@ -5,12 +6,44 @@
 *.o
 *.a
 *.so
+*.d
+*.ko
+*.obj
+*.lib
+*.la
+*.lo
+*.so.*
+*.dll
+*.dylib
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+*.ilk
+*.map
+*.exp
+*.gch
+*.pch
+*.dSYM/
+*.su
+*.idb
+*.pdb
+*.dwo
 *.pyc
 __pycache__/
 
 # Local CPython source/build trees can be large; add deliberately after review.
 /upstream/
 
-# Temp.
+# Temporary files and generated kernel-module metadata.
 .temp/
 .tmp/
+.tmp_versions/
+modules.order
+Module.symvers
+Mkfile.old
+dkms.conf
+*.mod*
+*.cmd
