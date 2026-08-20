@@ -292,6 +292,21 @@ Open `http://<PS5-IP>:8090/` in a browser. The arguments are the HTTP port,
 TCP WebREPL port, and local application-supervisor port. Keep the supervisor
 running while using the web launcher.
 
+Connect to the raw TCP WebREPL from WSL, Linux, or macOS with netcat:
+
+```sh
+nc <PS5-IP> 8091
+```
+
+For command history when `rlwrap` is installed:
+
+```sh
+rlwrap nc <PS5-IP> 8091
+```
+
+The prompt accepts one Python source line at a time. Use the second launcher
+argument if you choose a different WebREPL port.
+
 The PS5 configure path uses the FreeBSD compatibility triplet expected by the
 SDK (`x86_64-pc-freebsd`) and the tracked patch in
 `patches/ps5-freebsd-configure.patch`. Optional modules that require a
