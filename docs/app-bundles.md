@@ -117,7 +117,7 @@ make host-app APP=apps/flask_dashboard
 Deploy it to the PS5:
 
 ```sh
-PS5_HOST=192.168.4.30 make ps5-app APP=apps/flask_dashboard
+PS5_HOST="<your-PS5-IP>" make ps5-app APP=apps/flask_dashboard
 ```
 
 The app mode stores the shared interpreter under `/data/python/runtime/` and
