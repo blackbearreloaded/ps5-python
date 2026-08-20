@@ -10,7 +10,7 @@ from serve import serve
 
 app = Flask("media_catalog")
 PORT = 9110
-ROOT = os.path.abspath(os.environ.get("CPYTHONPS5_MEDIA_ROOT", "/data/python"))
+ROOT = os.path.abspath(os.environ.get("CPYTHONPS5_MEDIA_ROOT", "/data"))
 CATEGORIES = {
     "images": {".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp"},
     "video": {".mp4", ".mkv", ".webm", ".avi", ".mov"},

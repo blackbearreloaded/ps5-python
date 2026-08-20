@@ -17,6 +17,7 @@
 #define PATH_CAPACITY 512
 #define APP_JOB_CAPACITY 16
 #define APP_STATUS_CAPACITY 8192
+#define APP_ARGUMENT_CAPACITY 1024
 
 typedef struct app_job
 {
@@ -119,6 +120,7 @@ enum MHD_Result app_list_response(struct MHD_Connection *connection)
             char manifest[PATH_CAPACITY];
             char name[128];
             char entry_script[128];
+            char mode[32];
             if (entry->d_name[0] == '.' || !valid_app_id(entry->d_name))
                 continue;
             snprintf(manifest, sizeof manifest, "/data/python/apps/%s/app.json", entry->d_name);
@@ -126,12 +128,16 @@ enum MHD_Result app_list_response(struct MHD_Connection *connection)
                 continue;
             if (manifest_value(manifest, "name", name, sizeof name) != 0)
                 snprintf(name, sizeof name, "%s", entry->d_name);
+            if (manifest_value(manifest, "mode", mode, sizeof mode) != 0)
+                snprintf(mode, sizeof mode, "web");
             if (!first)
                 at += (size_t)snprintf(body + at, sizeof body - at, ",");
             at += (size_t)snprintf(body + at, sizeof body - at, "{\"id\":\"");
             at = web_json_append(body, at, sizeof body, entry->d_name);
             at += (size_t)snprintf(body + at, sizeof body - at, "\",\"name\":\"");
             at = web_json_append(body, at, sizeof body, name);
+            at += (size_t)snprintf(body + at, sizeof body - at, "\",\"mode\":\"");
+            at = web_json_append(body, at, sizeof body, mode);
             at += (size_t)snprintf(body + at, sizeof body - at, "\"}");
             first = 0;
             if (at + 128 >= sizeof body)
@@ -467,11 +473,23 @@ enum MHD_Result app_launch_response(struct MHD_Connection *connection, const cha
     char app_id[WEB_APP_ID_CAPACITY];
     char manifest[PATH_CAPACITY];
     char entry[128];
+    const char *argument_text;
     app_job_t *job;
     if (query == NULL || strncmp(query, "app=", 4) != 0 || strlen(query + 4) >= sizeof app_id ||
         !valid_app_id(query + 4))
         return text_response(connection, MHD_HTTP_BAD_REQUEST, "invalid app");
     snprintf(app_id, sizeof app_id, "%s", query + 4);
+    argument_text = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "args");
+    if (argument_text != NULL)
+    {
+        if (strlen(argument_text) >= APP_ARGUMENT_CAPACITY)
+            return text_response(connection, MHD_HTTP_URI_TOO_LONG, "arguments too long");
+        for (const char *cursor = argument_text; *cursor != '\0'; cursor++)
+        {
+            if (*cursor == '\r' || *cursor == '\n' || *cursor == '\t')
+                return text_response(connection, MHD_HTTP_BAD_REQUEST, "invalid arguments");
+        }
+    }
     snprintf(manifest, sizeof manifest, "/data/python/apps/%s/app.json", app_id);
     if (manifest_value(manifest, "entry", entry, sizeof entry) != 0 || entry[0] == '/' ||
         strstr(entry, "..") != NULL)
@@ -513,10 +531,11 @@ enum MHD_Result app_launch_response(struct MHD_Connection *connection, const cha
     pthread_mutex_unlock(&jobs_mutex);
     websocket_broadcast_status();
 
-    char line[PATH_CAPACITY * 3 + 16];
+    char line[PATH_CAPACITY * 3 + APP_ARGUMENT_CAPACITY + 32];
     int fd = connect_supervisor();
-    if (fd < 0 || snprintf(line, sizeof line, "START\t%s\t%s\t%s\n", script_path,
-                           app_root, app_lib) >= (int)sizeof line ||
+    if (fd < 0 || snprintf(line, sizeof line, "START\t%s\t%s\t%s\t%s\n", script_path,
+                           app_root, app_lib, argument_text == NULL ? "" : argument_text) >=
+                           (int)sizeof line ||
         write_all(fd, line, strlen(line)) != 0)
     {
         if (fd >= 0)

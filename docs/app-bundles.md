@@ -37,13 +37,17 @@ The first manifest format is intentionally small:
   "name": "Flask PS5 Dashboard",
   "version": "1.0.0",
   "entry": "main.py",
-  "runtime": "shared"
+  "runtime": "shared",
+  "mode": "web"
 }
 ```
 
 The deployment tool currently requires `entry` and rejects absolute or parent
-directory paths. The other fields are metadata for the future native app
-launcher.
+directory paths. `mode` is optional and defaults to `web`; use `script` for a
+regular process-backed program that prints output and exits instead of serving
+HTTP. The browser displays the mode and lets the user provide optional
+command-line arguments. They are parsed with shell-style quotes and exposed to
+the entry script as `sys.argv[1:]`.
 
 ## Module and asset paths
 
@@ -118,4 +122,6 @@ PS5_HOST=192.168.4.30 make ps5-app APP=apps/flask_dashboard
 
 The app mode stores the shared interpreter under `/data/python/runtime/` and
 the selected bundle under `/data/python/apps/<id>/`. The normal `ps5-run`
-target remains available for one-off scripts.
+target remains available for one-off scripts. Each launched app still runs in
+its own supervisor-managed child process, regardless of whether its mode is
+`web` or `script`.

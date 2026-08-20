@@ -6,6 +6,8 @@ typedef struct cpython_run_options {
     const char *runtime_path;
     const char *app_root_path;
     const char *app_lib_path;
+    const char *const *argv;
+    size_t argc;
 } cpython_run_options_t;
 
 #define CPYTHON_PS5_RUNTIME_RESTARTED 1

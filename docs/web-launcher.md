@@ -104,9 +104,9 @@ application log and through `/api/logs`.
 | Endpoint | Purpose |
 | --- | --- |
 | `/` | Browser manager page |
-| `/api/apps` | Lists app IDs and display names |
+| `/api/apps` | Lists app IDs, display names, and `mode` (`web` or `script`) |
 | `/api/status` | Reports launcher data plus the complete app-job list |
-| `/api/launch?app=flask_dashboard` | Starts an app bundle and returns its job ID/PID |
+| `/api/launch?app=flask_dashboard&args=--port%209101` | Starts an app bundle with optional arguments and returns its job ID/PID |
 | `POST /api/app/stop?job_id=1` | Stops one selected application child |
 | `POST /api/script/run` | Runs a bounded script body in the persistent interpreter |
 | `/api/logs?since=0` | Returns new stdout/stderr bytes and `X-Log-Next` |
@@ -206,17 +206,22 @@ ports are intentionally separate so several can run at once:
 | `storage_inspector` | Read-only `/data/python` inventory | 9102 |
 | `sqlite_notes` | Persistent notes backed by SQLite | 9103 |
 | `network_toolbox` | DNS, TCP, and HTTP checks | 9104 |
-| `lan_file_browser` | Read-only LAN downloads from a share folder | 9105 |
-| `log_viewer` | Browse recent `.log` and `.txt` files | 9106 |
+| `lan_file_browser` | Read-only LAN downloads, rooted at `/` by default | 9105 |
+| `log_viewer` | Browse ShadowMountPlus `/data/shadowmount/debug.log` and other logs | 9106 |
 | `markdown_server` | Browse Markdown notes and docs | 9107 |
 | `webhook_inspector` | Capture and inspect POST payloads | 9108 |
 | `static_site` | Starter HTML/CSS/JavaScript site | 9109 |
-| `media_catalog` | Recursive media and document inventory | 9110 |
+| `media_catalog` | Recursive media and document inventory under `/data` | 9110 |
+| `system_report` | Regular script that prints runtime details | — |
 
 Launch an app from the Applications page, open its displayed port from a LAN
-browser, and use Stop to terminate only that app’s child process. The
-cooperative server loop checks the supervisor stop request without blocking the
-other apps or the interpreter.
+browser, or run a script app and read its output in the console. Each card
+accepts optional command-line arguments; quote values containing spaces. Use
+Stop to terminate only that app’s child process. The cooperative server loop
+checks the supervisor stop request without blocking the other apps or the
+interpreter. The Network Toolbox may fall back to unverified HTTPS when the
+PS5 has no usable CA bundle; its JSON response marks this with
+`"tls_verified": false` and explains the fallback in `tls_note`.
 
 ## Script workspace
 

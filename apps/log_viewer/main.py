@@ -10,7 +10,7 @@ from serve import serve
 
 app = Flask("log_viewer")
 PORT = 9106
-ROOT = os.path.abspath(os.environ.get("CPYTHONPS5_LOG_ROOT", "/data/python"))
+ROOT = os.path.abspath(os.environ.get("CPYTHONPS5_LOG_ROOT", "/data/shadowmount"))
 EXTENSIONS = (".log", ".txt")
 
 PAGE = """<!doctype html>
@@ -63,6 +63,8 @@ def read_tail(path, filter_text):
 def index():
     selected = request.args.get("file", "").strip()
     filter_text = request.args.get("filter", "").strip()
+    if not selected and os.path.isfile(os.path.join(ROOT, "debug.log")):
+        selected = "debug.log"
     content = ""
     if selected:
         try:

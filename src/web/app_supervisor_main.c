@@ -1,4 +1,5 @@
 #include <arpa/inet.h>
+#include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <netinet/in.h>
@@ -15,10 +16,12 @@
 #include "cpython_runtime.h"
 
 #define PATH_CAPACITY 512
-#define CONTROL_CAPACITY 2048
+#define CONTROL_CAPACITY 4096
 #define LOG_CHUNK 1024
 #define STOP_TIMEOUT_SECONDS 3
 #define MAX_SESSIONS 16
+#define MAX_APP_ARGUMENTS 32
+#define MAX_APP_ARGUMENT_LENGTH 512
 
 static volatile sig_atomic_t session_stop_requested;
 
@@ -81,8 +84,84 @@ static int send_logs(int fd, int output_fd)
     return 0;
 }
 
+static void free_app_arguments(char **arguments, size_t count)
+{
+    for (size_t index = 0; index < count; index++)
+        free(arguments[index]);
+    free(arguments);
+}
+
+static int parse_app_arguments(const char *text, char ***arguments_out, size_t *count_out)
+{
+    char **arguments = calloc(MAX_APP_ARGUMENTS, sizeof *arguments);
+    size_t count = 0;
+    const char *cursor = text == NULL ? "" : text;
+    if (arguments == NULL)
+        return -1;
+    while (*cursor != '\0')
+    {
+        char argument[MAX_APP_ARGUMENT_LENGTH];
+        size_t length = 0;
+        int quote = 0;
+        int escaped = 0;
+        while (isspace((unsigned char)*cursor))
+            cursor++;
+        if (*cursor == '\0')
+            break;
+        while (*cursor != '\0')
+        {
+            unsigned char current = (unsigned char)*cursor++;
+            if (escaped)
+            {
+                if (length + 1 >= sizeof argument)
+                    goto invalid;
+                argument[length++] = (char)current;
+                escaped = 0;
+            }
+            else if (current == '\\' && !quote)
+                escaped = 1;
+            else if (quote != 0)
+            {
+                if (current == (unsigned char)quote)
+                    quote = 0;
+                else
+                {
+                    if (length + 1 >= sizeof argument)
+                        goto invalid;
+                    argument[length++] = (char)current;
+                }
+            }
+            else if (current == '\'' || current == '"')
+                quote = current;
+            else if (isspace(current))
+                break;
+            else
+            {
+                if (length + 1 >= sizeof argument)
+                    goto invalid;
+                argument[length++] = (char)current;
+            }
+        }
+        if (quote != 0 || escaped || count >= MAX_APP_ARGUMENTS)
+            goto invalid;
+        argument[length] = '\0';
+        arguments[count] = malloc(length + 1);
+        if (arguments[count] == NULL)
+            goto invalid;
+        memcpy(arguments[count], argument, length + 1);
+        count++;
+    }
+    *arguments_out = arguments;
+    *count_out = count;
+    return 0;
+
+invalid:
+    free_app_arguments(arguments, count);
+    return -1;
+}
+
 static int run_child_session(int client_fd, const char *script_path, const char *app_root,
-                             const char *app_lib)
+                             const char *app_lib, const char *argument_text)
 {
     int output_pipe[2];
     pid_t child_pid;
@@ -113,12 +192,18 @@ static int run_child_session(int client_fd, const char *script_path, const char 
     }
     if (child_pid == 0)
     {
+        char **arguments = NULL;
+        size_t argument_count = 0;
         cpython_run_options_t options = {
             .runtime_path = "/data/python/runtime/cpython-lib",
             .app_root_path = app_root,
             .app_lib_path = app_lib,
         };
         int result;
+        if (parse_app_arguments(argument_text, &arguments, &argument_count) != 0)
+            _exit(2);
+        options.argv = (const char *const *)arguments;
+        options.argc = argument_count;
         close(output_pipe[0]);
         close(client_fd);
         if (dup2(output_pipe[1], STDOUT_FILENO) < 0 ||
@@ -126,6 +211,7 @@ static int run_child_session(int client_fd, const char *script_path, const char 
             _exit(127);
         close(output_pipe[1]);
         result = cpython_ps5_run_file(script_path, &options);
+        free_app_arguments(arguments, argument_count);
         _exit(result < 0 ? 1 : result & 0xff);
     }
 
@@ -276,9 +362,9 @@ static int handle_connection(int client_fd, int server_fd, pid_t *session_pid)
     if (strncmp(line, "START\t", 6) != 0)
         return 0;
 
-    char *fields[4] = {0};
+    char *fields[5] = {0};
     char *cursor = line;
-    for (unsigned i = 0; i < 4; i++)
+    for (unsigned i = 0; i < 5; i++)
     {
         fields[i] = cursor;
         cursor = strchr(cursor, '\t');
@@ -286,7 +372,7 @@ static int handle_connection(int client_fd, int server_fd, pid_t *session_pid)
             break;
         *cursor++ = '\0';
     }
-    if (fields[1] == NULL || fields[2] == NULL || fields[3] == NULL ||
+    if (fields[1] == NULL || fields[2] == NULL || fields[3] == NULL || fields[4] == NULL ||
         fields[0][0] == '\0' || fields[1][0] == '\0' || fields[2][0] == '\0' ||
         fields[3][0] == '\0')
         return 0;
@@ -297,7 +383,7 @@ static int handle_connection(int client_fd, int server_fd, pid_t *session_pid)
     {
         int result;
         close(server_fd);
-        result = run_child_session(client_fd, fields[1], fields[2], fields[3]);
+        result = run_child_session(client_fd, fields[1], fields[2], fields[3], fields[4]);
         close(client_fd);
         _exit(result == 0 ? 0 : 1);
     }

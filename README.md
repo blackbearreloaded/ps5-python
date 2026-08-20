@@ -249,8 +249,9 @@ PS5_HOST=192.168.4.30 make ps5-app APP=apps/flask_dashboard
 The web deployment ships a practical starter suite under `apps/`: a Flask
 runtime dashboard, storage and LAN file browsers, SQLite notes, network
 checks, log and Markdown viewers, a webhook inspector, a static-site starter,
-and a media catalog. Each web app listens on its own documented port so they
-can run together under the process supervisor.
+and a media catalog, plus a regular `system_report` script. Each web app
+listens on its own documented port so they can run together under the process
+supervisor, and every app card accepts optional command-line arguments.
 
 Prepare an app's pure-Python dependencies on the host with
 `make package-app APP=apps/myapp`; the PS5 receives the completed bundle and

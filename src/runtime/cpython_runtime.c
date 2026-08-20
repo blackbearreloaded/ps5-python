@@ -97,6 +97,32 @@ static int append_runtime_path(const char *path)
     return result;
 }
 
+static int set_sys_argv(const char *script_path, const cpython_run_options_t *options)
+{
+    size_t argument_count = options == NULL ? 0 : options->argc;
+    PyObject *argv = PyList_New(argument_count + 1);
+    if (argv == NULL)
+        return -1;
+    for (size_t index = 0; index <= argument_count; index++)
+    {
+        const char *value = index == 0 ? script_path : options->argv[index - 1];
+        PyObject *item = PyUnicode_DecodeFSDefault(value == NULL ? "" : value);
+        if (item == NULL || PyList_SetItem(argv, (Py_ssize_t)index, item) != 0)
+        {
+            Py_XDECREF(item);
+            Py_DECREF(argv);
+            return -1;
+        }
+    }
+    if (PySys_SetObject("argv", argv) != 0)
+    {
+        Py_DECREF(argv);
+        return -1;
+    }
+    Py_DECREF(argv);
+    return 0;
+}
+
 static int install_exit_helpers(void)
 {
     PyObject *builtins = PyEval_GetBuiltins();
@@ -568,6 +594,19 @@ int cpython_ps5_run_file(const char *script_path, const cpython_run_options_t *o
     {
         PyErr_PrintEx(0);
         Py_XDECREF(file_name);
+        result = 1;
+        goto done;
+    }
+    if (options != NULL && options->argc > 0 && options->argv == NULL)
+    {
+        PyErr_SetString(PyExc_ValueError, "invalid application arguments");
+        PyErr_PrintEx(0);
+        result = 1;
+        goto done;
+    }
+    if (set_sys_argv(script_path, options) != 0)
+    {
+        PyErr_PrintEx(0);
         result = 1;
         goto done;
     }

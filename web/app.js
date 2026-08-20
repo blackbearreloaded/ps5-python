@@ -218,19 +218,33 @@
       return;
     }
     apps.forEach((app) => {
+      const card = document.createElement("div");
+      card.className = "app-card";
+      card.dataset.appId = app.id;
       const button = document.createElement("button");
-      button.className = "app-card";
+      button.className = "app-card-launch";
       button.type = "button";
-      button.dataset.appId = app.id;
       const title = document.createElement("span");
       title.className = "app-card-title";
       title.textContent = app.name;
       const id = document.createElement("span");
       id.className = "app-card-id";
-      id.textContent = app.id;
+      id.textContent = app.id + " · " + (app.mode === "script" ? "script" : "web");
+      const args = document.createElement("input");
+      args.className = "app-card-args";
+      args.type = "text";
+      args.placeholder = "arguments (optional)";
+      args.setAttribute("aria-label", app.name + " arguments");
       button.append(title, id);
-      button.addEventListener("click", () => launch(app));
-      appsElement.appendChild(button);
+      button.addEventListener("click", () => launch(app, args.value));
+      args.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          launch(app, args.value);
+        }
+      });
+      card.append(button, args);
+      appsElement.appendChild(card);
     });
   }
   async function refreshApps() {
@@ -248,7 +262,7 @@
       appsElement.appendChild(empty);
     }
   }
-  async function launch(app) {
+  async function launch(app, argumentText = "") {
     state.launching = true;
     state.selectedId = app.id;
     titleElement.textContent = app.name;
@@ -257,7 +271,9 @@
     setStatus("Starting", "running");
     setStopButton(true);
     try {
-      const response = await fetch("/api/launch?app=" + encodeURIComponent(app.id));
+      const query = "?app=" + encodeURIComponent(app.id) +
+        (argumentText.trim() ? "&args=" + encodeURIComponent(argumentText.trim()) : "");
+      const response = await fetch("/api/launch" + query);
       if (!response.ok) {
         appendOutput("[launcher] " + await response.text() + "\n");
         state.launching = false;
