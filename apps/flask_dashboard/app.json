@@ -1,0 +1,8 @@
+{
+  "id": "flask_dashboard",
+  "name": "Flask PS5 Dashboard",
+  "version": "1.0.0",
+  "entry": "main.py",
+  "runtime": "shared",
+  "port": 9101
+}

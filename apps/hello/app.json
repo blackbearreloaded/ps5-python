@@ -1,7 +1,0 @@
-{
-  "id": "hello",
-  "name": "Hello Python App",
-  "version": "0.1.0",
-  "entry": "main.py",
-  "runtime": "shared"
-}

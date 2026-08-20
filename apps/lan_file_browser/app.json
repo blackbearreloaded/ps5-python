@@ -1,0 +1,8 @@
+{
+  "id": "lan_file_browser",
+  "name": "LAN File Browser",
+  "version": "1.0.0",
+  "entry": "main.py",
+  "runtime": "shared",
+  "port": 9105
+}

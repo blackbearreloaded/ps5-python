@@ -62,10 +62,14 @@ upstream source commit `823f0323ee6ec1402088b73bce1a38473cac36dc`.
   selected jobs with bounded TERM/KILL escalation. Multiple apps can remain
   active while the browser, WebREPL, and script editor continue to work.
 
-### Networking and DNS
+### Networking and practical app examples
 
-- Added the packaged `apps/dns_demo` application.
-- Verified `localhost` and external `google.com` DNS resolution on PS5.
+- Replaced the old toy app bundles with ten practical applications: a Flask
+  dashboard, storage inspector, SQLite notes, network toolbox, LAN file
+  browser, log viewer, Markdown server, webhook inspector, static site, and
+  media catalog. Their ports are documented in each app manifest and README.
+- The network toolbox exercises DNS, TCP connect, and HTTP requests directly
+  from the deployed PS5 runtime.
 - Existing IPv4 TCP and UDP support remains verified.
 - Added non-blocking socket tests for `accept()` and `recv()`.
 - Added `select.poll()` readiness tests.

@@ -106,7 +106,7 @@ application log and through `/api/logs`.
 | `/` | Browser manager page |
 | `/api/apps` | Lists app IDs and display names |
 | `/api/status` | Reports launcher data plus the complete app-job list |
-| `/api/launch?app=hello` | Starts an app bundle and returns its job ID/PID |
+| `/api/launch?app=flask_dashboard` | Starts an app bundle and returns its job ID/PID |
 | `POST /api/app/stop?job_id=1` | Stops one selected application child |
 | `POST /api/script/run` | Runs a bounded script body in the persistent interpreter |
 | `/api/logs?since=0` | Returns new stdout/stderr bytes and `X-Log-Next` |
@@ -195,6 +195,29 @@ clears the shared output buffer and connected browser consoles. The table is
 intentionally not persisted because it describes live OS processes; completed
 slots are reused after their reader exits.
 
+## Practical packaged apps
+
+The web deployment includes these independent, process-backed examples. Their
+ports are intentionally separate so several can run at once:
+
+| App | Use case | Port |
+| --- | --- | ---: |
+| `flask_dashboard` | Runtime and health dashboard | 9101 |
+| `storage_inspector` | Read-only `/data/python` inventory | 9102 |
+| `sqlite_notes` | Persistent notes backed by SQLite | 9103 |
+| `network_toolbox` | DNS, TCP, and HTTP checks | 9104 |
+| `lan_file_browser` | Read-only LAN downloads from a share folder | 9105 |
+| `log_viewer` | Browse recent `.log` and `.txt` files | 9106 |
+| `markdown_server` | Browse Markdown notes and docs | 9107 |
+| `webhook_inspector` | Capture and inspect POST payloads | 9108 |
+| `static_site` | Starter HTML/CSS/JavaScript site | 9109 |
+| `media_catalog` | Recursive media and document inventory | 9110 |
+
+Launch an app from the Applications page, open its displayed port from a LAN
+browser, and use Stop to terminate only that app’s child process. The
+cooperative server loop checks the supervisor stop request without blocking the
+other apps or the interpreter.
+
 ## Script workspace
 
 The **Run script** menu provides a complete-script editor separate from the
@@ -208,7 +231,7 @@ source under the same runtime mutex as the WebREPL, and returns JSON in this
 form:
 
 ```json
-{"ok":true,"restarted":false,"data":"hello\\n","source_bytes":15}
+{"ok":true,"restarted":false,"data":"PS5\\n","source_bytes":13}
 ```
 
 Python exceptions return HTTP 200 with `ok: false` and the captured traceback
@@ -237,7 +260,7 @@ The deployment script can run an end-to-end HTTP check:
 PS5_HOST=192.168.4.30 PS5_WEB_CHECK=1 make ps5-web
 ```
 
-This lists the apps, starts `hello`, fetches its live output, and shuts down
+This lists the apps, starts `flask_dashboard`, fetches its live output, and shuts down
 the manager. It also evaluates `print(123)` and `1 + 1` through both the
 embedded WebREPL and the raw TCP REPL, then posts a complete script through
 `/api/script/run` and verifies its shared interpreter state. Input is

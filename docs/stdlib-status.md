@@ -512,9 +512,9 @@ Platform notes:
   `tests/stdlib/test_socket.py`. The PS5 bundle uses a minimal IDNA codec for
   ordinary ASCII DNS names; internationalized Unicode domain names remain
   unsupported until full IDNA/Punycode support is added.
-- `apps/dns_demo` provides a hardware-facing DNS check. It always resolves
-  `localhost`; an external hostname can be selected with
-  `CPYTHONPS5_DNS_HOST`, but internet DNS is not a required suite criterion.
+- `apps/network_toolbox` provides a hardware-facing DNS, TCP, and HTTP check
+  on port 9104. It accepts an explicit host or URL from the browser; internet
+  access is useful for the demo but is not a required suite criterion.
 
 Source and tests:
 

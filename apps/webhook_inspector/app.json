@@ -1,0 +1,8 @@
+{
+  "id": "webhook_inspector",
+  "name": "Webhook Inspector",
+  "version": "1.0.0",
+  "entry": "main.py",
+  "runtime": "shared",
+  "port": 9108
+}

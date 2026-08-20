@@ -10,17 +10,17 @@ metadata.
 │   ├── python.elf
 │   └── cpython-lib/
 └── apps/
-    └── hello/
-        ├── app.json
-        ├── main.py
-        ├── lib/
-        └── assets/
+    ├── flask_dashboard/
+    │   ├── app.json
+    │   └── main.py
+    └── .shared/
+        └── serve.py
 ```
 
 The local source layout mirrors the PS5 layout:
 
 ```text
-apps/hello/
+apps/flask_dashboard/
 ├── app.json
 ├── main.py
 ├── lib/
@@ -33,9 +33,9 @@ The first manifest format is intentionally small:
 
 ```json
 {
-  "id": "hello",
-  "name": "Hello Python App",
-  "version": "0.1.0",
+  "id": "flask_dashboard",
+  "name": "Flask PS5 Dashboard",
+  "version": "1.0.0",
   "entry": "main.py",
   "runtime": "shared"
 }
@@ -54,11 +54,14 @@ The native launcher adds both of these paths to CPython's module search path:
 /data/python/apps/<id>/lib/
 ```
 
-This allows the entry script to import app-local modules:
+This allows an entry script to import app-local modules:
 
 ```python
 from greeting import build_message
 ```
+
+The practical web examples also add `/data/python/apps/.shared` to
+`sys.path` for the common cooperative server loop.
 
 The launcher also sets `__file__` to the real PS5 entry path. Applications
 should derive asset paths from it rather than assuming a current working
@@ -66,7 +69,7 @@ directory:
 
 ```python
 app_dir = __file__.replace("\\", "/").rsplit("/", 1)[0]
-asset_path = app_dir + "/assets/message.txt"
+asset_path = app_dir + "/assets/index.html"
 ```
 
 ## Build and deploy
@@ -104,13 +107,13 @@ deployed normally:
 Validate an app on the host:
 
 ```sh
-make host-app APP=apps/hello
+make host-app APP=apps/flask_dashboard
 ```
 
 Deploy it to the PS5:
 
 ```sh
-PS5_HOST=192.168.4.30 make ps5-app APP=apps/hello
+PS5_HOST=192.168.4.30 make ps5-app APP=apps/flask_dashboard
 ```
 
 The app mode stores the shared interpreter under `/data/python/runtime/` and
