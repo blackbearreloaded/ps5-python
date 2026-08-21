@@ -1,3 +1,5 @@
+> **Disclaimer:** This is an AI-assisted project developed using OpenAI Codex.
+
 <h1 align="center">Python-PS5</h1>
 
 <p align="center">
