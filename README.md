@@ -1,6 +1,6 @@
 > **Disclaimer:** This is an AI-assisted project developed using OpenAI Codex.
 
-<h1 align="center">Python-PS5</h1>
+<h1 align="center">PS5-Python</h1>
 
 <p align="center">
   <strong>CPython for the PlayStation 5</strong><br>
