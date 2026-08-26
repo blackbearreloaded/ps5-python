@@ -1,3 +1,7 @@
+# PS5-Python - CPython for the PlayStation 5.
+# Copyright (C) 2026 BlackBearReloaded
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Focused coverage for feasible gaps in the CPython standard library.
 
 These checks cover import and small local behaviors only.  They deliberately

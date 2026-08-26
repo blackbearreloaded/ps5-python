@@ -1,4 +1,6 @@
 {
+  "copyright": "Copyright (C) 2026 BlackBearReloaded",
+  "license": "GPL-3.0-or-later",
   "id": "log_viewer",
   "name": "Log Viewer",
   "version": "1.0.0",

@@ -1,3 +1,7 @@
+# PS5-Python - CPython for the PlayStation 5.
+# Copyright (C) 2026 BlackBearReloaded
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Small logging surface used internally by concurrent.futures on PS5.
 
 The full logging package is not part of the runtime bundle yet. Futures keep

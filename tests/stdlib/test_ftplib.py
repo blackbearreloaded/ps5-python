@@ -1,3 +1,7 @@
+# PS5-Python - CPython for the PlayStation 5.
+# Copyright (C) 2026 BlackBearReloaded
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Tier 8 protocol and mail helpers, adapted from CPython 3.14.7 Lib/test.
 
 The official ``test_ftplib.py``, ``test_poplib.py``, ``test_imaplib.py``,

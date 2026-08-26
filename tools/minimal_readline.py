@@ -1,3 +1,7 @@
+# PS5-Python - CPython for the PlayStation 5.
+# Copyright (C) 2026 BlackBearReloaded
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Small POSIX-safe readline compatibility layer for the PS5 runtime.
 
 The PS5 SDK ships the editline headers but not a linkable editline archive.

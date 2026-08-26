@@ -1,3 +1,7 @@
+# PS5-Python - CPython for the PlayStation 5.
+# Copyright (C) 2026 BlackBearReloaded
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Use Maildir's atomic rename fallback when PS5 lacks hard-link support."""
 
 import pathlib

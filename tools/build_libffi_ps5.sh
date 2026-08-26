@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# PS5-Python - CPython for the PlayStation 5.
+# Copyright (C) 2026 BlackBearReloaded
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 set -eu
 root_dir=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 sdk_dir="${PS5_PAYLOAD_SDK:-/opt/ps5-payload-sdk}"

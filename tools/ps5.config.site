@@ -1,3 +1,7 @@
+# PS5-Python - CPython for the PlayStation 5.
+# Copyright (C) 2026 BlackBearReloaded
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 # Cross-build answers for the PS5 payload environment.
 ac_cv_file__dev_ptmx=no
 ac_cv_file__dev_ptc=no

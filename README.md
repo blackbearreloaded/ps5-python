@@ -357,6 +357,6 @@ the local `gh release upload` fallback.
 
 ## License
 
-Python-PS5 is licensed under the [GNU General Public License v3.0](LICENSE).
+PS5-Python is licensed under the [GNU General Public License version 3 or later](LICENSE).
 Bundled third-party components retain their respective licenses; see
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for attribution and details.

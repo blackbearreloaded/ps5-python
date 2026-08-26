@@ -1,3 +1,7 @@
+# PS5-Python - CPython for the PlayStation 5.
+# Copyright (C) 2026 BlackBearReloaded
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Loopback WSGI checks adapted from CPython 3.14.7 ``test_wsgiref``.
 
 The upstream test module exercises the full unittest/support harness and

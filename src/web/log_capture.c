@@ -1,3 +1,9 @@
+/*
+ * PS5-Python - CPython for the PlayStation 5.
+ * Copyright (C) 2026 BlackBearReloaded
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 #include <pthread.h>
 #include <stdio.h>
 #include <string.h>

@@ -1,3 +1,7 @@
+# PS5-Python - CPython for the PlayStation 5.
+# Copyright (C) 2026 BlackBearReloaded
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Tier 7 interactive helpers, adapted from CPython 3.14.7 Lib/test.
 
 The full upstream ``test_code_module.py``, ``test_pdb.py``, and

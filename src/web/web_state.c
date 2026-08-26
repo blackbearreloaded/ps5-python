@@ -1,3 +1,9 @@
+/*
+ * PS5-Python - CPython for the PlayStation 5.
+ * Copyright (C) 2026 BlackBearReloaded
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 #include "web_state.h"
 
 pthread_mutex_t web_log_mutex = PTHREAD_MUTEX_INITIALIZER;

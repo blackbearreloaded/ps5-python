@@ -1,3 +1,7 @@
+# PS5-Python - CPython for the PlayStation 5.
+# Copyright (C) 2026 BlackBearReloaded
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """CPython 3.14.7-derived tests for feasible Tier 8 utility modules.
 
 The checks are adapted from ``Lib/test/test_graphlib.py``,

@@ -1,3 +1,7 @@
+# PS5-Python - CPython for the PlayStation 5.
+# Copyright (C) 2026 BlackBearReloaded
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Minimal IDNA codec for ASCII DNS hostnames on PS5.
 
 This intentionally supports ordinary ASCII DNS names only. Full Unicode

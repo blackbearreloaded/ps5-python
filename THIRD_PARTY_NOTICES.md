@@ -22,6 +22,5 @@ The repository does not include the PS5 SDK, the pinned CPython checkout, or
 the downloaded native dependency source trees. They are fetched or supplied
 at build time according to the project build scripts and their own terms.
 
-Before the first public release, the maintainer should select and add a
-top-level license for project-owned code. The project currently does not make
-that legal choice implicitly.
+Project-owned code is licensed under GPL-3.0-or-later. Bundled and fetched
+third-party components retain the licenses identified above.

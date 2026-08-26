@@ -1,3 +1,7 @@
+# PS5-Python - CPython for the PlayStation 5.
+# Copyright (C) 2026 BlackBearReloaded
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """CPython 3.14.7 Tier 4 data-structure and archive smoke tests.
 
 Adapted from Lib/test/test_pickle.py, test_struct.py, test_bisect.py,

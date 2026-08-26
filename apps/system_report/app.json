@@ -1,4 +1,6 @@
 {
+  "copyright": "Copyright (C) 2026 BlackBearReloaded",
+  "license": "GPL-3.0-or-later",
   "id": "system_report",
   "name": "System Report",
   "version": "1.0.0",

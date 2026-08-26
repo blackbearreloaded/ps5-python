@@ -1,3 +1,7 @@
+# PS5-Python - CPython for the PlayStation 5.
+# Copyright (C) 2026 BlackBearReloaded
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Flask/Werkzeug compatibility smoke test for CPython 3.14.7 on PS5.
 
 The request, WSGI, cookie, and escaping assertions are adapted from the

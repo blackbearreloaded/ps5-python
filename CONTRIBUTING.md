@@ -13,6 +13,7 @@ care and PS5-specific validation when they cross the native boundary.
    ```sh
    make host-suite
    python tests/stdlib/test_missing_stdlib.py
+   python tools/check_license_headers.py
    ```
 
 3. For C or build changes, also run:
@@ -42,6 +43,7 @@ care and PS5-specific validation when they cross the native boundary.
 ## Pull-request checklist
 
 - [ ] Host tests pass.
+- [ ] New first-party code includes the PS5-Python copyright and SPDX notice.
 - [ ] Formatting and tidy checks pass when native code changed.
 - [ ] PS5 validation is included or the limitation is documented.
 - [ ] README/status/roadmap documentation is current.

@@ -1,4 +1,6 @@
 {
+  "copyright": "Copyright (C) 2026 BlackBearReloaded",
+  "license": "GPL-3.0-or-later",
   "id": "flask_dashboard",
   "name": "Flask PS5 Dashboard",
   "version": "1.0.0",

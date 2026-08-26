@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# PS5-Python - CPython for the PlayStation 5.
+# Copyright (C) 2026 BlackBearReloaded
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 set -eu
 
 if [ "$#" -lt 1 ] || [ "$#" -gt 2 ]; then

@@ -1,3 +1,7 @@
+# PS5-Python - CPython for the PlayStation 5.
+# Copyright (C) 2026 BlackBearReloaded
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Gunicorn 23.0.0 import and sync HTTP parser smoke checks.
 
 The parser assertions follow the request/WSGI boundary cases in the pinned

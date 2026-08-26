@@ -1,3 +1,7 @@
+# PS5-Python - CPython for the PlayStation 5.
+# Copyright (C) 2026 BlackBearReloaded
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Focused CPython 3.14.7-derived tests for Tier 6 text/file utilities.
 
 The assertions are adapted from Lib/test/test_string/, test_textwrap.py,

@@ -1,3 +1,7 @@
+# PS5-Python - CPython for the PlayStation 5.
+# Copyright (C) 2026 BlackBearReloaded
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Gunicorn 23 sync master/worker loopback lifecycle.
 
 The request and shutdown assertions are adapted from CPython 3.14.7's
