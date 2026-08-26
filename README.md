@@ -1,5 +1,3 @@
-> **Disclaimer:** This is an AI-assisted project developed using OpenAI Codex.
-
 <h1 align="center">PS5-Python</h1>
 
 <p align="center">
@@ -355,8 +353,18 @@ runtime bundle, and uploads the ELF files, archive, and checksums to an
 existing GitHub Release. [docs/releasing.md](docs/releasing.md) also provides
 the local `gh release upload` fallback.
 
-## License
+## License and attribution
+
+Repository-authored code is licensed under GPL-3.0-or-later. Optional fetched
+tools remain under their upstream licenses. See [LICENSE](LICENSE) and
+[NOTICE.md](NOTICE.md).
 
 PS5-Python is licensed under the [GNU General Public License version 3 or later](LICENSE).
 Bundled third-party components retain their respective licenses; see
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for attribution and details.
+
+PlayStation and PS5 are trademarks of Sony Interactive Entertainment. This
+project is independent and is not affiliated with or endorsed by Sony.
+
+This project was developed with assistance from OpenAI Codex. Project
+maintainers reviewed and validated the resulting code and documentation.
