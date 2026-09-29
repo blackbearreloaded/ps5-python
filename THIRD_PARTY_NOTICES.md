@@ -1,5 +1,19 @@
 # Third-party notices
 
+## Credits and acknowledgements
+
+| Project | Role |
+| --- | --- |
+| [CPython](https://github.com/python/cpython/tree/v3.14.7) | Pinned interpreter and standard-library source |
+| [PS5 Payload SDK](https://github.com/ps5-payload-dev/sdk) | Prospero compiler, linker, headers, and ELF deployment tooling |
+| [PacBrew packages](https://github.com/ps5-payload-dev/pacbrew-repo) | PS5 payload ecosystem and packaged build dependencies |
+| [Flask](https://github.com/pallets/flask) | Practical web-app example |
+| [Gunicorn](https://github.com/benoitc/gunicorn) | Constrained synchronous WSGI serving example |
+| [OpenSSL](https://github.com/openssl/openssl) | Static TLS and cryptography dependency |
+| [SQLite](https://www.sqlite.org/) | Static database dependency and example app backend |
+| [zlib](https://github.com/madler/zlib), [bzip2](https://sourceware.org/bzip2/), [XZ Utils](https://github.com/tukaani-project/xz) | Compression dependencies |
+| [libffi](https://github.com/libffi/libffi), [libmicrohttpd](https://git.gnunet.org/libmicrohttpd.git/) | Native runtime and web-launcher dependencies |
+
 Python-PS5 combines project-owned launcher code with upstream CPython,
 PS5-payload tooling, native libraries, and example web packages. This file is
 an attribution index; each upstream project remains the authority for its
