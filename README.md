@@ -368,5 +368,4 @@ Bundled third-party components retain their respective licenses; see
 PlayStation and PS5 are trademarks of Sony Interactive Entertainment. This
 project is independent and is not affiliated with or endorsed by Sony.
 
-This project was developed with assistance from OpenAI Codex. Project
-maintainers reviewed and validated the resulting code and documentation.
+This project was developed with AI assistance from OpenAI and/or Anthropic tools.
