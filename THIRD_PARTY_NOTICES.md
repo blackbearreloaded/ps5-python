@@ -8,7 +8,7 @@ license and notice text.
 | Project | Used for | License / notices |
 | --- | --- | --- |
 | [CPython 3.14.7](https://github.com/python/cpython/tree/v3.14.7) | Interpreter and standard-library source | [PSF License](https://docs.python.org/3.14/license.html) |
-| [PS5 Payload SDK](https://github.com/ps5-payload-dev/sdk) | PS5 compiler, linker, headers, and deployment tools | See upstream repository; SDK is build-time only and is not redistributed here |
+| [PS5 Payload SDK](https://github.com/ps5-payload-dev/sdk) | PS5 compiler, linker, headers, and deployment tools | GPL-3.0-or-later, Copyright (C) John Törnblom (FreeBSD-derived parts BSD); its C runtime is statically linked into the released ELFs |
 | [Flask](https://github.com/pallets/flask) | Flask dashboard example | See upstream repository |
 | [Gunicorn](https://github.com/benoitc/gunicorn) | WSGI server example | See upstream repository |
 | [Werkzeug](https://github.com/pallets/werkzeug), [Jinja](https://github.com/pallets/jinja), [MarkupSafe](https://github.com/markupsafe/markupsafe), [ItsDangerous](https://github.com/pallets/itsdangerous), [Click](https://github.com/pallets/click), [Blinker](https://github.com/pallets-eco/blinker) | Flask dependency closure | See each upstream repository |

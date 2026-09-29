@@ -355,6 +355,8 @@ the local `gh release upload` fallback.
 
 ## License and attribution
 
+Built with the [PS5 Payload SDK](https://github.com/ps5-payload-dev/sdk) by John Törnblom (ps5-payload-dev).
+
 Repository-authored code is licensed under GPL-3.0-or-later. Optional fetched
 tools remain under their upstream licenses. See [LICENSE](LICENSE) and
 [NOTICE.md](NOTICE.md).
